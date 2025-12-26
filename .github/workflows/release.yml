@@ -32,9 +32,20 @@ jobs:
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+    - name: Rename jar for release
+      run: |
+        cd build/libs
+        # 找到 -all.jar 文件并重命名为简洁版本
+        ALL_JAR=$(ls *-all.jar 2>/dev/null | head -1)
+        if [ -n "$ALL_JAR" ]; then
+          mv "$ALL_JAR" "DreamRealms-v${{ steps.version.outputs.VERSION }}.jar"
+        fi
+        # 删除非 -all 的 jar
+        rm -f DreamRealms-*-build-*.jar 2>/dev/null || true
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         name: DreamRealms ${{ steps.version.outputs.VERSION }}
-        files: build/libs/*.jar
+        files: build/libs/DreamRealms-v*.jar
         generate_release_notes: true
