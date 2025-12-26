@@ -1,11 +1,3 @@
-<!--
- * @Description:
- * @Author: LectWolf
- * @Date: 2025-12-27 05:38:01
- * @LastEditTime: 2025-12-27 06:00:27
- * @LastEditors: LectWolf
--->
-
 # DreamRealms
 
 Minecraft Spigot/Paper 插件，基于 [PluginBase](https://github.com/MrXiaoM/PluginBase) 框架开发。
