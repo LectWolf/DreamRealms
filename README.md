@@ -10,7 +10,7 @@ Minecraft Spigot/Paper 插件，基于 [PluginBase](https://github.com/MrXiaoM/P
 
 ## 文档
 
-详细文档请查看 [Wiki](https://github.com/LectWolf/DreamRealms/wiki)
+详细文档请查看 [在线文档](https://lectwolf.github.io/DreamRealms/)
 
 ## 依赖
 
