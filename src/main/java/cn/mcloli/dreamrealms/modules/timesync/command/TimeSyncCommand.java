@@ -63,10 +63,10 @@ public class TimeSyncCommand implements ISubCommandHandler {
                     return TimeSyncMessages.module_disabled.t(sender);
                 }
                 TimeSyncMessages.status__header.t(sender);
-                TimeSyncMessages.status__timezone.t(sender, Pair.of("timezone", config.getTimeZone().getID()));
-                TimeSyncMessages.status__mode.t(sender, Pair.of("mode", config.isWhitelistMode() ? "白名单" : "黑名单"));
-                TimeSyncMessages.status__worlds.t(sender, Pair.of("worlds", String.join(", ", config.getWorlds())));
-                TimeSyncMessages.status__sleep.t(sender, Pair.of("sleep", config.isDisableSleep() ? "是" : "否"));
+                TimeSyncMessages.status__timezone.t(sender, Pair.of("{timezone}", config.getTimeZone().getID()));
+                TimeSyncMessages.status__mode.t(sender, Pair.of("{mode}", config.isWhitelistMode() ? "白名单" : "黑名单"));
+                TimeSyncMessages.status__worlds.t(sender, Pair.of("{worlds}", String.join(", ", config.getWorlds())));
+                TimeSyncMessages.status__sleep.t(sender, Pair.of("{sleep}", config.isDisableSleep() ? "是" : "否"));
                 return true;
             }
             case "toggle" -> {
@@ -83,11 +83,11 @@ public class TimeSyncCommand implements ISubCommandHandler {
                 String tzId = args[1];
                 TimeZone tz = TimeZone.getTimeZone(tzId);
                 if (tz.getID().equals("GMT") && !tzId.equalsIgnoreCase("GMT")) {
-                    return TimeSyncMessages.timezone__invalid.t(sender, Pair.of("timezone", tzId));
+                    return TimeSyncMessages.timezone__invalid.t(sender, Pair.of("{timezone}", tzId));
                 }
                 config.setTimeZone(tzId);
                 module.startSyncTask();
-                return TimeSyncMessages.timezone__success.t(sender, Pair.of("timezone", tz.getID()));
+                return TimeSyncMessages.timezone__success.t(sender, Pair.of("{timezone}", tz.getID()));
             }
             case "mode" -> {
                 if (args.length < 2) {
@@ -111,17 +111,17 @@ public class TimeSyncCommand implements ISubCommandHandler {
                 String worldName = args[2];
                 if ("add".equals(action)) {
                     if (Bukkit.getWorld(worldName) == null) {
-                        TimeSyncMessages.world__not_exist.t(sender, Pair.of("world", worldName));
+                        TimeSyncMessages.world__not_exist.t(sender, Pair.of("{world}", worldName));
                     }
                     if (config.addWorld(worldName)) {
-                        return TimeSyncMessages.world__add_success.t(sender, Pair.of("world", worldName));
+                        return TimeSyncMessages.world__add_success.t(sender, Pair.of("{world}", worldName));
                     }
-                    return TimeSyncMessages.world__add_exists.t(sender, Pair.of("world", worldName));
+                    return TimeSyncMessages.world__add_exists.t(sender, Pair.of("{world}", worldName));
                 } else if ("remove".equals(action)) {
                     if (config.removeWorld(worldName)) {
-                        return TimeSyncMessages.world__remove_success.t(sender, Pair.of("world", worldName));
+                        return TimeSyncMessages.world__remove_success.t(sender, Pair.of("{world}", worldName));
                     }
-                    return TimeSyncMessages.world__remove_not_found.t(sender, Pair.of("world", worldName));
+                    return TimeSyncMessages.world__remove_not_found.t(sender, Pair.of("{world}", worldName));
                 }
                 return TimeSyncMessages.world__invalid_action.t(sender);
             }
