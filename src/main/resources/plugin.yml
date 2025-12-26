@@ -1,0 +1,18 @@
+name: DreamRealms
+version: '${version}'
+main: cn.mcloli.dreamrealms.DreamRealms
+api-version: 1.13
+depend: 
+  - Vault
+softdepend: 
+  - PlaceholderAPI
+  - PlayerPoints
+authors: [ LectWolf ]
+folia-supported: true
+commands:
+  dreamrealms:
+    description: 'The main command of DreamRealms'
+    aliases: [ dr ]
+  example:
+    description: 'Example module command'
+    aliases: [ ex ]

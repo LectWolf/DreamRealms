@@ -1,0 +1,9 @@
+# DreamRealms 主配置
+
+# 物品名称语言 (从 Minecraft 官方资源下载)
+# 支持: zh_cn, zh_tw, en_us, ja_jp, ko_kr 等
+item-language: zh_cn
+
+# 模块开关 (默认禁用，模块会自动添加开关到此处)
+modules:
+  # 模块开关会在首次加载时自动添加

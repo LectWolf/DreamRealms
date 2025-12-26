@@ -1,0 +1,22 @@
+# 时间同步模块配置
+
+# 调试模式
+debug: false
+
+# 时区 (如: Asia/Shanghai, America/New_York, Europe/London)
+timezone: "Asia/Shanghai"
+
+# 同步间隔 (tick, 20tick = 1秒, 1200tick = 1分钟)
+sync-interval: 1200
+
+# 世界列表模式
+# true = 白名单模式 (只同步列表中的世界)
+# false = 黑名单模式 (同步除列表外的所有世界)
+whitelist-mode: true
+
+# 世界列表
+worlds:
+  - "world"
+
+# 禁止睡觉 (在同步的世界中禁止玩家睡觉跳过夜晚)
+disable-sleep: true
