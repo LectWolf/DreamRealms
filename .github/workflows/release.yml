@@ -32,20 +32,43 @@ jobs:
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+    - name: Get tag message
+      id: tag_message
+      run: |
+        # 获取当前 tag 的 annotation message
+        TAG_MESSAGE=$(git tag -l --format='%(contents)' ${GITHUB_REF#refs/tags/})
+        
+        # 如果 tag message 为空，则使用提交日志
+        if [ -z "$TAG_MESSAGE" ]; then
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            TAG_MESSAGE=$(git log --pretty=format:"- %s" $PREV_TAG..HEAD --no-merges | head -20)
+          else
+            TAG_MESSAGE=$(git log --pretty=format:"- %s" -10 --no-merges)
+          fi
+        fi
+        
+        # 添加提交历史链接
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        COMMITS_URL="https://github.com/${{ github.repository }}/commits/${TAG_NAME}"
+        
+        echo "$TAG_MESSAGE" > release_notes.txt
+        echo "" >> release_notes.txt
+        echo "---" >> release_notes.txt
+        echo "[查看完整提交记录](${COMMITS_URL})" >> release_notes.txt
+        
     - name: Rename jar for release
       run: |
         cd build/libs
-        # 找到 -all.jar 文件并重命名为简洁版本
-        ALL_JAR=$(ls *-all.jar 2>/dev/null | head -1)
-        if [ -n "$ALL_JAR" ]; then
-          mv "$ALL_JAR" "DreamRealms-v${{ steps.version.outputs.VERSION }}.jar"
+        # 找到主 jar 文件并重命名为简洁版本
+        JAR_FILE=$(ls DreamRealms-*.jar 2>/dev/null | head -1)
+        if [ -n "$JAR_FILE" ]; then
+          mv "$JAR_FILE" "DreamRealms-v${{ steps.version.outputs.VERSION }}.jar"
         fi
-        # 删除非 -all 的 jar
-        rm -f DreamRealms-*-build-*.jar 2>/dev/null || true
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         name: DreamRealms ${{ steps.version.outputs.VERSION }}
         files: build/libs/DreamRealms-v*.jar
-        generate_release_notes: true
+        body_path: release_notes.txt

@@ -79,6 +79,7 @@ java {
 }
 tasks {
     shadowJar {
+        archiveClassifier.set("") // 移除 -all 后缀，直接输出主 jar
         mapOf(
             "top.mrxiaom.pluginbase" to "base",
             "com.zaxxer.hikari" to "hikari",
@@ -86,6 +87,9 @@ tasks {
         ).forEach { (original, target) ->
             relocate(original, "$shadowGroup.$target")
         }
+    }
+    jar {
+        enabled = false // 禁用默认 jar 任务，只输出 shadowJar
     }
     val copyTask = create<Copy>("copyBuildArtifact") {
         dependsOn(shadowJar)

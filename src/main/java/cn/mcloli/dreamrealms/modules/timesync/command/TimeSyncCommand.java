@@ -35,7 +35,7 @@ public class TimeSyncCommand implements ISubCommandHandler {
 
     @Override
     public @NotNull String[] getAliases() {
-        return new String[]{"ts"};
+        return new String[]{};
     }
 
     @Override

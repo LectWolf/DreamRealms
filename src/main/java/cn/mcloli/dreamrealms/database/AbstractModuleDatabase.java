@@ -24,6 +24,24 @@ public abstract class AbstractModuleDatabase implements IDatabase {
     public AbstractModuleDatabase(DreamRealms plugin, AbstractModule module) {
         this.plugin = plugin;
         this.module = module;
+        // 自动初始化数据表
+        initTables();
+    }
+
+    /**
+     * 初始化数据表
+     */
+    private void initTables() {
+        try (Connection conn = getConnection()) {
+            if (conn == null) {
+                module.warn("无法获取数据库连接，数据表初始化失败");
+                return;
+            }
+            this.tablePrefix = plugin.options.database().getTablePrefix() + module.getModuleId() + "_";
+            createTables(conn);
+        } catch (SQLException e) {
+            handleException(e);
+        }
     }
 
     /**

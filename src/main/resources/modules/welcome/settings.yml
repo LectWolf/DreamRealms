@@ -1,0 +1,70 @@
+# 欢迎模块配置
+
+# 调试模式
+debug: false
+
+# 欢迎按钮文本 (发送给其他玩家)
+# 占位符: {player} - 新玩家名称
+# 支持 MiniMessage 格式
+welcome-text:
+  - "&8[&b🌟点击欢迎新玩家 &f{player}&8]"
+
+# 鼠标悬浮提示 (支持多行)
+# 占位符: {player} - 新玩家名称
+welcome-hover:
+  - ""
+  - "&a🌟 欢迎 &6{player} &a加入我们的大家庭"
+  - "&e💰 成功欢迎可获得 &6{welcomer_balance} &e奖励"
+  - "&7⏰ 奖励将在 {delay} 分钟后发放"
+  - "&7📝 新玩家需保持在线哦~"
+  - ""
+
+# 欢迎消息 (点击后随机发送一条，以玩家聊天形式发送)
+# 占位符: {player} - 新玩家名称, {welcomer} - 欢迎者名称
+welcome-messages:
+  - "欢迎新伙伴 @{player} 加入！一起来玩吧~"
+  - "新朋友 @{player} 欢迎你~"
+  - "@{player} 驾到 统统闪开~"
+  - "🚀@{player} 空降成功！准备迎接新冒险"
+  - "🎨欢迎艺术家 @{player} 为服务器增添色彩"
+  - "⚔勇士 @{player} 已加入战场，谁与争锋"
+  - "🏰@{player} 踏入服务器，传说就此开始"
+  - "🎪欢迎 @{player} 加入我们的狂欢派对！"
+
+# 奖励配置
+reward:
+  # 是否启用奖励
+  enabled: true
+  # 奖励延迟 (分钟)，新玩家进服后多久发放奖励
+  delay-minutes: 5
+  # 新玩家退出后是否依旧发送奖励
+  # false = 新玩家退出不发奖励
+  # true = 新玩家退出也发奖励
+  on-new-player-quit: false
+  # 欢迎者获得的奖励数值
+  welcomer-balance: 100
+  # 新玩家基础奖励数值 (新玩家奖励 = 基础数值 * 欢迎人数)
+  newplayer-balance: 40
+  # 是否允许重复欢迎 (重复欢迎只发送欢迎词，不计入奖励)
+  allow-repeat-welcome: true
+
+# 命令配置 (支持多行)
+# 所有奖励命令都在延迟时间后执行，且仅在新玩家在线时发放
+# 占位符:
+#   {player} - 执行命令的玩家名称
+#   {uuid} - 执行命令的玩家UUID
+#   {new_player} - 新玩家名称 (仅欢迎者命令可用)
+#   {welcomer_count} - 欢迎人数
+#   {welcomer_balance} - 欢迎者奖励数值
+#   {newplayer_balance} - 新玩家总奖励 (基础数值 * 欢迎人数)
+# 前缀:
+#   [console] - 以控制台执行
+#   [player] - 以玩家执行
+#   无前缀 - 默认以控制台执行
+commands:
+  # 新玩家获得奖励时执行的命令 (延迟后，新玩家在线时)
+  new-player-reward:
+    - "[console]eco give {player} {newplayer_balance}"
+  # 欢迎者获得奖励时执行的命令 (延迟后，新玩家在线时)
+  welcomer:
+    - "[console]eco give {player} {welcomer_balance}"
