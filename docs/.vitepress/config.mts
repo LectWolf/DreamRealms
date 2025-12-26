@@ -1,0 +1,65 @@
+import { defineConfig } from "vitepress";
+
+export default defineConfig({
+  title: "DreamRealms",
+  description: "Minecraft Spigot/Paper 插件文档",
+  lang: "zh-CN",
+  base: "/DreamRealms/",
+
+  themeConfig: {
+    nav: [
+      { text: "首页", link: "/" },
+      { text: "指南", link: "/guide/" },
+      { text: "模块", link: "/modules/" },
+      { text: "更新日志", link: "/changelog" },
+      { text: "GitHub", link: "https://github.com/LectWolf/DreamRealms" },
+    ],
+
+    sidebar: {
+      "/guide/": [
+        {
+          text: "入门",
+          items: [
+            { text: "安装", link: "/guide/" },
+            { text: "配置", link: "/guide/config" },
+            { text: "命令", link: "/guide/commands" },
+          ],
+        },
+      ],
+      "/modules/": [
+        {
+          text: "模块",
+          items: [
+            { text: "概述", link: "/modules/" },
+            { text: "TimeSync 时间同步", link: "/modules/timesync" },
+          ],
+        },
+      ],
+    },
+
+    socialLinks: [
+      { icon: "github", link: "https://github.com/LectWolf/DreamRealms" },
+    ],
+
+    footer: {
+      message: "Released under the GPL-3.0 License.",
+      copyright: "Copyright © 2025 LectWolf",
+    },
+
+    // 中文本地化
+    outline: {
+      label: "页面导航",
+    },
+    docFooter: {
+      prev: "上一页",
+      next: "下一页",
+    },
+    lastUpdated: {
+      text: "最后更新于",
+    },
+    darkModeSwitchLabel: "主题",
+    sidebarMenuLabel: "菜单",
+    returnToTopLabel: "回到顶部",
+    langMenuLabel: "语言",
+  },
+});

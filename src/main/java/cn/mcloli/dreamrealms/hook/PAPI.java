@@ -1,10 +1,3 @@
-/*
- * @Description: 
- * @Author: LectWolf
- * @Date: 2025-12-27 03:06:25
- * @LastEditTime: 2025-12-27 03:37:42
- * @LastEditors: LectWolf
- */
 package cn.mcloli.dreamrealms.hook;
 
 import me.clip.placeholderapi.PlaceholderAPI;

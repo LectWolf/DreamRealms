@@ -2,11 +2,12 @@ name: DreamRealms
 version: '${version}'
 main: cn.mcloli.dreamrealms.DreamRealms
 api-version: 1.13
-depend: 
-  - Vault
+depend: []
 softdepend: 
+  - Vault
   - PlaceholderAPI
   - PlayerPoints
+  - CraftEngine
 authors: [ LectWolf ]
 folia-supported: true
 commands:

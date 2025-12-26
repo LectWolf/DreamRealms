@@ -62,3 +62,8 @@ run/
 
 # Reference projects (not part of main project)
 reference/
+
+# Docs build output and dependencies
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
