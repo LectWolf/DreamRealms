@@ -135,6 +135,7 @@ public enum ItemManagerMessages implements IHolderAccessor {
     item__added("&a物品已添加到列表"),
     category__renamed("&a分类名称已更新"),
     category__icon_set("&a分类图标已设置"),
+    category__not_empty("&c无法删除: 分类中还有 &f{count} &c个物品"),
 
     // 聊天消息 (MiniMessage 格式)
     chat__copy_cmd("<aqua><click:copy_to_clipboard:{command}><hover:show_text:'<gray>点击复制'>点击复制获取命令</hover></click>"),

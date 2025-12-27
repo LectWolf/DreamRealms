@@ -187,7 +187,13 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
             // 左键 - 打开分类
             new ItemListGui(player, module.getItemListMenuConfig(), category).open();
         } else if (click == ClickType.CONTROL_DROP) {
-            // Shift+Q - 删除分类
+            // Ctrl+Q - 删除分类
+            // 检查分类是否有物品
+            int itemCount = module.getDatabase().getItemsByCategory(category.getId()).size();
+            if (itemCount > 0) {
+                ItemManagerMessages.category__not_empty.t(player, Pair.of("{count}", String.valueOf(itemCount)));
+                return;
+            }
             module.getDatabase().deleteCategory(category.getId());
             categories.remove(index);
             refreshInventory();
