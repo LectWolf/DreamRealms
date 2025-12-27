@@ -42,10 +42,12 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
         // 加载分类数据
         categories = module.getDatabase().getAllCategories();
 
-        // 计算每页槽位数
+        // 先创建 inventory
+        this.inventory = config.createInventory(this, player);
+
+        // 再计算每页槽位数
         slotsPerPage = countSlots('C');
 
-        this.inventory = config.createInventory(this, player);
         refreshInventory();
         return inventory;
     }
