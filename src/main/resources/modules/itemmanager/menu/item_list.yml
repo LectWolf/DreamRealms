@@ -1,0 +1,50 @@
+# 物品列表菜单配置
+
+title: "&0物品列表"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XIIIIIIIX"
+  - "XIIIIIIIX"
+  - "XIIIIIIIX"
+  - "X<XBA>XPX"
+
+# 主图标
+items:
+  # 物品槽位 (动态填充)
+  I:
+    material: STONE
+    display: "&f物品"
+
+  # 添加物品按钮 (可交互)
+  A:
+    material: LIME_DYE
+    display: "&a添加物品"
+    lore:
+      - "&7将物品拖放到此处"
+      - "&7或点击添加手持物品"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回分类列表"
+
+  P:
+    material: PLAYER_HEAD
+    skull-owner: "%player_name%"
+    display: "&e%player_name%"
+
+  <:
+    material: ARROW
+    display: "&7上一页"
+
+  >:
+    material: ARROW
+    display: "&7下一页"

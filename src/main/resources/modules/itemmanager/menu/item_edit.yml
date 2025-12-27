@@ -1,0 +1,103 @@
+# 物品编辑菜单配置
+
+title: "&0编辑物品"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XPXXSXXCX"
+  - "XNLEAFDXX"
+  - "XXXIGXXXX"
+  - "XXXXBXXXX"
+
+# 主图标
+items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+
+  # 序列化按钮
+  S:
+    material: ANVIL
+    display: "&e序列化物品"
+    lore:
+      - "&7将物品转为可编辑格式"
+      - ""
+      - "&c警告: 序列化后可能无法识别"
+      - "&c特殊物品 (如 ExcellentCrate 钥匙)"
+
+  # 修改名称
+  N:
+    material: NAME_TAG
+    display: "&e修改名称"
+    lore:
+      - "&7修改物品显示名称"
+
+  # 修改 Lore
+  L:
+    material: WRITABLE_BOOK
+    display: "&e修改描述"
+    lore:
+      - "&7修改物品描述 (Lore)"
+
+  # 修改附魔
+  E:
+    material: ENCHANTED_BOOK
+    display: "&e修改附魔"
+    lore:
+      - "&7添加/移除附魔"
+
+  # 修改属性
+  A:
+    material: IRON_SWORD
+    display: "&e修改属性"
+    lore:
+      - "&7修改物品属性修饰符"
+
+  # 修改 Flag
+  F:
+    material: PAPER
+    display: "&e修改 Flag"
+    lore:
+      - "&7隐藏附魔、属性等信息"
+
+  # 修改耐久
+  D:
+    material: IRON_PICKAXE
+    display: "&e修改耐久"
+    lore:
+      - "&7修改物品耐久度"
+
+  # 设置标识名
+  I:
+    material: OAK_SIGN
+    display: "&e设置标识名"
+    lore:
+      - "&7设置物品的自定义标识名"
+      - "&7用于命令获取"
+
+  # 设置分类
+  G:
+    material: CHEST
+    display: "&e设置分类"
+    lore:
+      - "&7将物品移动到其他分类"
+
+  # 复制命令
+  C:
+    material: COMMAND_BLOCK
+    display: "&b复制获取命令"
+    lore:
+      - "&7点击复制获取命令到剪贴板"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品列表"

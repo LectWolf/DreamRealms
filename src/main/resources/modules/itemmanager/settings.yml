@@ -1,0 +1,7 @@
+# ItemManager 物品管理器配置
+
+# 调试模式
+debug: false
+
+# 静默获取 (give 命令不发送消息给目标玩家)
+silent-give: true
