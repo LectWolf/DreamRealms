@@ -49,6 +49,7 @@ dependencies {
     compileOnly("org.black_ixx:playerpoints:3.2.7")
     compileOnly("net.momirealms:craft-engine-core:0.0.66.10-SNAPSHOT")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.66.10-SNAPSHOT")
+    compileOnly("com.github.LoneDev6:api-itemsadder:3.6.1")
 
 
     base.library("net.kyori:adventure-api:4.22.0")

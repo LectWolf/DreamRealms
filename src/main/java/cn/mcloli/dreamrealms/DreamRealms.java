@@ -1,6 +1,7 @@
 package cn.mcloli.dreamrealms;
 
 import cn.mcloli.dreamrealms.hook.CraftEngineHook;
+import cn.mcloli.dreamrealms.hook.ItemsAdderHook;
 import cn.mcloli.dreamrealms.hook.PAPI;
 import cn.mcloli.dreamrealms.lang.ItemLanguage;
 import top.mrxiaom.pluginbase.BukkitPlugin;
@@ -78,6 +79,7 @@ public class DreamRealms extends BukkitPlugin {
     protected void beforeEnable() {
         // 初始化 Hook
         CraftEngineHook.init();
+        ItemsAdderHook.init();
         PAPI.init();
 
         // 初始化物品语言

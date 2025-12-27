@@ -17,6 +17,7 @@ bypass-permissions:
 
 # 狗牌配置
 # 玩家死亡时会按优先级检查权限，使用第一个匹配的狗牌
+# permission 为空字符串 "" 表示不需要权限，所有玩家都匹配
 #
 # 可用变量:
 #   {victim}       - 死亡玩家名称
@@ -49,9 +50,9 @@ dogtags:
       - ""
       - "&e✦ VIP 专属狗牌 ✦"
 
-  # 默认狗牌 (低优先级)
+  # 默认狗牌 (低优先级，无权限要求)
   default:
-    permission: "dreamrealms.dogtag.default"
+    permission: ""
     priority: 0
     material: NAME_TAG
     # custom-model-data: 1000  # 可选

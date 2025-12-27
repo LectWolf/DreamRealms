@@ -4,6 +4,7 @@ import cn.mcloli.dreamrealms.hook.PAPI;
 import cn.mcloli.dreamrealms.modules.dogtag.DogTagModule;
 import cn.mcloli.dreamrealms.modules.dogtag.config.DogTagConfig;
 import cn.mcloli.dreamrealms.modules.dogtag.data.DogTagData;
+import cn.mcloli.dreamrealms.utils.ItemBuilder;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,8 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
-import top.mrxiaom.pluginbase.utils.ItemStackUtil;
-import top.mrxiaom.pluginbase.utils.Pair;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,7 +53,9 @@ public class DogTagListener implements Listener {
         // 查找匹配的狗牌配置 (按优先级)
         DogTagData matchedTag = null;
         for (DogTagData tag : config.getSortedDogTags()) {
-            if (victim.hasPermission(tag.getPermission())) {
+            String perm = tag.getPermission();
+            // permission 为空表示不需要权限
+            if (perm == null || perm.isEmpty() || victim.hasPermission(perm)) {
                 matchedTag = tag;
                 break;
             }
@@ -82,12 +83,11 @@ public class DogTagListener implements Listener {
      */
     @Nullable
     private ItemStack createDogTag(DogTagData data, Player victim, @Nullable Player killer, String dateFormat) {
-        // 解析材质
-        Pair<Material, Integer> pair = ItemStackUtil.parseMaterial(data.getMaterial());
-        if (pair == null) {
+        // 使用 ItemBuilder 解析材质 (支持 CraftEngine)
+        ItemStack item = ItemBuilder.parseItem(data.getMaterial());
+        if (item.getType() == Material.AIR) {
             return null;
         }
-        ItemStack item = ItemStackUtil.legacy(pair);
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {

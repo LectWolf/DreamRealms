@@ -8,6 +8,7 @@ softdepend:
   - PlaceholderAPI
   - PlayerPoints
   - CraftEngine
+  - ItemsAdder
 authors: [ LectWolf ]
 folia-supported: true
 commands:

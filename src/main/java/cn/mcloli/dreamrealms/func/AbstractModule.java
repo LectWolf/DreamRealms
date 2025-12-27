@@ -95,6 +95,12 @@ public abstract class AbstractModule extends top.mrxiaom.pluginbase.func.Abstrac
         }
         
         this.enabled = config.getBoolean(key, false);
+        
+        // 模块启用时自动保存 README.md
+        if (this.enabled) {
+            saveModuleResource("README.md");
+        }
+        
         return this.enabled;
     }
 
