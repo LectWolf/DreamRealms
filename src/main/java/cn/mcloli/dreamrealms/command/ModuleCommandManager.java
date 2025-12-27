@@ -140,9 +140,9 @@ public class ModuleCommandManager implements CommandExecutor, TabCompleter {
 
             String desc = cmd.getDescription();
             if (desc.isEmpty()) {
-                sender.sendMessage(ColorHelper.parseColor("&e/" + module.getModuleId() + " " + cmd.getName()));
+                sender.sendMessage(ColorHelper.parseColor("&b/" + module.getModuleId() + " " + cmd.getName()));
             } else {
-                sender.sendMessage(ColorHelper.parseColor("&e/" + module.getModuleId() + " " + cmd.getName() + " &7- &f" + desc));
+                sender.sendMessage(ColorHelper.parseColor("&b/" + module.getModuleId() + " " + cmd.getName() + " &7- &f" + desc));
             }
         }
         return true;

@@ -34,7 +34,7 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
 
     public ItemListGui(Player player, ItemListMenuConfig config, @Nullable ItemCategory category) {
         super(player, config);
-        this.module = config.getModule();
+        this.module = ItemManagerModule.inst();
         this.category = category;
     }
 

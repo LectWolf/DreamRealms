@@ -34,10 +34,6 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
         this.module = module;
     }
 
-    public ItemManagerModule getModule() {
-        return module;
-    }
-
     public Icon getPreviewIcon() {
         return previewIcon;
     }

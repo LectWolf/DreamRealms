@@ -28,7 +28,7 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
 
     public ItemEditGui(Player player, ItemEditMenuConfig config, StoredItem storedItem, ItemListGui parentGui) {
         super(player, config);
-        this.module = config.getModule();
+        this.module = ItemManagerModule.inst();
         this.storedItem = storedItem;
         this.parentGui = parentGui;
     }

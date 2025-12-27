@@ -34,7 +34,7 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
 
     public LoreEditGui(Player player, LoreEditMenuConfig config, StoredItem storedItem, ItemEditGui parentGui) {
         super(player, config);
-        this.module = config.getModule();
+        this.module = ItemManagerModule.inst();
         this.storedItem = storedItem;
         this.parentGui = parentGui;
         // 获取当前 Lore
