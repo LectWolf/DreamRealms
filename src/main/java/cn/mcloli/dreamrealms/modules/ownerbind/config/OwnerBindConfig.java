@@ -5,7 +5,9 @@ import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OwnerBindConfig {
     private final DreamRealms plugin;
@@ -30,6 +32,10 @@ public class OwnerBindConfig {
     private boolean antiContainerPickup;
     private boolean repairMode;
     private String nonOwnerAction; // DROP 或 DESTROY
+    
+    // 死亡掉落处理
+    private String deathDropDefault;
+    private Map<String, String> deathDropWorlds;
     
     // Hook 配置
     private boolean hookSweetMail;
@@ -74,6 +80,16 @@ public class OwnerBindConfig {
         repairMode = config.getBoolean("repair-mode", true);
         nonOwnerAction = config.getString("non-owner-action", "DROP").toUpperCase();
         
+        // 死亡掉落处理
+        deathDropDefault = config.getString("death-drop.default", "DEFAULT").toUpperCase();
+        deathDropWorlds = new HashMap<>();
+        var worldsSection = config.getConfigurationSection("death-drop.worlds");
+        if (worldsSection != null) {
+            for (String world : worldsSection.getKeys(false)) {
+                deathDropWorlds.put(world, worldsSection.getString(world, "DEFAULT").toUpperCase());
+            }
+        }
+        
         // Hook 配置
         hookSweetMail = config.getBoolean("hooks.sweetmail.enabled", false);
         mailSenderType = config.getString("hooks.sweetmail.sender-type", "SYSTEM").toUpperCase();
@@ -104,6 +120,18 @@ public class OwnerBindConfig {
     public boolean isRepairMode() { return repairMode; }
     public String getNonOwnerAction() { return nonOwnerAction; }
     public boolean isNonOwnerDrop() { return "DROP".equals(nonOwnerAction); }
+    
+    public String getDeathDropDefault() { return deathDropDefault; }
+    public Map<String, String> getDeathDropWorlds() { return deathDropWorlds; }
+    
+    /**
+     * 获取指定世界的死亡掉落处理方式
+     * @param worldName 世界名
+     * @return 处理方式: DEFAULT, KEEP, DROP, DESTROY
+     */
+    public String getDeathDropAction(String worldName) {
+        return deathDropWorlds.getOrDefault(worldName, deathDropDefault);
+    }
     
     public boolean isHookSweetMail() { return hookSweetMail; }
     public String getMailSenderType() { return mailSenderType; }

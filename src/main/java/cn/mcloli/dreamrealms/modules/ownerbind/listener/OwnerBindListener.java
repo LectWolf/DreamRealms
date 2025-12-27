@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -16,12 +17,16 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import top.mrxiaom.pluginbase.utils.Pair;
 import top.mrxiaom.sweetmail.IMail;
 import top.mrxiaom.sweetmail.attachments.AttachmentItem;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +35,7 @@ public class OwnerBindListener implements Listener {
 
     private final OwnerBindModule module;
     private final Map<UUID, Boolean> playerInventoryOpenMap = new ConcurrentHashMap<>();
+    private final Map<UUID, List<ItemStack>> deathKeepItems = new ConcurrentHashMap<>();
 
     public OwnerBindListener(OwnerBindModule module) {
         this.module = module;
@@ -499,6 +505,70 @@ public class OwnerBindListener implements Listener {
     public void onCloseInventory(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
             playerInventoryOpenMap.put(player.getUniqueId(), false);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        String worldName = player.getWorld().getName();
+        String action = module.getModuleConfig().getDeathDropAction(worldName);
+        
+        module.debug("玩家死亡: " + player.getName() + ", 世界: " + worldName + ", 处理方式: " + action);
+        
+        // DEFAULT 不处理
+        if ("DEFAULT".equals(action)) {
+            return;
+        }
+        
+        List<ItemStack> drops = event.getDrops();
+        List<ItemStack> boundItems = new ArrayList<>();
+        
+        // 找出所有绑定物品
+        Iterator<ItemStack> iterator = drops.iterator();
+        while (iterator.hasNext()) {
+            ItemStack item = iterator.next();
+            if (!module.isEmptyItem(item) && module.hasBoundOwner(item) && module.isOwner(player, item)) {
+                boundItems.add(item.clone());
+                iterator.remove();
+                module.debug("移除掉落物: " + item.getType());
+            }
+        }
+        
+        if (boundItems.isEmpty()) {
+            return;
+        }
+        
+        switch (action) {
+            case "KEEP" -> {
+                // 保留在背包中 - 存储物品，重生时归还
+                deathKeepItems.put(player.getUniqueId(), boundItems);
+                module.debug("保留绑定物品数量: " + boundItems.size());
+            }
+            case "DROP" -> {
+                // 掉落到地上 - 重新添加到掉落列表
+                drops.addAll(boundItems);
+                module.debug("掉落绑定物品数量: " + boundItems.size());
+            }
+            case "DESTROY" -> {
+                // 销毁物品 - 已从掉落列表移除，不做任何处理
+                module.debug("销毁绑定物品数量: " + boundItems.size());
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        List<ItemStack> items = deathKeepItems.remove(player.getUniqueId());
+        if (items != null && !items.isEmpty()) {
+            // 延迟1tick归还物品，确保玩家已完全重生
+            cn.mcloli.dreamrealms.utils.Util.runLater(() -> {
+                for (ItemStack item : items) {
+                    cn.mcloli.dreamrealms.utils.Util.giveItem(player, item);
+                }
+                module.debug("重生归还绑定物品数量: " + items.size());
+            }, 1L);
         }
     }
 }
