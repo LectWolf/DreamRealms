@@ -34,4 +34,7 @@ debug: false
 
 # 射线追踪距离 (格)
 ray-trace-distance: 10
+
+# 是否格式化输出 (换行缩进)
+pretty-print: false
 ```
