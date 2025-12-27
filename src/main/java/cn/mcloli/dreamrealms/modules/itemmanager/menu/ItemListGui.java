@@ -6,7 +6,6 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.ItemCategory;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
-import cn.mcloli.dreamrealms.utils.ChatInputUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -143,10 +142,10 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
         switch (key) {
             case 'I' -> handleItemClick(click, index + page * slotsPerPage);
             case 'A' -> {
-                // 添加按钮 - 点击添加手持物品
+                // 添加按钮 - 点击添加手持物品 (不删除手持物品)
                 ItemStack cursor = event.getCursor();
                 if (cursor != null && !cursor.getType().isAir()) {
-                    // 手持有物品，添加到列表
+                    // 手持有物品，复制一份添加到列表
                     StoredItem storedItem = StoredItem.create(cursor.clone());
                     if (category != null) {
                         storedItem.setCategoryId(category.getId());
@@ -155,26 +154,20 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
                     module.getDatabase().saveItem(storedItem);
                     items.add(storedItem);
                     
-                    // 清空手持物品
-                    event.getWhoClicked().setItemOnCursor(null);
-                    
                     refreshInventory();
                     ItemManagerMessages.item__added.t(player);
                 }
             }
             case 'R' -> {
-                // 重命名分类
+                // 设置分类图标 - 手持物品点击设置
                 if (category != null) {
-                    player.closeInventory();
-                    ChatInputUtil.requestInput(player, ItemManagerMessages.input__category_name.str(), input -> {
-                        if (input != null) {
-                            category.setName(input);
-                            module.getDatabase().saveCategory(category);
-                            ItemManagerMessages.category__renamed.t(player);
-                        }
-                        // 重新打开菜单
-                        new ItemListGui(player, config, category).open();
-                    });
+                    ItemStack cursor = event.getCursor();
+                    if (cursor != null && !cursor.getType().isAir()) {
+                        // 设置分类图标为手持物品的材质
+                        category.setIcon(cursor.getType().name());
+                        module.getDatabase().saveCategory(category);
+                        ItemManagerMessages.category__icon_set.t(player);
+                    }
                 }
             }
             case 'B' -> {

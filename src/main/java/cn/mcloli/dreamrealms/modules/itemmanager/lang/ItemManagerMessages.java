@@ -43,15 +43,27 @@ public enum ItemManagerMessages implements IHolderAccessor {
     edit__attribute_wip("&e属性编辑功能开发中..."),
     edit__flag_wip("&eFlag 编辑功能开发中..."),
     edit__durability_wip("&e耐久编辑功能开发中..."),
+    edit__current_name("<gray>当前名称: <click:copy_to_clipboard:{name}><hover:show_text:'<gray>点击复制'><white>{name}</white></hover></click>"),
+    edit__name_success("&a物品名称已更新"),
+
+    // Lore 编辑
+    lore__current("<gray>第 {index} 行: <click:copy_to_clipboard:{content}><hover:show_text:'<gray>点击复制'><white>{content}</white></hover></click>"),
+    lore__added("&a已添加新行"),
+    lore__edited("&a已修改该行"),
+    lore__deleted("&c已删除该行"),
 
     // 输入提示
     input__category_name("&e请输入分类名称:"),
     input__identifier("&e请输入物品标识名:"),
     input__category_icon("&e请输入分类图标 (材质名或 craftengine:xxx):"),
+    input__item_name("&e请输入物品名称 (支持颜色代码):"),
+    input__lore_add("&e请输入新的 Lore 行 (支持颜色代码):"),
+    input__lore_edit("&e请输入新的内容 (支持颜色代码):"),
 
     // 操作反馈
     item__added("&a物品已添加到列表"),
     category__renamed("&a分类名称已更新"),
+    category__icon_set("&a分类图标已设置"),
 
     // 聊天消息 (MiniMessage 格式)
     chat__copy_cmd("<green><click:copy_to_clipboard:{command}><hover:show_text:'<gray>点击复制'>点击复制获取命令</hover></click>"),

@@ -10,6 +10,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.CategoryMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.LoreEditMenuConfig;
 import org.bukkit.configuration.MemoryConfiguration;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 
@@ -25,6 +26,7 @@ public class ItemManagerModule extends AbstractModule {
     private CategoryMenuConfig categoryMenuConfig;
     private ItemListMenuConfig itemListMenuConfig;
     private ItemEditMenuConfig itemEditMenuConfig;
+    private LoreEditMenuConfig loreEditMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -57,6 +59,10 @@ public class ItemManagerModule extends AbstractModule {
 
     public ItemEditMenuConfig getItemEditMenuConfig() {
         return itemEditMenuConfig;
+    }
+
+    public LoreEditMenuConfig getLoreEditMenuConfig() {
+        return loreEditMenuConfig;
     }
 
     @Override
@@ -99,6 +105,11 @@ public class ItemManagerModule extends AbstractModule {
             itemEditMenuConfig = new ItemEditMenuConfig(plugin, this);
         }
         itemEditMenuConfig.reloadConfig(cfg);
+
+        if (loreEditMenuConfig == null) {
+            loreEditMenuConfig = new LoreEditMenuConfig(plugin, this);
+        }
+        loreEditMenuConfig.reloadConfig(cfg);
 
         // 注册命令
         if (command == null) {

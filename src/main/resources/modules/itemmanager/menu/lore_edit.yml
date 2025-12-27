@@ -1,0 +1,44 @@
+# Lore 编辑菜单配置
+
+title: "&0编辑 Lore"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XLLLLLLLX"
+  - "XLLLLLLLX"
+  - "XLLLLLLLX"
+  - "X<XBA>XXX"
+
+# 主图标
+items:
+  # Lore 行槽位 (动态填充)
+  L:
+    material: PAPER
+    display: "&f第 %index% 行"
+
+  # 添加按钮
+  A:
+    material: LIME_DYE
+    display: "&a添加新行"
+    lore:
+      - "&7点击添加新的 Lore 行"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7保存并返回"
+
+  "<":
+    material: ARROW
+    display: "&7上一页"
+
+  ">":
+    material: ARROW
+    display: "&7下一页"

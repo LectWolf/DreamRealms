@@ -36,10 +36,11 @@ other-items:
       - "&7返回分类列表"
 
   R:
-    material: NAME_TAG
-    display: "&e重命名分类"
+    material: ITEM_FRAME
+    display: "&e设置分类图标"
     lore:
-      - "&7点击修改分类名称"
+      - "&7手持物品点击此处"
+      - "&7将分类图标设为手持物品"
 
   "<":
     material: ARROW

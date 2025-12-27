@@ -12,6 +12,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import top.mrxiaom.pluginbase.utils.ColorHelper;
+import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Pair;
 
 /**
@@ -149,12 +151,32 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
 
     private void handleEditName() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__name_wip.t(player);
+        
+        player.closeInventory();
+        
+        // 显示当前名称供复制
+        ItemStack item = storedItem.getItemStack();
+        String currentName = ItemStackUtil.getItemDisplayName(item);
+        if (currentName != null && !currentName.isEmpty()) {
+            ItemManagerMessages.edit__current_name.tm(player, Pair.of("{name}", currentName));
+        }
+        
+        ChatInputUtil.requestInput(player, ItemManagerMessages.input__item_name.str(), input -> {
+            if (input != null) {
+                ItemStack itemStack = storedItem.getItemStack();
+                ItemStackUtil.setItemDisplayName(itemStack, ColorHelper.parseColor(input));
+                module.getDatabase().saveItem(storedItem);
+                ItemManagerMessages.edit__name_success.t(player);
+            }
+            // 重新打开菜单
+            new ItemEditGui(player, config, storedItem, parentGui).open();
+        });
     }
 
     private void handleEditLore() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__lore_wip.t(player);
+        // 打开 Lore 编辑菜单
+        new LoreEditGui(player, module.getLoreEditMenuConfig(), storedItem, this).open();
     }
 
     private void handleEditEnchant() {
