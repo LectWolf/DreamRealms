@@ -52,6 +52,12 @@ anti-container-pickup: true
 # 例如: 物品有绑定 NBT 但没有绑定 Lore，会自动添加 Lore
 repair-mode: true
 
+# 非物主处理方式
+# 当非物主尝试使用绑定物品时的处理方式
+# DROP - 丢出物品到地上
+# DESTROY - 销毁物品
+non-owner-action: DROP
+
 # ====================================
 # 插件挂钩
 # ====================================
@@ -61,7 +67,11 @@ hooks:
   sweetmail:
     # 是否启用邮件归还
     enabled: false
-    # 邮件发送者名称 (显示在邮件中)
+    # 邮件发送者类型
+    # SYSTEM - 系统发送 (使用下方 sender-name)
+    # PLAYER - 捡到物品的玩家发送
+    sender-type: SYSTEM
+    # 邮件发送者名称 (仅 sender-type 为 SYSTEM 时生效)
     sender-name: "系统"
     # 邮件图标 (Material 名称，或 ItemsAdder/CraftEngine 物品ID)
     icon: "CHEST"

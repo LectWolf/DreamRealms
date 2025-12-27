@@ -27,9 +27,11 @@ public class OwnerBindConfig {
     private boolean antiDrop;
     private boolean antiContainerPickup;
     private boolean repairMode;
+    private String nonOwnerAction; // DROP 或 DESTROY
     
     // Hook 配置
     private boolean hookSweetMail;
+    private String mailSenderType; // SYSTEM 或 PLAYER
     private String mailSenderName;
     private String mailIcon;
     private String mailTitle;
@@ -66,9 +68,11 @@ public class OwnerBindConfig {
         antiDrop = config.getBoolean("anti-drop", false);
         antiContainerPickup = config.getBoolean("anti-container-pickup", true);
         repairMode = config.getBoolean("repair-mode", true);
+        nonOwnerAction = config.getString("non-owner-action", "DROP").toUpperCase();
         
         // Hook 配置
         hookSweetMail = config.getBoolean("hooks.sweetmail.enabled", false);
+        mailSenderType = config.getString("hooks.sweetmail.sender-type", "SYSTEM").toUpperCase();
         mailSenderName = config.getString("hooks.sweetmail.sender-name", "系统");
         mailIcon = config.getString("hooks.sweetmail.icon", "CHEST");
         mailTitle = config.getString("hooks.sweetmail.title", "物品归还");
@@ -92,8 +96,12 @@ public class OwnerBindConfig {
     public boolean isAntiDrop() { return antiDrop; }
     public boolean isAntiContainerPickup() { return antiContainerPickup; }
     public boolean isRepairMode() { return repairMode; }
+    public String getNonOwnerAction() { return nonOwnerAction; }
+    public boolean isNonOwnerDrop() { return "DROP".equals(nonOwnerAction); }
     
     public boolean isHookSweetMail() { return hookSweetMail; }
+    public String getMailSenderType() { return mailSenderType; }
+    public boolean isMailSenderPlayer() { return "PLAYER".equals(mailSenderType); }
     public String getMailSenderName() { return mailSenderName; }
     public String getMailIcon() { return mailIcon; }
     public String getMailTitle() { return mailTitle; }
