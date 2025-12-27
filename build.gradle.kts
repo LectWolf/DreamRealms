@@ -37,6 +37,7 @@ repositories {
     maven("https://repo.momirealms.net/snapshots/")
     maven("https://libraries.minecraft.net/") // Mojang authlib
     maven("https://repo.hibiscusmc.com/releases/") // HMCWraps
+    maven("https://repo.ghostchu.com/releases/") // QuickShop-Hikari
 }
 
 dependencies {
@@ -56,6 +57,7 @@ dependencies {
     compileOnly("com.github.MrXiaoM:SweetMail:1.1.2")
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.1.3.0")
     compileOnly(files("libs/GlobalMarketPlus-v1.2.12.1.jar")) // GlobalMarketPlus 本地依赖
+    compileOnly("com.ghostchu:quickshop-api:6.2.0.6") // QuickShop-Hikari
 
 
     base.library("net.kyori:adventure-api:4.22.0")

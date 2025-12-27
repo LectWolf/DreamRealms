@@ -11,6 +11,7 @@ import cn.mcloli.dreamrealms.modules.ownerbind.config.OwnerBindConfig;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.OwnerBindListener;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.GlobalMarketPlusListener;
+import cn.mcloli.dreamrealms.modules.ownerbind.listener.QuickShopListener;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.ZAuctionHouseListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -36,6 +37,7 @@ public class OwnerBindModule extends AbstractModule {
     private OwnerBindCommand command;
     private OwnerBindListener listener;
     private GlobalMarketPlusListener globalMarketPlusListener;
+    private QuickShopListener quickShopListener;
     private ZAuctionHouseListener zAuctionHouseListener;
 
     // NBT Keys
@@ -126,6 +128,18 @@ public class OwnerBindModule extends AbstractModule {
             HandlerList.unregisterAll(zAuctionHouseListener);
             zAuctionHouseListener = null;
         }
+
+        // QuickShop Hook
+        if (config.isHookQuickShop() && Bukkit.getPluginManager().isPluginEnabled("QuickShop-Hikari")) {
+            if (quickShopListener == null) {
+                quickShopListener = new QuickShopListener(this);
+                registerEvents(quickShopListener);
+                info("已挂钩 QuickShop-Hikari");
+            }
+        } else if (quickShopListener != null) {
+            HandlerList.unregisterAll(quickShopListener);
+            quickShopListener = null;
+        }
     }
 
     private void disableModule() {
@@ -140,6 +154,10 @@ public class OwnerBindModule extends AbstractModule {
         if (zAuctionHouseListener != null) {
             HandlerList.unregisterAll(zAuctionHouseListener);
             zAuctionHouseListener = null;
+        }
+        if (quickShopListener != null) {
+            HandlerList.unregisterAll(quickShopListener);
+            quickShopListener = null;
         }
     }
 

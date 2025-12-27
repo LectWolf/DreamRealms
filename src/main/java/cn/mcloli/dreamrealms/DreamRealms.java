@@ -36,7 +36,7 @@ public class DreamRealms extends BukkitPlugin {
                 .adventure(true)
                 .database(true)
                 .reconnectDatabaseWhenReloadConfig(true)
-                .economy(EnumEconomy.VAULT)
+                .economy(EnumEconomy.NONE)
                 .scanIgnore("cn.mcloli.dreamrealms.libs")
         );
         this.scheduler = new FoliaLibScheduler(this);

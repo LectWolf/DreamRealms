@@ -38,6 +38,7 @@ public class OwnerBindConfig {
     
     private boolean hookGlobalMarketPlus;
     private boolean hookZAuctionHouse;
+    private boolean hookQuickShop;
 
     public OwnerBindConfig(DreamRealms plugin, OwnerBindModule module) {
         this.plugin = plugin;
@@ -76,6 +77,7 @@ public class OwnerBindConfig {
         
         hookGlobalMarketPlus = config.getBoolean("hooks.globalmarketplus.enabled", false);
         hookZAuctionHouse = config.getBoolean("hooks.zauctionhouse.enabled", false);
+        hookQuickShop = config.getBoolean("hooks.quickshop.enabled", false);
     }
 
     // Getters
@@ -100,4 +102,5 @@ public class OwnerBindConfig {
     
     public boolean isHookGlobalMarketPlus() { return hookGlobalMarketPlus; }
     public boolean isHookZAuctionHouse() { return hookZAuctionHouse; }
+    public boolean isHookQuickShop() { return hookQuickShop; }
 }

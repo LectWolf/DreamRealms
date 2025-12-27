@@ -54,6 +54,7 @@ bind-detection:
 - **SweetMail** - 邮件归还功能
 - **GlobalMarketPlus** - 禁止上架绑定物品
 - **zAuctionHouse** - 禁止上架绑定物品
+- **QuickShop-Hikari** - 禁止创建绑定物品商店
 
 ## 配置文件
 

@@ -87,3 +87,8 @@ hooks:
   # 阻止玩家将绑定物品上架到拍卖行
   zauctionhouse:
     enabled: false
+
+  # QuickShop-Hikari - 禁止创建绑定物品商店
+  # 阻止玩家使用绑定物品创建箱子商店
+  quickshop:
+    enabled: false
