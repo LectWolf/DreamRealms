@@ -1,0 +1,145 @@
+# 时装菜单
+
+title: "&e时装菜单"
+inventory:
+  - "IIIIIIIII"
+  - "IIIIIIIII"
+  - "IIIIIIIII"
+  - "IIIIIIIII"
+  - "XXXXPXXXX"
+  - "<ABCDEFG>"
+
+items:
+  I:
+    material: PAPER
+    display: "&f时装"
+  I_equipped:
+    material: PAPER
+    display: "&a已装备"
+    enchanted: true
+  P:
+    material: BARRIER
+    display: "&c卸下当前分类时装"
+    lore:
+      - "&7点击卸下当前分类的时装"
+  P_empty:
+    material: GRAY_STAINED_GLASS_PANE
+    display: "&7无时装可卸下"
+    lore:
+      - "&7当前分类没有装备时装"
+  "<":
+    material: ARROW
+    display: "&e上一页"
+  ">":
+    material: ARROW
+    display: "&e下一页"
+  "<_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+  ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+  # 分类按钮 - 支持变量: %count% (当前分类数量), %total% (总时装数量)
+  A:
+    material: IRON_HELMET
+    display: "&e头部"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到头部时装"
+  A_selected:
+    material: DIAMOND_HELMET
+    display: "&b头部 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  B:
+    material: IRON_CHESTPLATE
+    display: "&e胸部"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到胸部时装"
+  B_selected:
+    material: DIAMOND_CHESTPLATE
+    display: "&b胸部 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  C:
+    material: IRON_LEGGINGS
+    display: "&e腿部"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到腿部时装"
+  C_selected:
+    material: DIAMOND_LEGGINGS
+    display: "&b腿部 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  D:
+    material: IRON_BOOTS
+    display: "&e脚部"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到脚部时装"
+  D_selected:
+    material: DIAMOND_BOOTS
+    display: "&b脚部 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  E:
+    material: CHEST
+    display: "&e背包"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到背包时装"
+  E_selected:
+    material: ENDER_CHEST
+    display: "&b背包 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  F:
+    material: SHIELD
+    display: "&e副手"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到副手时装"
+  F_selected:
+    material: TOTEM_OF_UNDYING
+    display: "&b副手 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+  G:
+    material: LEAD
+    display: "&e气球"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&7点击切换到气球时装"
+  G_selected:
+    material: HEART_OF_THE_SEA
+    display: "&b气球 &a(当前)"
+    lore:
+      - "&7拥有: &f%count% &7件"
+      - ""
+      - "&a当前正在浏览此分类"
+
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "

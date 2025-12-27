@@ -41,6 +41,7 @@ export default defineConfig({
             { text: "OwnerBind 物主绑定", link: "/modules/ownerbind" },
             { text: "Debug 调试工具", link: "/modules/debug" },
             { text: "ItemManager 物品管理器", link: "/modules/itemmanager" },
+            { text: "CosmeticMenu 时装菜单", link: "/modules/cosmeticmenu" },
           ],
         },
       ],

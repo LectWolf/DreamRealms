@@ -92,7 +92,7 @@ public class CommandRegister {
     }
 
     /**
-     * 注销命令
+     * 注销命令 (只注销本插件注册的命令)
      */
     public static boolean unregister(@NotNull String name) {
         if (commandMap == null || knownCommands == null) {
@@ -100,32 +100,52 @@ public class CommandRegister {
             if (commandMap == null || knownCommands == null) return false;
         }
 
-        Command command = knownCommands.get(name.toLowerCase());
+        String fallbackPrefix = DreamRealms.getInstance().getName().toLowerCase();
+        String prefixedName = fallbackPrefix + ":" + name.toLowerCase();
+        
+        // 优先查找带前缀的命令 (本插件注册的)
+        Command command = knownCommands.get(prefixedName);
+        
+        // 如果没有带前缀的，检查无前缀的是否是本插件注册的
         if (command == null) {
-            // 尝试带前缀查找
-            String fallbackPrefix = DreamRealms.getInstance().getName().toLowerCase();
-            command = knownCommands.get(fallbackPrefix + ":" + name.toLowerCase());
+            Command unprefixedCommand = knownCommands.get(name.toLowerCase());
+            // 只有当命令是本插件注册的 DynamicCommand 时才注销
+            if (unprefixedCommand instanceof DynamicCommand) {
+                command = unprefixedCommand;
+            }
         }
+        
         if (command == null) return false;
+        
+        // 确保只注销本插件的命令
+        if (!(command instanceof DynamicCommand)) {
+            return false;
+        }
 
         // 从 commandMap 注销
         command.unregister(commandMap);
         
-        // 从 knownCommands 中移除所有相关键 (包括带前缀的)
-        final Command finalCommand = command;
-        knownCommands.keySet().removeIf(key -> 
-            key.equalsIgnoreCase(finalCommand.getName()) || 
-            finalCommand.getAliases().contains(key) ||
-            key.endsWith(":" + finalCommand.getName().toLowerCase())
-        );
+        // 只移除本插件注册的命令键
+        final String cmdName = command.getName().toLowerCase();
+        knownCommands.remove(prefixedName);
         
-        // 移除别名 (包括带前缀的)
+        // 检查无前缀的命令是否指向本插件的命令，如果是则移除
+        Command unprefixed = knownCommands.get(cmdName);
+        if (unprefixed instanceof DynamicCommand) {
+            knownCommands.remove(cmdName);
+        }
+        
+        // 移除别名 (只移除本插件注册的)
         for (String alias : command.getAliases()) {
-            knownCommands.keySet().removeIf(key -> 
-                key.equalsIgnoreCase(alias) || 
-                key.endsWith(":" + alias.toLowerCase())
-            );
-            registeredCommands.remove(alias.toLowerCase());
+            String aliasLower = alias.toLowerCase();
+            String prefixedAlias = fallbackPrefix + ":" + aliasLower;
+            knownCommands.remove(prefixedAlias);
+            
+            Command aliasCmd = knownCommands.get(aliasLower);
+            if (aliasCmd instanceof DynamicCommand) {
+                knownCommands.remove(aliasLower);
+            }
+            registeredCommands.remove(aliasLower);
         }
         
         registeredCommands.remove(name.toLowerCase());
