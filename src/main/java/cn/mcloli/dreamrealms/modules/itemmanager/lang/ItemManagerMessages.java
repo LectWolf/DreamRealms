@@ -44,11 +44,11 @@ public enum ItemManagerMessages implements IHolderAccessor {
     edit__attribute_wip("&e属性编辑功能开发中..."),
     edit__flag_wip("&eFlag 编辑功能开发中..."),
     edit__durability_wip("&e耐久编辑功能开发中..."),
-    edit__current_name("&7当前名称: &f{name}"),
+    edit__current_name("<gray>当前名称: <white>{name}</white> <green><click:copy_to_clipboard:'{name}'><hover:show_text:'<gray>点击复制'>[复制]</hover></click> <yellow><click:suggest_command:'{name}'><hover:show_text:'<gray>点击输入到聊天框'>[输入]</hover></click>"),
     edit__name_success("&a物品名称已更新"),
 
     // Lore 编辑
-    lore__current("&7第 {index} 行: &f{content}"),
+    lore__current("<gray>第 {index} 行: <white>{content}</white> <green><click:copy_to_clipboard:'{content}'><hover:show_text:'<gray>点击复制'>[复制]</hover></click> <yellow><click:suggest_command:'{content}'><hover:show_text:'<gray>点击输入到聊天框'>[输入]</hover></click>"),
     lore__added("&a已添加新行"),
     lore__edited("&a已修改该行"),
     lore__deleted("&c已删除该行"),

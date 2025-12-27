@@ -182,7 +182,7 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
         ItemStack item = storedItem.getItemStack();
         String currentName = ItemStackUtil.getItemDisplayName(item);
         if (currentName != null && !currentName.isEmpty()) {
-            ItemManagerMessages.edit__current_name.t(player, Pair.of("{name}", currentName));
+            ItemManagerMessages.edit__current_name.tm(player, Pair.of("{name}", currentName));
         }
         
         ChatInputUtil.requestInput(player, ItemManagerMessages.input__item_name.str(), input -> {

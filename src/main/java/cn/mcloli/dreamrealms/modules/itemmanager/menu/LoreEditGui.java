@@ -204,7 +204,7 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         
         // 显示当前内容供复制
         String currentLine = loreList.get(index);
-        ItemManagerMessages.lore__current.t(player, 
+        ItemManagerMessages.lore__current.tm(player, 
                 Pair.of("{index}", String.valueOf(index + 1)),
                 Pair.of("{content}", currentLine));
         
