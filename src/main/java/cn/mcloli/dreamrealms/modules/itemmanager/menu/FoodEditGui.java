@@ -140,15 +140,25 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
 
     private ItemStack getUsingConvertsToIcon(FoodComponent food) {
         ItemStack icon = new ItemStack(Material.BOWL);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e使用后转换"));
+        String displayName = ColorHelper.parseColor("&e使用后转换");
 
         List<String> lore = new ArrayList<>();
         if (PaperUtil.isPaper()) {
+            // 先尝试从 FoodComponent 获取 (1.21.1-)
             ItemStack convertsTo = PaperUtil.getUsingConvertsTo(food);
+            module.debug("getUsingConvertsToIcon: from FoodComponent = " + convertsTo);
+            
+            // 如果为空，尝试从 USE_REMAINDER 组件获取 (1.21.2+)
+            if (convertsTo == null || Util.isAir(convertsTo)) {
+                convertsTo = PaperUtil.getUsingConvertsToViaConsumable(storedItem.getItemStack());
+                module.debug("getUsingConvertsToIcon: from USE_REMAINDER = " + convertsTo);
+            }
+            
             if (convertsTo != null && !Util.isAir(convertsTo)) {
-                lore.add(ColorHelper.parseColor("&7当前: &f" + ItemNameUtil.getItemName(convertsTo)));
+                String itemName = ItemNameUtil.getItemName(convertsTo);
+                module.debug("getUsingConvertsToIcon: itemName = " + itemName);
+                lore.add(ColorHelper.parseColor("&7当前: &f" + itemName));
                 icon = convertsTo.clone();
-                ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e使用后转换"));
             } else {
                 lore.add(ColorHelper.parseColor("&7当前: &7无"));
             }
@@ -158,6 +168,7 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
         } else {
             lore.add(ColorHelper.parseColor("&c需要 Paper 服务端"));
         }
+        ItemStackUtil.setItemDisplayName(icon, displayName);
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
     }
@@ -168,7 +179,14 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
 
         List<String> lore = new ArrayList<>();
         if (PaperUtil.isPaper()) {
+            // 先尝试从 FoodComponent 获取效果数量 (1.21.1-)
             int effectCount = PaperUtil.getFoodEffectCount(food);
+            
+            // 如果为0，尝试从 ConsumableComponent 获取 (1.21.2+)
+            if (effectCount == 0) {
+                effectCount = PaperUtil.getConsumableEffects(storedItem.getItemStack()).size();
+            }
+            
             if (effectCount > 0) {
                 lore.add(ColorHelper.parseColor("&7当前效果数: &f" + effectCount));
             } else {
@@ -340,6 +358,7 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
     }
     
     private void handleUsingConvertsToEdit(ClickType click, InventoryClickEvent event) {
+        module.debug("handleUsingConvertsToEdit: click=" + click);
         if (!PaperUtil.isPaper()) {
             ItemManagerMessages.properties__need_paper.t(player);
             return;
@@ -347,14 +366,27 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
         
         ItemStack item = storedItem.getItemStack();
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
+        if (meta == null) {
+            module.debug("handleUsingConvertsToEdit: meta is null");
+            return;
+        }
         
         if (click == ClickType.RIGHT) {
-            // 右键清除
+            // 右键清除 - 尝试两种方式
             FoodComponent food = getOrCreateFood();
-            if (food != null && PaperUtil.setUsingConvertsTo(food, null)) {
-                meta.setFood(food);
-                item.setItemMeta(meta);
+            boolean cleared = false;
+            if (food != null) {
+                cleared = PaperUtil.setUsingConvertsTo(food, null);
+                if (cleared) {
+                    meta.setFood(food);
+                    item.setItemMeta(meta);
+                }
+            }
+            if (!cleared) {
+                // 尝试通过 ConsumableComponent 清除
+                cleared = PaperUtil.setUsingConvertsToViaConsumable(item, null);
+            }
+            if (cleared) {
                 module.getDatabase().saveItem(storedItem);
                 refreshInventory();
                 ItemManagerMessages.properties__food_converts_to_cleared.t(player);
@@ -364,20 +396,36 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
         
         // 左键 - 检查玩家手持物品
         ItemStack cursor = event.getCursor();
+        module.debug("handleUsingConvertsToEdit: cursor=" + cursor + ", isAir=" + Util.isAir(cursor));
         if (Util.notAir(cursor)) {
             // 手持物品 - 设置为转换物品
+            ItemStack convertsTo = cursor.clone();
+            convertsTo.setAmount(1);
+            
+            // 先尝试 FoodComponent 方式
             FoodComponent food = getOrCreateFood();
+            boolean success = false;
+            module.debug("handleUsingConvertsToEdit: food=" + food);
             if (food != null) {
-                ItemStack convertsTo = cursor.clone();
-                convertsTo.setAmount(1);
-                if (PaperUtil.setUsingConvertsTo(food, convertsTo)) {
+                success = PaperUtil.setUsingConvertsTo(food, convertsTo);
+                if (success) {
                     meta.setFood(food);
                     item.setItemMeta(meta);
-                    module.getDatabase().saveItem(storedItem);
-                    refreshInventory();
-                    ItemManagerMessages.properties__food_converts_to_set.t(player, 
-                        Pair.of("{item}", ItemNameUtil.getItemName(convertsTo)));
                 }
+            }
+            
+            // 如果失败，尝试 ConsumableComponent 方式 (1.21.2+)
+            if (!success) {
+                module.debug("handleUsingConvertsToEdit: trying ConsumableComponent way");
+                success = PaperUtil.setUsingConvertsToViaConsumable(item, convertsTo);
+            }
+            
+            module.debug("handleUsingConvertsToEdit: final result=" + success);
+            if (success) {
+                module.getDatabase().saveItem(storedItem);
+                refreshInventory();
+                ItemManagerMessages.properties__food_converts_to_set.t(player, 
+                    Pair.of("{item}", ItemNameUtil.getItemName(convertsTo)));
             }
         } else {
             ItemManagerMessages.properties__food_converts_to_hint.t(player);

@@ -31,7 +31,7 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
     private final StoredItem storedItem;
     private final FoodEffectEditGui parentGui;
     private int page = 0;
-    private static final int EFFECTS_PER_PAGE = 28; // 4行7列
+    private int slotsPerPage = 0;
     
     // 所有可用的药水效果类型
     private static final PotionEffectType[] EFFECT_TYPES = {
@@ -60,42 +60,48 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
     @NotNull
     public Inventory newInventory() {
         this.inventory = config.createInventory(this, player);
+        slotsPerPage = countSlots('E');
         refreshInventory();
         return inventory;
     }
 
-    private void refreshInventory() {
-        // 效果槽位: 第2-5行的中间7格 (索引 10-16, 19-25, 28-34, 37-43)
-        int[] effectSlots = {
-            10, 11, 12, 13, 14, 15, 16,
-            19, 20, 21, 22, 23, 24, 25,
-            28, 29, 30, 31, 32, 33, 34,
-            37, 38, 39, 40, 41, 42, 43
-        };
+    private int countSlots(char key) {
+        int count = 0;
+        for (int i = 0; i < inventory.getSize(); i++) {
+            Character k = config.getSlotKey(i);
+            if (k != null && k == key) count++;
+        }
+        return count;
+    }
 
+    private void refreshInventory() {
         for (int i = 0; i < inventory.getSize(); i++) {
             Character key = config.getSlotKey(i);
             if (key == null) continue;
 
+            String keyStr = String.valueOf(key);
+            if (keyStr.equals(" ") || keyStr.equals("　")) {
+                inventory.setItem(i, null);
+                continue;
+            }
+
             switch (key) {
-                case '<' -> inventory.setItem(i, getPrevPageIcon());
-                case '>' -> inventory.setItem(i, getNextPageIcon());
                 case 'E' -> {
-                    // 效果槽位
-                    int slotIndex = -1;
-                    for (int j = 0; j < effectSlots.length; j++) {
-                        if (effectSlots[j] == i) {
-                            slotIndex = j;
-                            break;
-                        }
+                    int index = config.getKeyIndex(key, i) + page * slotsPerPage;
+                    inventory.setItem(i, getEffectTypeIcon(index));
+                }
+                case '<' -> {
+                    if (page > 0) {
+                        config.applyIcon(this, inventory, player, i);
+                    } else {
+                        inventory.setItem(i, config.getEmptyPrevIcon(player));
                     }
-                    if (slotIndex >= 0) {
-                        int effectIndex = page * EFFECTS_PER_PAGE + slotIndex;
-                        if (effectIndex < EFFECT_TYPES.length) {
-                            inventory.setItem(i, getEffectTypeIcon(EFFECT_TYPES[effectIndex]));
-                        } else {
-                            inventory.setItem(i, null);
-                        }
+                }
+                case '>' -> {
+                    if (hasNextPage()) {
+                        config.applyIcon(this, inventory, player, i);
+                    } else {
+                        inventory.setItem(i, config.getEmptyNextIcon(player));
                     }
                 }
                 default -> config.applyIcon(this, inventory, player, i);
@@ -103,21 +109,16 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
         }
     }
 
-    private ItemStack getPrevPageIcon() {
-        ItemStack icon = new ItemStack(page > 0 ? Material.ARROW : Material.GRAY_DYE);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor(page > 0 ? "&e◀ 上一页" : "&7已是第一页"));
-        return icon;
+    private boolean hasNextPage() {
+        return (page + 1) * slotsPerPage < EFFECT_TYPES.length;
     }
 
-    private ItemStack getNextPageIcon() {
-        int maxPage = (EFFECT_TYPES.length - 1) / EFFECTS_PER_PAGE;
-        boolean hasNext = page < maxPage;
-        ItemStack icon = new ItemStack(hasNext ? Material.ARROW : Material.GRAY_DYE);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor(hasNext ? "&e下一页 ▶" : "&7已是最后一页"));
-        return icon;
-    }
+    private ItemStack getEffectTypeIcon(int index) {
+        if (index >= EFFECT_TYPES.length) {
+            return null;
+        }
 
-    private ItemStack getEffectTypeIcon(PotionEffectType type) {
+        PotionEffectType type = EFFECT_TYPES[index];
         ItemStack icon = new ItemStack(Material.POTION);
         String effectName = getEffectName(type);
         ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&b" + effectName));
@@ -173,7 +174,7 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
 
     @Override
     protected void handleClick(ClickType click, char key, int index, ItemStack currentItem, InventoryClickEvent event) {
-        module.debug("FoodEffectSelectGui click: key=" + key + ", click=" + click);
+        module.debug("FoodEffectSelectGui click: key=" + key + ", index=" + index + ", click=" + click);
 
         switch (key) {
             case '<' -> {
@@ -183,8 +184,7 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
                 }
             }
             case '>' -> {
-                int maxPage = (EFFECT_TYPES.length - 1) / EFFECTS_PER_PAGE;
-                if (page < maxPage) {
+                if (hasNextPage()) {
                     page++;
                     refreshInventory();
                 }
@@ -194,25 +194,9 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
                 parentGui.open();
             }
             case 'E' -> {
-                // 计算点击的效果索引
-                int[] effectSlots = {
-                    10, 11, 12, 13, 14, 15, 16,
-                    19, 20, 21, 22, 23, 24, 25,
-                    28, 29, 30, 31, 32, 33, 34,
-                    37, 38, 39, 40, 41, 42, 43
-                };
-                int slotIndex = -1;
-                for (int j = 0; j < effectSlots.length; j++) {
-                    if (effectSlots[j] == index) {
-                        slotIndex = j;
-                        break;
-                    }
-                }
-                if (slotIndex >= 0) {
-                    int effectIndex = page * EFFECTS_PER_PAGE + slotIndex;
-                    if (effectIndex < EFFECT_TYPES.length) {
-                        addEffect(EFFECT_TYPES[effectIndex]);
-                    }
+                int effectIndex = index + page * slotsPerPage;
+                if (effectIndex < EFFECT_TYPES.length) {
+                    addEffect(EFFECT_TYPES[effectIndex]);
                 }
             }
             default -> config.handleOtherIconClick(player, click, key);
@@ -224,28 +208,39 @@ public class FoodEffectSelectGui extends AbstractInteractiveGui<FoodEffectSelect
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
-        FoodComponent food;
-        if (meta.hasFood()) {
-            food = meta.getFood();
-        } else {
-            food = meta.getFood();
+        // 确保有 FoodComponent
+        if (!meta.hasFood()) {
+            FoodComponent food = meta.getFood();
             food.setNutrition(4);
             food.setSaturation(2.4f);
+            meta.setFood(food);
+            item.setItemMeta(meta);
         }
 
         // 添加默认效果: 等级1, 持续10秒, 100%概率
         PotionEffect effect = new PotionEffect(type, 200, 0); // 200 ticks = 10秒
-        List<Object> effects = PaperUtil.getFoodEffects(food);
+        
+        // 先尝试旧方式 (1.21.1-)
+        FoodComponent food = meta.getFood();
         Object newEffect = PaperUtil.addFoodEffect(food, effect, 1.0f);
+        
         if (newEffect != null) {
+            // 旧方式成功
+            List<Object> effects = PaperUtil.getFoodEffects(food);
             effects.add(newEffect);
             PaperUtil.setFoodEffects(food, effects);
+            meta.setFood(food);
+            item.setItemMeta(meta);
+        } else {
+            // 尝试新方式 (1.21.2+)
+            boolean success = PaperUtil.addFoodEffectViaConsumable(item, effect, 1.0f);
+            if (!success) {
+                ItemManagerMessages.properties__food_effect_add_failed.t(player);
+                return;
+            }
         }
         
-        meta.setFood(food);
-        item.setItemMeta(meta);
         module.getDatabase().saveItem(storedItem);
-        
         ItemManagerMessages.properties__food_effect_added.t(player);
         
         // 返回效果列表

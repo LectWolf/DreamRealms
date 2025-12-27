@@ -24,6 +24,8 @@ import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemPropertiesMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.LoreEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.ToolEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.ToolRuleEditMenuConfig;
 import org.bukkit.configuration.MemoryConfiguration;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 
@@ -52,6 +54,8 @@ public class ItemManagerModule extends AbstractModule {
     private FoodEffectEditMenuConfig foodEffectEditMenuConfig;
     private FoodEffectSelectMenuConfig foodEffectSelectMenuConfig;
     private FoodEffectDetailMenuConfig foodEffectDetailMenuConfig;
+    private ToolEditMenuConfig toolEditMenuConfig;
+    private ToolRuleEditMenuConfig toolRuleEditMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -132,6 +136,14 @@ public class ItemManagerModule extends AbstractModule {
 
     public FoodEffectDetailMenuConfig getFoodEffectDetailMenuConfig() {
         return foodEffectDetailMenuConfig;
+    }
+
+    public ToolEditMenuConfig getToolEditMenuConfig() {
+        return toolEditMenuConfig;
+    }
+
+    public ToolRuleEditMenuConfig getToolRuleEditMenuConfig() {
+        return toolRuleEditMenuConfig;
     }
 
     @Override
@@ -234,6 +246,16 @@ public class ItemManagerModule extends AbstractModule {
             foodEffectDetailMenuConfig = new FoodEffectDetailMenuConfig(plugin, this);
         }
         foodEffectDetailMenuConfig.reloadConfig(cfg);
+
+        if (toolEditMenuConfig == null) {
+            toolEditMenuConfig = new ToolEditMenuConfig(plugin, this);
+        }
+        toolEditMenuConfig.reloadConfig(cfg);
+
+        if (toolRuleEditMenuConfig == null) {
+            toolRuleEditMenuConfig = new ToolRuleEditMenuConfig(plugin, this);
+        }
+        toolRuleEditMenuConfig.reloadConfig(cfg);
 
         // 注册命令到 /dr itemmanager
         if (command == null) {

@@ -1,6 +1,6 @@
-# 食物效果编辑菜单配置
+# 工具挖掘规则编辑菜单配置
 
-title: "&0编辑食用效果"
+title: "&0编辑挖掘规则"
 
 inventory:
   - "XXXXXXXXX"
@@ -19,24 +19,24 @@ items:
     lore:
       - "&e左键获取物品"
 
-  # 效果槽位 (动态填充)
+  # 规则槽位 (动态填充)
   E:
-    material: POTION
-    display: "&b%effect_name%"
+    material: PAPER
+    display: "&b规则 #%index%"
     lore:
-      - "&7等级: &f%level%"
-      - "&7持续时间: &f%duration% &7秒"
-      - "&7触发概率: &f%probability%%"
+      - "&7方块: &f%blocks%"
+      - "&7速度: &f%speed%"
+      - "&7正确工具: &f%correct%"
       - ""
       - "&e左键编辑"
       - "&cCtrl+Q删除"
 
-  # 添加效果按钮
+  # 添加规则
   A:
-    material: BREWING_STAND
-    display: "&a添加效果"
+    material: EMERALD
+    display: "&a添加规则"
     lore:
-      - "&7点击选择要添加的效果"
+      - "&7点击添加新的挖掘规则"
 
 # 其他图标
 other-items:
@@ -48,7 +48,7 @@ other-items:
     material: ARROW
     display: "&7返回"
     lore:
-      - "&7返回食物组件编辑"
+      - "&7返回工具组件编辑"
 
   "<":
     material: ARROW

@@ -37,7 +37,8 @@ public class OwnerBindListener implements Listener {
 
     private final OwnerBindModule module;
     private final Map<UUID, Boolean> playerInventoryOpenMap = new ConcurrentHashMap<>();
-    private final Map<UUID, List<ItemStack>> deathKeepItems = new ConcurrentHashMap<>();
+    // 存储死亡保留的物品及其原始槽位 (槽位 -> 物品)
+    private final Map<UUID, Map<Integer, ItemStack>> deathKeepItems = new ConcurrentHashMap<>();
 
     public OwnerBindListener(OwnerBindModule module) {
         this.module = module;
@@ -60,6 +61,17 @@ public class OwnerBindListener implements Listener {
     }
 
     /**
+     * 快速检查物品是否需要处理
+     * 如果物品没有任何绑定相关信息，直接返回 true 跳过后续处理
+     */
+    private boolean quickCheck(ItemStack item) {
+        if (module.isEmptyItem(item)) return true;
+        if (!item.hasItemMeta()) return true;
+        // 没有任何绑定信息的物品不需要处理
+        return !module.hasAnyBindInfo(item);
+    }
+
+    /**
      * 处理物品：修复Lore + 自动绑定 + 检查所有权
      * @return true 如果玩家可以操作该物品
      */
@@ -75,7 +87,10 @@ public class OwnerBindListener implements Listener {
     private boolean processItem(Player player, ItemStack item, OwnerBindEvent.BindSource source) {
         if (module.isEmptyItem(item)) return true;
 
-        // 修复Lore
+        // 快速路径：没有绑定信息的物品直接通过
+        if (!module.hasAnyBindInfo(item)) return true;
+
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(item);
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
@@ -186,13 +201,16 @@ public class OwnerBindListener implements Listener {
         ItemStack currentItem = event.getCurrentItem();
         if (module.isEmptyItem(currentItem)) return;
 
+        // 快速路径：没有绑定信息的物品直接跳过
+        if (quickCheck(currentItem)) return;
+
         boolean isPlayerInventory = event.getClickedInventory() != null 
                 && event.getClickedInventory().getType() == InventoryType.PLAYER;
         boolean isContainerInventory = event.getClickedInventory() != null 
                 && event.getClickedInventory().getType() != InventoryType.PLAYER
                 && event.getClickedInventory().getType() != InventoryType.CREATIVE;
 
-        // 修复Lore
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(currentItem);
 
         // 从容器中拿取他人绑定物品的处理
@@ -237,7 +255,10 @@ public class OwnerBindListener implements Listener {
         ItemStack item = event.getItem().getItemStack();
         if (module.isEmptyItem(item)) return;
 
-        // 修复Lore
+        // 快速路径：没有绑定信息的物品直接跳过
+        if (quickCheck(item)) return;
+
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(item);
 
         // 检查所有权
@@ -274,43 +295,49 @@ public class OwnerBindListener implements Listener {
             return;
         }
 
+        // 快速路径：没有绑定信息的物品直接跳过（但仍需检查右键穿戴）
+        boolean hasBindInfo = module.hasAnyBindInfo(item);
+        
         // 检查是否是右键穿戴盔甲
         boolean isRightClickEquip = isRightClick && isArmorItem(item.getType());
         
         module.debug("交互物品: " + player.getName() + ", 物品: " + item.getType() + ", Action: " + event.getAction() + ", 右键穿戴: " + isRightClickEquip + ", 事件已取消: " + event.isCancelled());
 
-        // 修复Lore
-        module.repairItemLore(item);
+        // 只在有绑定信息时才处理
+        if (hasBindInfo) {
+            // 修复Lore
+            module.repairItemLore(item);
 
-        // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
-        if (!hasNobindPermission(player) && module.isBindable(item) && !module.hasBoundOwner(item)) {
-            module.bindToPlayer(item, player.getName(), OwnerBindEvent.BindSource.INTERACT);
-            module.debug("交互时自动绑定给: " + player.getName());
-        }
-
-        // 检查所有权 - 手持物品
-        if (!hasBypassPermission(player) && !module.isOwner(player, item)) {
-            String boundOwner = module.getBoundOwner(item);
-            module.debug("交互被阻止: 非物主, 物主: " + boundOwner);
-            OwnerBindMessages.not_owner.tm(player, Pair.of("%owner%", boundOwner));
-            event.setCancelled(true);
-            
-            // 处理非物主的物品
-            EquipmentSlot hand = event.getHand();
-            if (hand == EquipmentSlot.HAND) {
-                player.getInventory().setItemInMainHand(null);
-            } else if (hand == EquipmentSlot.OFF_HAND) {
-                player.getInventory().setItemInOffHand(null);
+            // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
+            if (!hasNobindPermission(player) && module.isBindable(item) && !module.hasBoundOwner(item)) {
+                module.bindToPlayer(item, player.getName(), OwnerBindEvent.BindSource.INTERACT);
+                module.debug("交互时自动绑定给: " + player.getName());
             }
-            handleNonOwnerItem(player, item, boundOwner);
-            return;
+
+            // 检查所有权 - 手持物品
+            if (!hasBypassPermission(player) && !module.isOwner(player, item)) {
+                String boundOwner = module.getBoundOwner(item);
+                module.debug("交互被阻止: 非物主, 物主: " + boundOwner);
+                OwnerBindMessages.not_owner.tm(player, Pair.of("%owner%", boundOwner));
+                event.setCancelled(true);
+                
+                // 处理非物主的物品
+                EquipmentSlot hand = event.getHand();
+                if (hand == EquipmentSlot.HAND) {
+                    player.getInventory().setItemInMainHand(null);
+                } else if (hand == EquipmentSlot.OFF_HAND) {
+                    player.getInventory().setItemInOffHand(null);
+                }
+                handleNonOwnerItem(player, item, boundOwner);
+                return;
+            }
         }
 
         // 右键穿戴盔甲时，检查身上已穿戴的盔甲是否是他人绑定的
         if (isRightClickEquip && !hasBypassPermission(player)) {
             ItemStack wornArmor = getWornArmorByType(player, item.getType());
             module.debug("检查已穿戴盔甲: " + (wornArmor != null ? wornArmor.getType() : "null") + ", 是否为空: " + module.isEmptyItem(wornArmor));
-            if (!module.isEmptyItem(wornArmor)) {
+            if (!module.isEmptyItem(wornArmor) && module.hasAnyBindInfo(wornArmor)) {
                 module.debug("已穿戴盔甲物主: " + module.getBoundOwner(wornArmor) + ", 是否为物主: " + module.isOwner(player, wornArmor));
                 if (!module.isOwner(player, wornArmor)) {
                     String boundOwner = module.getBoundOwner(wornArmor);
@@ -355,9 +382,12 @@ public class OwnerBindListener implements Listener {
         ItemStack item = event.getItem();
         if (module.isEmptyItem(item)) return;
 
+        // 快速路径：没有绑定信息的物品直接跳过
+        if (quickCheck(item)) return;
+
         module.debug("消耗物品: " + player.getName() + ", 物品: " + item.getType());
 
-        // 修复Lore
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(item);
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
@@ -382,7 +412,7 @@ public class OwnerBindListener implements Listener {
         // 检查是否是装备槽点击 (放入装备)
         if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
             ItemStack cursorItem = event.getCursor();
-            if (!module.isEmptyItem(cursorItem)) {
+            if (!module.isEmptyItem(cursorItem) && module.hasAnyBindInfo(cursorItem)) {
                 module.debug("装备物品(光标): " + player.getName() + ", 物品: " + cursorItem.getType() + ", 槽位: " + event.getSlot());
 
                 // 修复Lore
@@ -409,7 +439,7 @@ public class OwnerBindListener implements Listener {
         if (event.isShiftClick() && event.getClickedInventory() != null 
                 && event.getClickedInventory().getType() == InventoryType.PLAYER) {
             ItemStack clickedItem = event.getCurrentItem();
-            if (!module.isEmptyItem(clickedItem) && isArmorItem(clickedItem.getType())) {
+            if (!module.isEmptyItem(clickedItem) && isArmorItem(clickedItem.getType()) && module.hasAnyBindInfo(clickedItem)) {
                 module.debug("Shift装备物品: " + player.getName() + ", 物品: " + clickedItem.getType());
 
                 // 修复Lore
@@ -438,7 +468,10 @@ public class OwnerBindListener implements Listener {
         ItemStack newItem = player.getInventory().getItem(event.getNewSlot());
         if (module.isEmptyItem(newItem)) return;
 
-        // 修复Lore
+        // 快速路径：没有绑定信息的物品直接跳过
+        if (quickCheck(newItem)) return;
+
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(newItem);
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
@@ -471,7 +504,10 @@ public class OwnerBindListener implements Listener {
         ItemStack item = event.getItemDrop().getItemStack();
         if (module.isEmptyItem(item)) return;
 
-        // 修复Lore
+        // 快速路径：没有绑定信息的物品直接跳过
+        if (quickCheck(item)) return;
+
+        // 修复Lore (只在有绑定信息时才修复)
         module.repairItemLore(item);
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
@@ -524,37 +560,66 @@ public class OwnerBindListener implements Listener {
         }
         
         List<ItemStack> drops = event.getDrops();
-        List<ItemStack> boundItems = new ArrayList<>();
+        Map<Integer, ItemStack> boundItemsWithSlot = new java.util.HashMap<>();
         
-        // 找出所有绑定物品
-        Iterator<ItemStack> iterator = drops.iterator();
-        while (iterator.hasNext()) {
-            ItemStack item = iterator.next();
+        // 先记录玩家背包中绑定物品的槽位
+        var inventory = player.getInventory();
+        
+        // 检查主背包 (0-35)
+        for (int i = 0; i < 36; i++) {
+            ItemStack item = inventory.getItem(i);
             if (!module.isEmptyItem(item) && module.hasBoundOwner(item) && module.isOwner(player, item)) {
-                boundItems.add(item.clone());
-                iterator.remove();
-                module.debug("移除掉落物: " + item.getType());
+                boundItemsWithSlot.put(i, item.clone());
+                module.debug("记录绑定物品槽位: " + i + " -> " + item.getType());
             }
         }
         
-        if (boundItems.isEmpty()) {
+        // 检查装备栏 (36-39: 靴子、护腿、胸甲、头盔)
+        ItemStack[] armor = inventory.getArmorContents();
+        for (int i = 0; i < armor.length; i++) {
+            ItemStack item = armor[i];
+            if (!module.isEmptyItem(item) && module.hasBoundOwner(item) && module.isOwner(player, item)) {
+                // 装备栏槽位: 36=靴子, 37=护腿, 38=胸甲, 39=头盔
+                boundItemsWithSlot.put(36 + i, item.clone());
+                module.debug("记录绑定装备槽位: " + (36 + i) + " -> " + item.getType());
+            }
+        }
+        
+        // 检查副手 (槽位 40)
+        ItemStack offhand = inventory.getItemInOffHand();
+        if (!module.isEmptyItem(offhand) && module.hasBoundOwner(offhand) && module.isOwner(player, offhand)) {
+            boundItemsWithSlot.put(40, offhand.clone());
+            module.debug("记录绑定副手槽位: 40 -> " + offhand.getType());
+        }
+        
+        if (boundItemsWithSlot.isEmpty()) {
             return;
+        }
+        
+        // 从掉落物中移除绑定物品
+        Iterator<ItemStack> iterator = drops.iterator();
+        while (iterator.hasNext()) {
+            ItemStack dropItem = iterator.next();
+            if (!module.isEmptyItem(dropItem) && module.hasBoundOwner(dropItem) && module.isOwner(player, dropItem)) {
+                iterator.remove();
+                module.debug("移除掉落物: " + dropItem.getType());
+            }
         }
         
         switch (action) {
             case "KEEP" -> {
-                // 保留在背包中 - 存储物品，重生时归还
-                deathKeepItems.put(player.getUniqueId(), boundItems);
-                module.debug("保留绑定物品数量: " + boundItems.size());
+                // 保留在背包中 - 存储物品和槽位，重生时归还到原位置
+                deathKeepItems.put(player.getUniqueId(), boundItemsWithSlot);
+                module.debug("保留绑定物品数量: " + boundItemsWithSlot.size());
             }
             case "DROP" -> {
                 // 掉落到地上 - 重新添加到掉落列表
-                drops.addAll(boundItems);
-                module.debug("掉落绑定物品数量: " + boundItems.size());
+                drops.addAll(boundItemsWithSlot.values());
+                module.debug("掉落绑定物品数量: " + boundItemsWithSlot.size());
             }
             case "DESTROY" -> {
                 // 销毁物品 - 已从掉落列表移除，不做任何处理
-                module.debug("销毁绑定物品数量: " + boundItems.size());
+                module.debug("销毁绑定物品数量: " + boundItemsWithSlot.size());
             }
         }
     }
@@ -573,17 +638,67 @@ public class OwnerBindListener implements Listener {
     }
 
     /**
-     * 归还死亡保留的绑定物品
+     * 归还死亡保留的绑定物品到原始槽位
      */
     private void restoreDeathKeepItems(Player player) {
-        List<ItemStack> items = deathKeepItems.remove(player.getUniqueId());
+        Map<Integer, ItemStack> items = deathKeepItems.remove(player.getUniqueId());
         if (items != null && !items.isEmpty()) {
             // 延迟1tick归还物品，确保玩家已完全重生/加入
             Util.runLater(() -> {
-                for (ItemStack item : items) {
+                var inventory = player.getInventory();
+                List<ItemStack> overflow = new ArrayList<>();
+                
+                for (Map.Entry<Integer, ItemStack> entry : items.entrySet()) {
+                    int slot = entry.getKey();
+                    ItemStack item = entry.getValue();
+                    
+                    if (slot >= 0 && slot < 36) {
+                        // 主背包槽位 (0-35)
+                        ItemStack existing = inventory.getItem(slot);
+                        if (module.isEmptyItem(existing)) {
+                            inventory.setItem(slot, item);
+                            module.debug("恢复物品到槽位 " + slot + ": " + item.getType());
+                        } else {
+                            // 槽位被占用，放入溢出列表
+                            overflow.add(item);
+                            module.debug("槽位 " + slot + " 被占用，物品加入溢出列表: " + item.getType());
+                        }
+                    } else if (slot >= 36 && slot <= 39) {
+                        // 装备栏 (36=靴子, 37=护腿, 38=胸甲, 39=头盔)
+                        int armorIndex = slot - 36;
+                        ItemStack[] armor = inventory.getArmorContents();
+                        if (module.isEmptyItem(armor[armorIndex])) {
+                            armor[armorIndex] = item;
+                            inventory.setArmorContents(armor);
+                            module.debug("恢复装备到槽位 " + slot + ": " + item.getType());
+                        } else {
+                            overflow.add(item);
+                            module.debug("装备槽位 " + slot + " 被占用，物品加入溢出列表: " + item.getType());
+                        }
+                    } else if (slot == 40) {
+                        // 副手
+                        ItemStack existing = inventory.getItemInOffHand();
+                        if (module.isEmptyItem(existing)) {
+                            inventory.setItemInOffHand(item);
+                            module.debug("恢复副手物品: " + item.getType());
+                        } else {
+                            overflow.add(item);
+                            module.debug("副手槽位被占用，物品加入溢出列表: " + item.getType());
+                        }
+                    } else {
+                        // 未知槽位，放入溢出列表
+                        overflow.add(item);
+                    }
+                }
+                
+                // 处理溢出物品
+                for (ItemStack item : overflow) {
                     Util.giveItem(player, item);
                 }
-                module.debug("归还绑定物品数量: " + items.size() + ", 玩家: " + player.getName());
+                
+                module.debug("归还绑定物品完成, 玩家: " + player.getName() + 
+                    ", 恢复到原位: " + (items.size() - overflow.size()) + 
+                    ", 溢出: " + overflow.size());
             }, 1L);
         }
     }

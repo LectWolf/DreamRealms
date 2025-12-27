@@ -1,11 +1,14 @@
 package cn.mcloli.dreamrealms.modules.itemmanager.menu;
 
 import cn.mcloli.dreamrealms.gui.AbstractInteractiveGui;
+import cn.mcloli.dreamrealms.DreamRealms;
+import cn.mcloli.dreamrealms.lang.ItemLanguage;
 import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
 import cn.mcloli.dreamrealms.utils.ItemNameUtil;
+import cn.mcloli.dreamrealms.utils.PaperUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -202,7 +205,8 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             lore.add(ColorHelper.parseColor("&7当前: &7未设置"));
         }
         lore.add("");
-        lore.add(ColorHelper.parseColor("&e点击修改"));
+        lore.add(ColorHelper.parseColor("&e手持物品点击复制"));
+        lore.add(ColorHelper.parseColor("&7空手点击输入数值"));
         lore.add(ColorHelper.parseColor("&7右键清除"));
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
@@ -236,7 +240,8 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             lore.add(ColorHelper.parseColor("&7当前: &7未设置"));
         }
         lore.add("");
-        lore.add(ColorHelper.parseColor("&e点击修改"));
+        lore.add(ColorHelper.parseColor("&e手持物品点击复制"));
+        lore.add(ColorHelper.parseColor("&7空手点击输入模型ID"));
         lore.add(ColorHelper.parseColor("&7右键清除"));
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
@@ -287,8 +292,15 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
         ItemStack icon = new ItemStack(Material.CRAFTING_TABLE);
         ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e切换材质"));
 
+        // 使用 ItemLanguage 获取翻译后的材质名
+        String materialName = item.getType().name();
+        ItemLanguage lang = DreamRealms.getInstance().getItemLanguage();
+        if (lang != null && lang.isLoaded()) {
+            materialName = lang.getItemName(item.getType());
+        }
+
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7当前: &f" + item.getType().name()));
+        lore.add(ColorHelper.parseColor("&7当前: &f" + materialName));
         lore.add("");
         lore.add(ColorHelper.parseColor("&e手持物品点击切换"));
         lore.add(ColorHelper.parseColor("&7空手点击输入材质名"));
@@ -310,14 +322,15 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             case 'H' -> handleHideTooltipToggle();
             case 'G' -> handleGlintToggle();
             case 'F' -> handleFireResistantToggle();
-            case 'C' -> handleCustomModelDataEdit(click);
+            case 'C' -> handleCustomModelDataEdit(click, event);
             case 'N' -> handleItemNameEdit(click);
-            case 'I' -> handleItemModelEdit(click);
+            case 'I' -> handleItemModelEdit(click, event);
             case 'E' -> handleEnchantableEdit(click);
             case 'R' -> handleRarityToggle(click);
             case 'T' -> handleMaterialChange(event);
             case '1' -> handleFoodEdit();
-            case '2', '3', '4', '5' -> ItemManagerMessages.properties__wip.t(player);
+            case '2' -> handleToolEdit();
+            case '3', '4', '5' -> ItemManagerMessages.properties__wip.t(player);
             case 'B' -> {
                 parentGui.refresh();
                 parentGui.open();
@@ -340,6 +353,10 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
 
     private void handleFoodEdit() {
         new FoodEditGui(player, module.getFoodEditMenuConfig(), storedItem, this).open();
+    }
+
+    private void handleToolEdit() {
+        new ToolEditGui(player, module.getToolEditMenuConfig(), storedItem, this).open();
     }
 
     private void handleDamageEdit() {
@@ -487,14 +504,29 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
-        meta.setFireResistant(!meta.isFireResistant());
-        item.setItemMeta(meta);
+        boolean currentState = meta.isFireResistant();
+        
+        if (currentState) {
+            // 当前是防火状态，需要关闭
+            meta.setFireResistant(false);
+            item.setItemMeta(meta);
+            
+            // 尝试移除 damage_resistant 组件 (1.21.2+)
+            if (PaperUtil.isPaper()) {
+                PaperUtil.removeDamageResistant(item);
+            }
+        } else {
+            // 当前不是防火状态，需要开启
+            meta.setFireResistant(true);
+            item.setItemMeta(meta);
+        }
+        
         module.getDatabase().saveItem(storedItem);
         refreshInventory();
         ItemManagerMessages.properties__fire_resistant_toggled.t(player);
     }
 
-    private void handleCustomModelDataEdit(ClickType click) {
+    private void handleCustomModelDataEdit(ClickType click, InventoryClickEvent event) {
         ItemStack item = storedItem.getItemStack();
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
@@ -506,6 +538,21 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             refreshInventory();
             ItemManagerMessages.properties__custom_model_data_cleared.t(player);
             return;
+        }
+
+        // 检查手持物品
+        ItemStack cursor = event.getCursor();
+        if (Util.notAir(cursor)) {
+            ItemMeta cursorMeta = cursor.getItemMeta();
+            if (cursorMeta != null && cursorMeta.hasCustomModelData()) {
+                int cmd = cursorMeta.getCustomModelData();
+                meta.setCustomModelData(cmd);
+                item.setItemMeta(meta);
+                module.getDatabase().saveItem(storedItem);
+                refreshInventory();
+                ItemManagerMessages.properties__custom_model_data_set.t(player);
+                return;
+            }
         }
 
         player.closeInventory();
@@ -554,7 +601,7 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
         });
     }
 
-    private void handleItemModelEdit(ClickType click) {
+    private void handleItemModelEdit(ClickType click, InventoryClickEvent event) {
         ItemStack item = storedItem.getItemStack();
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
@@ -566,6 +613,21 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             refreshInventory();
             ItemManagerMessages.properties__item_model_cleared.t(player);
             return;
+        }
+
+        // 检查手持物品
+        ItemStack cursor = event.getCursor();
+        if (Util.notAir(cursor)) {
+            ItemMeta cursorMeta = cursor.getItemMeta();
+            if (cursorMeta != null && cursorMeta.hasItemModel()) {
+                NamespacedKey model = cursorMeta.getItemModel();
+                meta.setItemModel(model);
+                item.setItemMeta(meta);
+                module.getDatabase().saveItem(storedItem);
+                refreshInventory();
+                ItemManagerMessages.properties__item_model_set.t(player);
+                return;
+            }
         }
 
         player.closeInventory();

@@ -4,6 +4,7 @@ import cn.mcloli.dreamrealms.command.AbstractModuleCommand;
 import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
+import cn.mcloli.dreamrealms.utils.ItemNameUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -66,9 +67,12 @@ public class GetCommand extends AbstractModuleCommand {
         item.setAmount(amount);
         Util.giveItem(player, item);
 
+        // 获取翻译后的物品名
+        String itemName = ItemNameUtil.getItemName(item);
+
         ItemManagerMessages.cmd__get_success.t(sender,
                 Pair.of("{amount}", String.valueOf(amount)),
-                Pair.of("{item}", storedItem.getDisplayIdentifier()));
+                Pair.of("{item}", itemName));
         return true;
     }
 

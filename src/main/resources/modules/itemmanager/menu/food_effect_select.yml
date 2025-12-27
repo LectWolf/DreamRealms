@@ -11,17 +11,21 @@ inventory:
   - "X<XXBXX>X"
 
 # 主图标 (由代码动态生成)
-items: {}
+items:
+  # 效果槽位 (动态填充)
+  E:
+    material: POTION
+    display: "&b%effect_name%"
+    lore:
+      - "&7ID: &f%effect_id%"
+      - ""
+      - "&e点击添加此效果"
 
 # 其他图标
 other-items:
   X:
     material: BLACK_STAINED_GLASS_PANE
     display: " "
-
-  E:
-    material: POTION
-    display: "&7效果槽位"
 
   B:
     material: ARROW
@@ -36,3 +40,11 @@ other-items:
   ">":
     material: ARROW
     display: "&e下一页 ▶"
+
+  "<_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "

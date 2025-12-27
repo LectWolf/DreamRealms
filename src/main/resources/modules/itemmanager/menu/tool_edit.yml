@@ -1,0 +1,65 @@
+# 工具组件编辑菜单配置
+
+title: "&0编辑工具组件"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XPXXXXXXX"
+  - "XSDXXXXXX"
+  - "XRXXXXXXX"
+  - "XXXXXXXXX"
+  - "XXXBXXXCX"
+
+# 主图标
+items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+    lore:
+      - "&e左键获取物品"
+
+  # 默认挖掘速度
+  S:
+    material: GOLDEN_PICKAXE
+    display: "&e默认挖掘速度"
+    lore:
+      - "&7当前: &f%speed%"
+      - ""
+      - "&e点击修改"
+
+  # 每方块耐久消耗
+  D:
+    material: ANVIL
+    display: "&e每方块耐久消耗"
+    lore:
+      - "&7当前: &f%damage%"
+      - ""
+      - "&e点击修改"
+
+  # 挖掘规则
+  R:
+    material: BOOK
+    display: "&e挖掘规则"
+    lore:
+      - "&7当前规则数: &f%rule_count%"
+      - ""
+      - "&e点击编辑规则"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品属性"
+
+  C:
+    material: BARRIER
+    display: "&c移除工具组件"
+    lore:
+      - "&7点击移除工具组件"

@@ -10,37 +10,32 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * 食物效果选择菜单配置
+ * 工具挖掘规则编辑菜单配置
  */
-public class FoodEffectSelectMenuConfig extends AbstractMenuConfig<IGui> {
+public class ToolRuleEditMenuConfig extends AbstractMenuConfig<IGui> {
 
-    private final ItemManagerModule module;
+    private Icon ruleIcon;
+    private Icon addIcon;
 
-    // 主图标
-    private Icon effectIcon;
-
-    public FoodEffectSelectMenuConfig(DreamRealms plugin, ItemManagerModule module) {
-        super(plugin, module.getModuleMenuPath() + "/food_effect_select.yml");
-        this.module = module;
-        markInteractive('E', '<', '>', 'B');
+    public ToolRuleEditMenuConfig(DreamRealms plugin, ItemManagerModule module) {
+        super(plugin, module.getModuleMenuPath() + "/tool_rule_edit.yml");
+        markInteractive('P', 'E', 'A', '<', '>', 'B');
     }
 
-    public Icon getEffectIcon() {
-        return effectIcon;
+    public Icon getRuleIcon() {
+        return ruleIcon;
     }
 
-    /**
-     * 获取空的上一页图标
-     */
+    public Icon getAddIcon() {
+        return addIcon;
+    }
+
     @Nullable
     public ItemStack getEmptyPrevIcon(Player player) {
         Icon icon = otherIcons.get("<_empty");
         return icon != null ? icon.generateIcon(player) : null;
     }
 
-    /**
-     * 获取空的下一页图标
-     */
     @Nullable
     public ItemStack getEmptyNextIcon(Player player) {
         Icon icon = otherIcons.get(">_empty");
@@ -49,13 +44,15 @@ public class FoodEffectSelectMenuConfig extends AbstractMenuConfig<IGui> {
 
     @Override
     protected void clearMainIcons() {
-        effectIcon = null;
+        ruleIcon = null;
+        addIcon = null;
     }
 
     @Override
     protected boolean loadMainIcon(ConfigurationSection section, String key, Icon icon) {
         switch (key) {
-            case "E" -> effectIcon = icon;
+            case "E" -> ruleIcon = icon;
+            case "A" -> addIcon = icon;
             default -> {
                 return false;
             }
@@ -66,7 +63,6 @@ public class FoodEffectSelectMenuConfig extends AbstractMenuConfig<IGui> {
     @Override
     @Nullable
     protected ItemStack tryApplyMainIcon(IGui gui, String key, Player player, int iconIndex) {
-        // 图标由 FoodEffectSelectGui.refreshInventory() 动态生成
         return null;
     }
 }

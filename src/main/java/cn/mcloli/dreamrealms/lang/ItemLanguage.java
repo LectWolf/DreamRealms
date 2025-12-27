@@ -33,9 +33,9 @@ public class ItemLanguage {
     private static ItemLanguage instance;
 
     private final DreamRealms plugin;
-    private final Map<String, String> langMap = new HashMap<>();
+    private final Map<String, String> langMap = new java.util.concurrent.ConcurrentHashMap<>();
     private String currentLang = "zh_cn";
-    private boolean loaded = false;
+    private volatile boolean loaded = false;
 
     public ItemLanguage(DreamRealms plugin) {
         this.plugin = plugin;
@@ -54,17 +54,30 @@ public class ItemLanguage {
         this.currentLang = lang.toLowerCase();
         File langFile = new File(plugin.getDataFolder(), "lang/" + currentLang + ".json");
 
-        // 如果文件不存在，尝试下载
+        // 如果文件不存在，异步下载
         if (!langFile.exists()) {
             langFile.getParentFile().mkdirs();
-            plugin.info("正在下载语言文件: " + currentLang + "...");
-            if (!downloadLangFile(langFile)) {
-                plugin.warn("无法下载语言文件，将使用英文名称");
-                return;
-            }
+            plugin.info("正在异步下载语言文件: " + currentLang + "...");
+            // 异步下载，不阻塞启动
+            cn.mcloli.dreamrealms.utils.Util.runAsync(() -> {
+                if (downloadLangFile(langFile)) {
+                    // 下载成功后加载
+                    loadLangFileInternal(langFile);
+                } else {
+                    plugin.warn("无法下载语言文件，将使用英文名称");
+                }
+            });
+            return;
         }
 
-        // 加载语言文件
+        // 文件存在，直接加载
+        loadLangFileInternal(langFile);
+    }
+
+    /**
+     * 内部方法：加载语言文件
+     */
+    private void loadLangFileInternal(File langFile) {
         try (InputStreamReader reader = new InputStreamReader(
                 new FileInputStream(langFile), StandardCharsets.UTF_8)) {
             Type type = new TypeToken<Map<String, String>>() {}.getType();

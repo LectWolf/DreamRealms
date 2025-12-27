@@ -160,9 +160,12 @@ other-items:
   # 工具组件
   2:
     material: IRON_PICKAXE
-    display: "&7工具组件"
+    display: "&e工具组件"
     lore:
-      - "&8开发中..."
+      - "&7编辑工具属性"
+      - "&7挖掘速度/耐久消耗/规则等"
+      - ""
+      - "&e点击编辑"
 
   # 使用冷却
   3:

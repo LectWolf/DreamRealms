@@ -281,71 +281,65 @@ public class OwnerBindModule extends AbstractModule {
 
     /**
      * 匹配 NBT 值 (支持字符串、整数、浮点数、布尔值)
-     * PDC.get() 在类型不匹配时会抛出异常，需要逐个 try-catch
+     * 优化: 使用 has() 先检查类型再 get()，避免不必要的异常
      */
     private boolean matchNbtValue(org.bukkit.persistence.PersistentDataContainer pdc, NamespacedKey key, String expectedValue) {
-        // 尝试字符串匹配
-        try {
+        // 按常用程度排序，优先检查字符串和整数
+        if (pdc.has(key, PersistentDataType.STRING)) {
             String strValue = pdc.get(key, PersistentDataType.STRING);
             if (strValue != null && strValue.equals(expectedValue)) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        }
         
-        // 尝试整数匹配
-        try {
+        if (pdc.has(key, PersistentDataType.INTEGER)) {
             Integer intValue = pdc.get(key, PersistentDataType.INTEGER);
             if (intValue != null && expectedValue.equals(String.valueOf(intValue))) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        }
         
-        // 尝试长整数匹配
-        try {
-            Long longValue = pdc.get(key, PersistentDataType.LONG);
-            if (longValue != null && expectedValue.equals(String.valueOf(longValue))) {
-                return true;
-            }
-        } catch (Exception ignored) {}
-        
-        // 尝试浮点数匹配
-        try {
-            Double doubleValue = pdc.get(key, PersistentDataType.DOUBLE);
-            if (doubleValue != null && expectedValue.equals(String.valueOf(doubleValue))) {
-                return true;
-            }
-        } catch (Exception ignored) {}
-        
-        try {
-            Float floatValue = pdc.get(key, PersistentDataType.FLOAT);
-            if (floatValue != null && expectedValue.equals(String.valueOf(floatValue))) {
-                return true;
-            }
-        } catch (Exception ignored) {}
-        
-        // 尝试布尔值匹配
-        try {
+        if (pdc.has(key, PersistentDataType.BOOLEAN)) {
             Boolean boolValue = pdc.get(key, PersistentDataType.BOOLEAN);
             if (boolValue != null && expectedValue.equalsIgnoreCase(String.valueOf(boolValue))) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        }
         
-        // 尝试字节匹配
-        try {
+        if (pdc.has(key, PersistentDataType.LONG)) {
+            Long longValue = pdc.get(key, PersistentDataType.LONG);
+            if (longValue != null && expectedValue.equals(String.valueOf(longValue))) {
+                return true;
+            }
+        }
+        
+        if (pdc.has(key, PersistentDataType.DOUBLE)) {
+            Double doubleValue = pdc.get(key, PersistentDataType.DOUBLE);
+            if (doubleValue != null && expectedValue.equals(String.valueOf(doubleValue))) {
+                return true;
+            }
+        }
+        
+        if (pdc.has(key, PersistentDataType.FLOAT)) {
+            Float floatValue = pdc.get(key, PersistentDataType.FLOAT);
+            if (floatValue != null && expectedValue.equals(String.valueOf(floatValue))) {
+                return true;
+            }
+        }
+        
+        if (pdc.has(key, PersistentDataType.BYTE)) {
             Byte byteValue = pdc.get(key, PersistentDataType.BYTE);
             if (byteValue != null && expectedValue.equals(String.valueOf(byteValue))) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        }
         
-        // 尝试短整数匹配
-        try {
+        if (pdc.has(key, PersistentDataType.SHORT)) {
             Short shortValue = pdc.get(key, PersistentDataType.SHORT);
             if (shortValue != null && expectedValue.equals(String.valueOf(shortValue))) {
                 return true;
             }
-        } catch (Exception ignored) {}
+        }
         
         return false;
     }
@@ -376,15 +370,16 @@ public class OwnerBindModule extends AbstractModule {
         return false;
     }
 
+    // 预编译正则表达式，避免重复编译
+    private static final java.util.regex.Pattern COLOR_CODE_PATTERN = java.util.regex.Pattern.compile("§[0-9a-fk-orA-FK-OR]");
+    private static final java.util.regex.Pattern HEX_COLOR_PATTERN = java.util.regex.Pattern.compile("§x(§[0-9a-fA-F]){6}");
+
     /**
      * 将文本转换为纯文本 (移除所有格式)
      * 支持传统颜色代码和 MiniMessage 格式
      */
     private String toPlainText(String text) {
         if (text == null || text.isEmpty()) return "";
-        
-        // 先尝试解析传统颜色代码
-        String parsed = ColorHelper.parseColor(text);
         
         // 如果包含 MiniMessage 标签，尝试解析
         if (text.contains("<") && text.contains(">")) {
@@ -396,8 +391,10 @@ public class OwnerBindModule extends AbstractModule {
             }
         }
         
-        // 移除所有颜色代码 (§x 格式)
-        return parsed.replaceAll("§[0-9a-fk-or]", "").replaceAll("§x(§[0-9a-f]){6}", "");
+        // 移除所有颜色代码 (使用预编译的正则)
+        String result = HEX_COLOR_PATTERN.matcher(text).replaceAll("");
+        result = COLOR_CODE_PATTERN.matcher(result).replaceAll("");
+        return result;
     }
 
     /**

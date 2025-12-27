@@ -72,3 +72,4 @@ reference/
 docs/node_modules/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
+/dave

@@ -19,7 +19,7 @@ items:
     lore:
       - "&e左键获取物品"
 
-  # 营养值 (饱食度)
+  # 营养值
   N:
     material: COOKED_BEEF
     display: "&e营养值"
@@ -56,24 +56,24 @@ items:
       - ""
       - "&e点击切换"
 
-  # 使用转换物品
+  # 使用后转换
   U:
     material: BOWL
     display: "&e使用后转换"
     lore:
-      - "&7吃完后转换为其他物品"
-      - "&7(如碗、玻璃瓶)"
+      - "&7当前: &f%converts_to%"
       - ""
-      - "&8开发中..."
+      - "&e手持物品点击设置"
+      - "&7右键清除"
 
-  # 效果
+  # 食用效果
   A:
     material: POTION
     display: "&e食用效果"
     lore:
-      - "&7吃完后获得的药水效果"
+      - "&7当前效果数: &f%effect_count%"
       - ""
-      - "&8开发中..."
+      - "&e点击编辑效果"
 
   # 移除食物组件
   R:

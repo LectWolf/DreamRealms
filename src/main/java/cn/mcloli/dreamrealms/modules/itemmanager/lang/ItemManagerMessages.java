@@ -101,10 +101,16 @@ public enum ItemManagerMessages implements IHolderAccessor {
     properties__food_effect_added("&a已添加食用效果"),
     properties__food_effect_removed("&c已移除食用效果"),
     properties__food_effect_modified("&a食用效果已修改"),
+    properties__food_effect_add_failed("&c添加食用效果失败"),
     properties__material_changed("&a物品材质已更改为: &f{material}"),
     properties__material_hint("&e请手持物品后点击，或空手点击输入材质名"),
     properties__material_invalid("&c无效的材质名: &f{material}"),
     properties__need_paper("&c此功能需要 Paper 服务端"),
+    properties__tool_speed_set("&a默认挖掘速度已设置"),
+    properties__tool_damage_set("&a每方块耐久消耗已设置"),
+    properties__tool_removed("&a工具组件已移除"),
+    properties__tool_rule_removed("&c已移除挖掘规则"),
+    properties__tool_rule_add_hint("&e添加规则功能开发中，请使用命令或NBT编辑器"),
 
     // 输入提示
     input__category_name("&e请输入分类名称:"),
@@ -130,6 +136,8 @@ public enum ItemManagerMessages implements IHolderAccessor {
     input__effect_amplifier("&e请输入效果等级 (1-255):"),
     input__effect_probability("&e请输入触发概率 (0-100):"),
     input__material("&e请输入材质名 (如 DIAMOND_SWORD):"),
+    input__tool_speed("&e请输入默认挖掘速度 (小数):"),
+    input__tool_damage("&e请输入每方块耐久消耗 (整数):"),
 
     // 操作反馈
     item__added("&a物品已添加到列表"),

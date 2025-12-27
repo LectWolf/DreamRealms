@@ -54,18 +54,36 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
     }
 
     private void refreshInventory() {
+        // 先尝试从 FoodEffect 获取 (1.21.1-)
         PotionEffect effect = PaperUtil.getEffectFromFoodEffect(foodEffect);
-        if (effect == null) return;
+        float probability = PaperUtil.getProbabilityFromFoodEffect(foodEffect);
+        
+        // 如果失败，尝试从 ConsumeEffect 获取 (1.21.2+)
+        if (effect == null) {
+            List<PotionEffect> potionEffects = PaperUtil.getPotionEffectsFromConsumeEffect(foodEffect);
+            if (!potionEffects.isEmpty()) {
+                effect = potionEffects.get(0);
+            }
+            probability = PaperUtil.getProbabilityFromConsumeEffect(foodEffect);
+        }
+        
+        if (effect == null) {
+            module.debug("FoodEffectDetailGui: effect is null, foodEffect=" + foodEffect);
+            return;
+        }
+        
+        final PotionEffect finalEffect = effect;
+        final float finalProbability = probability;
         
         for (int i = 0; i < inventory.getSize(); i++) {
             Character key = config.getSlotKey(i);
             if (key == null) continue;
 
             switch (key) {
-                case 'E' -> inventory.setItem(i, getEffectIcon(effect));
-                case 'L' -> inventory.setItem(i, getLevelIcon(effect));
-                case 'D' -> inventory.setItem(i, getDurationIcon(effect));
-                case 'P' -> inventory.setItem(i, getProbabilityIcon());
+                case 'E' -> inventory.setItem(i, getEffectIcon(finalEffect));
+                case 'L' -> inventory.setItem(i, getLevelIcon(finalEffect));
+                case 'D' -> inventory.setItem(i, getDurationIcon(finalEffect));
+                case 'P' -> inventory.setItem(i, getProbabilityIcon(finalProbability));
                 default -> config.applyIcon(this, inventory, player, i);
             }
         }
@@ -109,13 +127,12 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
         return icon;
     }
 
-    private ItemStack getProbabilityIcon() {
+    private ItemStack getProbabilityIcon(float probability) {
         ItemStack icon = new ItemStack(Material.RABBIT_FOOT);
-        float probability = PaperUtil.getProbabilityFromFoodEffect(foodEffect) * 100;
         ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e触发概率"));
         
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7当前: &f" + String.format("%.0f", probability) + "%"));
+        lore.add(ColorHelper.parseColor("&7当前: &f" + String.format("%.0f", probability * 100) + "%"));
         lore.add("");
         lore.add(ColorHelper.parseColor("&e点击修改"));
         ItemStackUtil.setItemLore(icon, lore);
@@ -180,7 +197,7 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
     }
 
     private void handleEditLevel() {
-        PotionEffect currentEffect = PaperUtil.getEffectFromFoodEffect(foodEffect);
+        PotionEffect currentEffect = getCurrentEffect();
         if (currentEffect == null) return;
         
         player.closeInventory();
@@ -188,7 +205,7 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
             if (input != null) {
                 Util.parseInt(input).ifPresent(value -> {
                     int amplifier = Math.max(0, Math.min(254, value - 1)); // 等级1对应amplifier 0
-                    updateEffect(amplifier, currentEffect.getDuration(), PaperUtil.getProbabilityFromFoodEffect(foodEffect));
+                    updateEffect(amplifier, currentEffect.getDuration(), getCurrentProbability());
                     ItemManagerMessages.properties__food_effect_modified.t(player);
                 });
             }
@@ -197,7 +214,7 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
     }
 
     private void handleEditDuration() {
-        PotionEffect currentEffect = PaperUtil.getEffectFromFoodEffect(foodEffect);
+        PotionEffect currentEffect = getCurrentEffect();
         if (currentEffect == null) return;
         
         player.closeInventory();
@@ -205,7 +222,7 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
             if (input != null) {
                 Util.parseInt(input).ifPresent(value -> {
                     int ticks = Math.max(1, value) * 20; // 秒转tick
-                    updateEffect(currentEffect.getAmplifier(), ticks, PaperUtil.getProbabilityFromFoodEffect(foodEffect));
+                    updateEffect(currentEffect.getAmplifier(), ticks, getCurrentProbability());
                     ItemManagerMessages.properties__food_effect_modified.t(player);
                 });
             }
@@ -214,7 +231,7 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
     }
 
     private void handleEditProbability() {
-        PotionEffect currentEffect = PaperUtil.getEffectFromFoodEffect(foodEffect);
+        PotionEffect currentEffect = getCurrentEffect();
         if (currentEffect == null) return;
         
         player.closeInventory();
@@ -230,47 +247,102 @@ public class FoodEffectDetailGui extends AbstractInteractiveGui<FoodEffectDetail
         });
     }
     
+    private PotionEffect getCurrentEffect() {
+        // 先尝试从 FoodEffect 获取 (1.21.1-)
+        PotionEffect effect = PaperUtil.getEffectFromFoodEffect(foodEffect);
+        
+        // 如果失败，尝试从 ConsumeEffect 获取 (1.21.2+)
+        if (effect == null) {
+            List<PotionEffect> potionEffects = PaperUtil.getPotionEffectsFromConsumeEffect(foodEffect);
+            if (!potionEffects.isEmpty()) {
+                effect = potionEffects.get(0);
+            }
+        }
+        return effect;
+    }
+    
+    private float getCurrentProbability() {
+        float probability = PaperUtil.getProbabilityFromFoodEffect(foodEffect);
+        if (probability == 0f) {
+            probability = PaperUtil.getProbabilityFromConsumeEffect(foodEffect);
+        }
+        return probability;
+    }
+    
+    private boolean isUsingConsumable() {
+        ItemStack item = storedItem.getItemStack();
+        ItemMeta meta = item.getItemMeta();
+        FoodComponent food = meta != null && meta.hasFood() ? meta.getFood() : null;
+        return PaperUtil.getFoodEffects(food).isEmpty();
+    }
+    
     private void reopenGui() {
         // 重新获取最新的 foodEffect
         ItemStack item = storedItem.getItemStack();
         ItemMeta meta = item.getItemMeta();
+        
+        // 先尝试从 FoodComponent 获取 (1.21.1-)
         if (meta != null && meta.hasFood()) {
             FoodComponent food = meta.getFood();
             List<Object> effects = PaperUtil.getFoodEffects(food);
             if (effectIndex >= 0 && effectIndex < effects.size()) {
                 this.foodEffect = effects.get(effectIndex);
+                new FoodEffectDetailGui(player, config, storedItem, parentGui, effectIndex, foodEffect).open();
+                return;
             }
+        }
+        
+        // 尝试从 ConsumableComponent 获取 (1.21.2+)
+        List<Object> effects = PaperUtil.getConsumableEffects(item);
+        if (effectIndex >= 0 && effectIndex < effects.size()) {
+            this.foodEffect = effects.get(effectIndex);
         }
         new FoodEffectDetailGui(player, config, storedItem, parentGui, effectIndex, foodEffect).open();
     }
 
     private void updateEffect(int amplifier, int duration, float probability) {
         ItemStack item = storedItem.getItemStack();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null || !meta.hasFood()) return;
-
-        FoodComponent food = meta.getFood();
-        List<Object> effects = PaperUtil.getFoodEffects(food);
+        PotionEffect currentEffect = getCurrentEffect();
+        if (currentEffect == null) return;
         
-        if (effectIndex >= 0 && effectIndex < effects.size()) {
-            PotionEffect oldEffect = PaperUtil.getEffectFromFoodEffect(foodEffect);
-            if (oldEffect == null) return;
+        PotionEffect newEffect = new PotionEffect(currentEffect.getType(), duration, amplifier);
+        
+        if (isUsingConsumable()) {
+            // 1.21.2+ 使用 ConsumableComponent
+            List<Object> effects = PaperUtil.getConsumableEffects(item);
+            if (effectIndex >= 0 && effectIndex < effects.size()) {
+                effects.remove(effectIndex);
+                // 需要重新构建整个效果列表
+                if (PaperUtil.setConsumableEffects(item, effects)) {
+                    // 添加新效果
+                    if (PaperUtil.addFoodEffectViaConsumable(item, newEffect, probability)) {
+                        module.getDatabase().saveItem(storedItem);
+                    }
+                }
+            }
+        } else {
+            // 1.21.1- 使用 FoodComponent
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null || !meta.hasFood()) return;
+
+            FoodComponent food = meta.getFood();
+            List<Object> effects = PaperUtil.getFoodEffects(food);
             
-            PotionEffect newEffect = new PotionEffect(oldEffect.getType(), duration, amplifier);
-            
-            // 移除旧效果，添加新效果
-            effects.remove(effectIndex);
-            Object newFoodEffect = PaperUtil.addFoodEffect(food, newEffect, probability);
-            if (newFoodEffect != null) {
-                effects.add(effectIndex, newFoodEffect);
-                PaperUtil.setFoodEffects(food, effects);
-                
-                meta.setFood(food);
-                item.setItemMeta(meta);
-                module.getDatabase().saveItem(storedItem);
-                
-                // 更新当前效果引用
-                this.foodEffect = newFoodEffect;
+            if (effectIndex >= 0 && effectIndex < effects.size()) {
+                // 移除旧效果，添加新效果
+                effects.remove(effectIndex);
+                Object newFoodEffect = PaperUtil.addFoodEffect(food, newEffect, probability);
+                if (newFoodEffect != null) {
+                    effects.add(effectIndex, newFoodEffect);
+                    PaperUtil.setFoodEffects(food, effects);
+                    
+                    meta.setFood(food);
+                    item.setItemMeta(meta);
+                    module.getDatabase().saveItem(storedItem);
+                    
+                    // 更新当前效果引用
+                    this.foodEffect = newFoodEffect;
+                }
             }
         }
     }

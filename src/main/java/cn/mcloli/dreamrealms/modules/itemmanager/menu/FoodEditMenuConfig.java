@@ -23,6 +23,7 @@ public class FoodEditMenuConfig extends AbstractMenuConfig<FoodEditGui> {
 
     public FoodEditMenuConfig(DreamRealms plugin, ItemManagerModule module) {
         super(plugin, module.getModuleMenuPath() + "/food_edit.yml");
+        markInteractive('P', 'N', 'S', 'T', 'C', 'U', 'A', 'R');
     }
 
     @Nullable public Icon getNutritionIcon() { return nutritionIcon; }

@@ -5,6 +5,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.CategoryGui;
+import cn.mcloli.dreamrealms.utils.ItemNameUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -140,17 +141,20 @@ public class ItemManagerCommand implements ISubCommandHandler {
         item.setAmount(amount);
         Util.giveItem(target, item);
 
+        // 获取翻译后的物品名
+        String itemName = ItemNameUtil.getItemName(item);
+
         // 发送消息给执行者
         ItemManagerMessages.cmd__give_success.t(sender,
                 Pair.of("{player}", target.getName()),
                 Pair.of("{amount}", String.valueOf(amount)),
-                Pair.of("{item}", storedItem.getDisplayIdentifier()));
+                Pair.of("{item}", itemName));
 
         // 如果不是静默模式且目标不是执行者，通知目标玩家
         if (!module.getModuleConfig().isSilentGive() && !target.equals(sender)) {
             ItemManagerMessages.cmd__give_received.t(target,
                     Pair.of("{amount}", String.valueOf(amount)),
-                    Pair.of("{item}", storedItem.getDisplayIdentifier()));
+                    Pair.of("{item}", itemName));
         }
         return true;
     }
@@ -184,9 +188,12 @@ public class ItemManagerCommand implements ISubCommandHandler {
         item.setAmount(amount);
         Util.giveItem(player, item);
 
+        // 获取翻译后的物品名
+        String itemName = ItemNameUtil.getItemName(item);
+
         ItemManagerMessages.cmd__get_success.t(sender,
                 Pair.of("{amount}", String.valueOf(amount)),
-                Pair.of("{item}", storedItem.getDisplayIdentifier()));
+                Pair.of("{item}", itemName));
         return true;
     }
 
