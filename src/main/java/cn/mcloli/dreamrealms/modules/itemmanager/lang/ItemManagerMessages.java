@@ -53,6 +53,12 @@ public enum ItemManagerMessages implements IHolderAccessor {
     lore__edited("&a已修改该行"),
     lore__deleted("&c已删除该行"),
 
+    // 附魔编辑
+    enchant__added("&a已添加附魔"),
+    enchant__removed("&c已移除附魔"),
+    enchant__level_increased("&a附魔等级已增加"),
+    enchant__level_decreased("&c附魔等级已减少"),
+
     // 输入提示
     input__category_name("&e请输入分类名称:"),
     input__identifier("&e请输入物品标识名:"),

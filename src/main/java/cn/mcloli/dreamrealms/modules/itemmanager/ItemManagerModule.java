@@ -10,6 +10,8 @@ import cn.mcloli.dreamrealms.modules.itemmanager.config.ItemManagerConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.database.ItemManagerDatabase;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.CategoryMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantSelectMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.LoreEditMenuConfig;
@@ -30,6 +32,8 @@ public class ItemManagerModule extends AbstractModule {
     private ItemListMenuConfig itemListMenuConfig;
     private ItemEditMenuConfig itemEditMenuConfig;
     private LoreEditMenuConfig loreEditMenuConfig;
+    private EnchantEditMenuConfig enchantEditMenuConfig;
+    private EnchantSelectMenuConfig enchantSelectMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -66,6 +70,14 @@ public class ItemManagerModule extends AbstractModule {
 
     public LoreEditMenuConfig getLoreEditMenuConfig() {
         return loreEditMenuConfig;
+    }
+
+    public EnchantEditMenuConfig getEnchantEditMenuConfig() {
+        return enchantEditMenuConfig;
+    }
+
+    public EnchantSelectMenuConfig getEnchantSelectMenuConfig() {
+        return enchantSelectMenuConfig;
     }
 
     @Override
@@ -113,6 +125,16 @@ public class ItemManagerModule extends AbstractModule {
             loreEditMenuConfig = new LoreEditMenuConfig(plugin, this);
         }
         loreEditMenuConfig.reloadConfig(cfg);
+
+        if (enchantEditMenuConfig == null) {
+            enchantEditMenuConfig = new EnchantEditMenuConfig(plugin, this);
+        }
+        enchantEditMenuConfig.reloadConfig(cfg);
+
+        if (enchantSelectMenuConfig == null) {
+            enchantSelectMenuConfig = new EnchantSelectMenuConfig(plugin, this);
+        }
+        enchantSelectMenuConfig.reloadConfig(cfg);
 
         // 注册命令到 /dr itemmanager
         if (command == null) {

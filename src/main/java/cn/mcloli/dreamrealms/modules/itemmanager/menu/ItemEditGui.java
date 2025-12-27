@@ -205,7 +205,8 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
 
     private void handleEditEnchant() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__enchant_wip.t(player);
+        // 打开附魔编辑菜单
+        new EnchantEditGui(player, module.getEnchantEditMenuConfig(), storedItem, this).open();
     }
 
     private void handleEditAttribute() {
