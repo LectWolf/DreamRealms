@@ -8,11 +8,11 @@ inventory:
   - "XEEEEEEEX"
   - "XEEEEEEEX"
   - "XEEEEEEEX"
-  - "X<XXBXX>X"
+  - "X<XBAXX>X"
 
 # 主图标
 items:
-  # 附魔槽位 (动态填充)
+  # 附魔/分类槽位 (动态填充)
   E:
     material: ENCHANTED_BOOK
     display: "&b%enchant%"
@@ -20,6 +20,13 @@ items:
       - "&7最大等级: &f%max_level%"
       - ""
       - "&e点击添加"
+
+  # 查看所有附魔按钮
+  A:
+    material: BOOK
+    display: "&e查看所有附魔"
+    lore:
+      - "&7点击查看所有可用附魔"
 
 # 其他图标
 other-items:
@@ -49,3 +56,116 @@ other-items:
   ">_empty":
     material: BLACK_STAINED_GLASS_PANE
     display: " "
+
+# 附魔分类配置
+# 格式:
+#   分类ID:
+#     display: "显示名称"
+#     icon: "图标材质"
+#     enchants:
+#       - "附魔键名1"
+#       - "附魔键名2"
+# 
+# 开启 debug 模式后，打开附魔选择菜单会在控制台输出所有附魔键名
+categories:
+  helmet:
+    display: "头盔"
+    icon: DIAMOND_HELMET
+    enchants:
+      - respiration
+      - aqua_affinity
+
+  armor:
+    display: "护甲"
+    icon: DIAMOND_CHESTPLATE
+    enchants:
+      - protection
+      - fire_protection
+      - blast_protection
+      - projectile_protection
+      - thorns
+      - binding_curse
+
+  boots:
+    display: "靴子"
+    icon: DIAMOND_BOOTS
+    enchants:
+      - feather_falling
+      - depth_strider
+      - frost_walker
+      - soul_speed
+
+  leggings:
+    display: "护腿"
+    icon: DIAMOND_LEGGINGS
+    enchants:
+      - swift_sneak
+
+  weapon:
+    display: "武器"
+    icon: DIAMOND_SWORD
+    enchants:
+      - sharpness
+      - smite
+      - bane_of_arthropods
+      - knockback
+      - fire_aspect
+      - looting
+      - sweeping_edge
+
+  tool:
+    display: "工具"
+    icon: DIAMOND_PICKAXE
+    enchants:
+      - efficiency
+      - silk_touch
+      - fortune
+
+  bow:
+    display: "弓"
+    icon: BOW
+    enchants:
+      - power
+      - punch
+      - flame
+      - infinity
+
+  crossbow:
+    display: "弩"
+    icon: CROSSBOW
+    enchants:
+      - multishot
+      - quick_charge
+      - piercing
+
+  trident:
+    display: "三叉戟"
+    icon: TRIDENT
+    enchants:
+      - loyalty
+      - impaling
+      - riptide
+      - channeling
+
+  mace:
+    display: "锤"
+    icon: MACE
+    enchants:
+      - density
+      - breach
+      - wind_burst
+
+  fishing:
+    display: "钓鱼竿"
+    icon: FISHING_ROD
+    enchants:
+      - luck_of_the_sea
+      - lure
+
+  universal:
+    display: "通用"
+    icon: EXPERIENCE_BOTTLE
+    enchants:
+      - unbreaking
+      - mending
+      - vanishing_curse

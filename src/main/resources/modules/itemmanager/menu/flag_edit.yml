@@ -1,0 +1,34 @@
+# Flag 编辑菜单配置
+
+title: "&0编辑 Flag"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XFFFFFFFX"
+  - "XFFXXXXXX"
+  - "XXXXXXXXX"
+  - "XXXXXXXXX"
+  - "XXXXBXXXX"
+
+# 主图标
+items:
+  # Flag 槽位 (动态填充)
+  F:
+    material: LIME_DYE
+    display: "&a%flag%"
+    lore:
+      - "&7状态: %status%"
+      - ""
+      - "&e点击切换"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品编辑"

@@ -3,12 +3,12 @@
 title: "&0物品列表"
 
 inventory:
-  - "XXXXXXXXX"
+  - "XXXXRXXXX"
   - "XIIIIIIIX"
   - "XIIIIIIIX"
   - "XIIIIIIIX"
   - "XIIIIIIIX"
-  - "X<XBA>XRX"
+  - "X<XBAXX>X"
 
 # 主图标
 items:
@@ -40,8 +40,8 @@ other-items:
     material: ITEM_FRAME
     display: "&e设置分类图标"
     lore:
-      - "&7手持物品点击此处"
-      - "&7将分类图标设为手持物品"
+      - "&7手持物品点击设置图标"
+      - "&7空手点击修改分类名"
 
   "<":
     material: ARROW

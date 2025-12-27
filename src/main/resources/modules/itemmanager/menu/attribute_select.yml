@@ -1,0 +1,169 @@
+# 属性选择菜单配置
+
+title: "&0选择属性"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "X<XBVXX>X"
+
+# 主图标
+items:
+  # 属性/分类槽位 (动态填充)
+  A:
+    material: NETHER_STAR
+    display: "&b%attribute%"
+    lore:
+      - "&7键: &f%key%"
+      - ""
+      - "&e点击添加"
+
+  # 查看所有属性按钮
+  V:
+    material: BOOK
+    display: "&e查看所有属性"
+    lore:
+      - "&7点击查看所有可用属性"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回属性编辑"
+
+  "<":
+    material: ARROW
+    display: "&e◀ 上一页"
+
+  ">":
+    material: ARROW
+    display: "&e下一页 ▶"
+
+  # 不存在时显示的图标
+  "<_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+# 属性分类配置
+# 格式:
+#   分类ID:
+#     display: "显示名称"
+#     icon: "图标材质"
+#     attributes:
+#       - "属性键名1"
+#       - "属性键名2"
+# 
+# 开启 debug 模式后，打开属性选择菜单会在控制台输出所有属性键名
+categories:
+  health:
+    display: "生命值"
+    icon: RED_DYE
+    attributes:
+      - max_health
+      - max_absorption
+
+  armor:
+    display: "护甲"
+    icon: DIAMOND_CHESTPLATE
+    attributes:
+      - armor
+      - armor_toughness
+
+  damage:
+    display: "攻击"
+    icon: DIAMOND_SWORD
+    attributes:
+      - attack_damage
+      - attack_speed
+      - attack_knockback
+      - sweeping_damage_ratio
+
+  movement:
+    display: "移动"
+    icon: DIAMOND_BOOTS
+    attributes:
+      - movement_speed
+      - flying_speed
+      - jump_strength
+      - safe_fall_distance
+      - fall_damage_multiplier
+      - step_height
+      - gravity
+      - scale
+      - movement_efficiency
+      - sneaking_speed
+
+  knockback:
+    display: "击退"
+    icon: SLIME_BALL
+    attributes:
+      - knockback_resistance
+      - explosion_knockback_resistance
+
+  luck:
+    display: "幸运"
+    icon: RABBIT_FOOT
+    attributes:
+      - luck
+
+  interaction:
+    display: "交互"
+    icon: CHEST
+    attributes:
+      - block_interaction_range
+      - entity_interaction_range
+      - follow_range
+      - tempt_range
+
+  mining:
+    display: "挖掘"
+    icon: DIAMOND_PICKAXE
+    attributes:
+      - block_break_speed
+      - mining_efficiency
+      - submerged_mining_speed
+
+  oxygen:
+    display: "氧气"
+    icon: PUFFERFISH
+    attributes:
+      - oxygen_bonus
+      - water_movement_efficiency
+
+  burning:
+    display: "燃烧"
+    icon: BLAZE_POWDER
+    attributes:
+      - burning_time
+
+  mob:
+    display: "生物"
+    icon: ZOMBIE_HEAD
+    attributes:
+      - spawn_reinforcements
+
+  camera:
+    display: "视角"
+    icon: SPYGLASS
+    attributes:
+      - camera_distance
+
+  waypoint:
+    display: "路径点"
+    icon: COMPASS
+    attributes:
+      - waypoint_transmit_range
+      - waypoint_receive_range

@@ -5,20 +5,49 @@
 ## 功能
 
 - 通过 Lore 或 NBT 识别可绑定物品
+- 支持传统颜色代码和 MiniMessage 格式
+- 支持自定义 NBT 键值对匹配
 - 丢弃、切换、拾取等操作时自动绑定
 - 非物主操作时自动丢出或邮件归还
 - 可选阻止 Q 键丢出
+- 可选只添加 NBT 不修改 Lore
 - 挂钩市场插件禁止上架
 
 ## 绑定识别
 
 ### Lore 识别
 
-物品 Lore 包含配置的特征文本时视为可绑定
+物品 Lore 包含配置的特征文本时视为可绑定。
+
+支持传统颜色代码 (`&7`) 和 MiniMessage 格式 (`<gray>`)：
+
+```yaml
+bind-detection:
+  lore:
+    enabled: true
+    patterns:
+      - "&7⛓ 不可转手" # 传统颜色代码
+      - "<gray>成功率:" # MiniMessage 格式
+```
 
 ### NBT 识别
 
-物品包含 `dreamrealms:ownerbind_bindable` NBT 标记时视为可绑定
+默认检查 `dreamrealms:ownerbind_bindable` NBT 标记。
+
+可配置自定义 NBT 键，支持键值对匹配：
+
+```yaml
+bind-detection:
+  nbt:
+    enabled: true
+    custom-keys:
+      - "divinity:item_module" # 只检查键是否存在
+      - "divinity:item_module=gems" # 字符串匹配
+      - "divinity:item_level=10" # 整数匹配
+      - "myplugin:bindable=true" # 布尔值匹配
+```
+
+**匹配逻辑：** 列表中任意一个匹配成功即可 (OR 逻辑)
 
 ## 命令
 

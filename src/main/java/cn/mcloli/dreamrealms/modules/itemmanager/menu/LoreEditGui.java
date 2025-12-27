@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -13,6 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import top.mrxiaom.pluginbase.utils.AdventureUtil;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Pair;
@@ -83,6 +85,13 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
                         inventory.setItem(i, icon.generateIcon(player));
                     }
                 }
+                case 'E' -> {
+                    // 添加空行按钮
+                    AbstractMenuConfig.Icon icon = config.getEmptyLineIcon();
+                    if (icon != null) {
+                        inventory.setItem(i, icon.generateIcon(player));
+                    }
+                }
                 case '<' -> {
                     if (page > 0) {
                         config.applyIcon(this, inventory, player, i);
@@ -137,6 +146,7 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         switch (key) {
             case 'L' -> handleLoreLineClick(click, index + page * slotsPerPage);
             case 'A' -> handleAddLine();
+            case 'E' -> handleAddEmptyLine();
             case 'B' -> {
                 // 返回 - 保存并返回
                 saveLore();
@@ -190,13 +200,20 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         player.closeInventory();
         ChatInputUtil.requestInput(player, ItemManagerMessages.input__lore_add.str(), input -> {
             if (input != null) {
-                loreList.add(ColorHelper.parseColor(input));
+                loreList.add(parseColorInput(input));
                 saveLore();
                 ItemManagerMessages.lore__added.t(player);
             }
             // 重新打开菜单
             new LoreEditGui(player, config, storedItem, parentGui).open();
         });
+    }
+
+    private void handleAddEmptyLine() {
+        loreList.add("");
+        saveLore();
+        refreshInventory();
+        ItemManagerMessages.lore__added.t(player);
     }
 
     private void handleEditLine(int index) {
@@ -210,13 +227,26 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         
         ChatInputUtil.requestInput(player, ItemManagerMessages.input__lore_edit.str(), input -> {
             if (input != null) {
-                loreList.set(index, ColorHelper.parseColor(input));
+                loreList.set(index, parseColorInput(input));
                 saveLore();
                 ItemManagerMessages.lore__edited.t(player);
             }
             // 重新打开菜单
             new LoreEditGui(player, config, storedItem, parentGui).open();
         });
+    }
+
+    /**
+     * 解析颜色输入 (支持 MiniMessage 和传统颜色代码)
+     */
+    private String parseColorInput(String input) {
+        // 如果包含 MiniMessage 标签，使用 MiniMessage 解析后转为传统格式
+        if (input.contains("<") && input.contains(">")) {
+            return LegacyComponentSerializer.legacySection()
+                    .serialize(AdventureUtil.miniMessage(input));
+        }
+        // 否则使用传统颜色代码解析
+        return ColorHelper.parseColor(input);
     }
 
     private void saveLore() {

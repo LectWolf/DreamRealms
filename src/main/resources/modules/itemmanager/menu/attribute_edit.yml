@@ -1,35 +1,33 @@
-# Lore 编辑菜单配置
+# 属性编辑菜单配置
 
-title: "&0编辑 Lore"
+title: "&0编辑属性"
 
 inventory:
   - "XXXXXXXXX"
-  - "XLLLLLLLX"
-  - "XLLLLLLLX"
-  - "XLLLLLLLX"
-  - "XLLLLLLLX"
-  - "X<XBEAX>X"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "XAAAAAAAX"
+  - "X<XBNXX>X"
 
 # 主图标
 items:
-  # Lore 行槽位 (动态填充)
-  L:
-    material: PAPER
-    display: "&f第 %index% 行"
-
-  # 添加按钮
+  # 属性槽位 (动态填充)
   A:
-    material: LIME_DYE
-    display: "&a添加新行"
+    material: NETHER_STAR
+    display: "&b%attribute%"
     lore:
-      - "&7点击添加新的 Lore 行"
+      - "&7数值: &f%value%"
+      - ""
+      - "&e左键编辑"
+      - "&cCtrl+Q删除"
 
-  # 添加空行按钮
-  E:
-    material: GRAY_DYE
-    display: "&7添加空行"
+  # 添加属性按钮
+  N:
+    material: LIME_DYE
+    display: "&a添加属性"
     lore:
-      - "&7点击添加一个空行"
+      - "&7点击选择要添加的属性"
 
 # 其他图标
 other-items:
@@ -51,7 +49,6 @@ other-items:
     material: ARROW
     display: "&e下一页 ▶"
 
-  # 不存在时显示的图标
   "<_empty":
     material: BLACK_STAINED_GLASS_PANE
     display: " "

@@ -5,9 +5,11 @@ import cn.mcloli.dreamrealms.gui.AbstractMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
-import cn.mcloli.dreamrealms.utils.EnchantmentUtil;
+import cn.mcloli.dreamrealms.utils.AttributeUtil;
+import com.google.common.collect.Multimap;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -23,36 +25,45 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 附魔编辑 GUI
+ * 属性编辑 GUI
  */
-public class EnchantEditGui extends AbstractInteractiveGui<EnchantEditMenuConfig> {
+public class AttributeEditGui extends AbstractInteractiveGui<AttributeEditMenuConfig> {
 
     private final ItemManagerModule module;
     private final StoredItem storedItem;
     private final ItemEditGui parentGui;
-    private List<Map.Entry<Enchantment, Integer>> enchantList;
+    private List<Map.Entry<Attribute, AttributeModifier>> attributeList;
     private int page = 0;
     private int slotsPerPage = 0;
 
-    public EnchantEditGui(Player player, EnchantEditMenuConfig config, StoredItem storedItem, ItemEditGui parentGui) {
+    public AttributeEditGui(Player player, AttributeEditMenuConfig config, StoredItem storedItem, ItemEditGui parentGui) {
         super(player, config);
         this.module = ItemManagerModule.inst();
         this.storedItem = storedItem;
         this.parentGui = parentGui;
-        refreshEnchantList();
+        refreshAttributeList();
     }
 
-    private void refreshEnchantList() {
+    private void refreshAttributeList() {
         ItemStack item = storedItem.getItemStack();
-        Map<Enchantment, Integer> enchants = item.getEnchantments();
-        this.enchantList = new ArrayList<>(enchants.entrySet());
+        ItemMeta meta = item.getItemMeta();
+        this.attributeList = new ArrayList<>();
+        
+        if (meta != null && meta.hasAttributeModifiers()) {
+            Multimap<Attribute, AttributeModifier> modifiers = meta.getAttributeModifiers();
+            if (modifiers != null) {
+                for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
+                    attributeList.add(entry);
+                }
+            }
+        }
     }
 
     @Override
     @NotNull
     public Inventory newInventory() {
         this.inventory = config.createInventory(this, player);
-        slotsPerPage = countSlots('E');
+        slotsPerPage = countSlots('A');
         refreshInventory();
         return inventory;
     }
@@ -78,11 +89,11 @@ public class EnchantEditGui extends AbstractInteractiveGui<EnchantEditMenuConfig
             }
 
             switch (key) {
-                case 'E' -> {
-                    int index = config.getKeyIndex(key, i) + page * slotsPerPage;
-                    inventory.setItem(i, getEnchantItem(index));
-                }
                 case 'A' -> {
+                    int index = config.getKeyIndex(key, i) + page * slotsPerPage;
+                    inventory.setItem(i, getAttributeItem(index));
+                }
+                case 'N' -> {
                     AbstractMenuConfig.Icon icon = config.getAddIcon();
                     if (icon != null) {
                         inventory.setItem(i, icon.generateIcon(player));
@@ -108,49 +119,65 @@ public class EnchantEditGui extends AbstractInteractiveGui<EnchantEditMenuConfig
     }
 
     private boolean hasNextPage() {
-        return (page + 1) * slotsPerPage < enchantList.size();
+        return (page + 1) * slotsPerPage < attributeList.size();
     }
 
-    private ItemStack getEnchantItem(int index) {
-        if (index >= enchantList.size()) {
+    private ItemStack getAttributeItem(int index) {
+        if (index >= attributeList.size()) {
             return null;
         }
 
-        Map.Entry<Enchantment, Integer> entry = enchantList.get(index);
-        Enchantment enchant = entry.getKey();
-        int level = entry.getValue();
+        Map.Entry<Attribute, AttributeModifier> entry = attributeList.get(index);
+        Attribute attr = entry.getKey();
+        AttributeModifier modifier = entry.getValue();
 
-        // 尝试获取分类图标材质
-        String enchantKey = enchant.getKey().getKey();
-        Material iconMaterial = module.getEnchantSelectMenuConfig().getCategoryIconForEnchant(enchantKey);
-        if (iconMaterial == null) {
-            iconMaterial = Material.ENCHANTED_BOOK;
+        // 尝试获取分类图标
+        String attrKey = attr.getKey().getKey();
+        ItemStack item = module.getAttributeSelectMenuConfig().getCategoryIconForAttribute(attrKey);
+        if (item == null) {
+            item = new ItemStack(Material.NETHER_STAR);
         }
         
-        ItemStack item = new ItemStack(iconMaterial);
-        String enchantName = EnchantmentUtil.getEnchantmentName(enchant);
-        ItemStackUtil.setItemDisplayName(item, ColorHelper.parseColor("&b" + enchantName));
+        String attrName = AttributeUtil.getAttributeName(attr);
+        ItemStackUtil.setItemDisplayName(item, ColorHelper.parseColor("&b" + attrName));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7等级: &f" + level + " &7/ &f" + enchant.getMaxLevel()));
+        lore.add(ColorHelper.parseColor("&7数值: &f" + formatValue(modifier)));
+        lore.add(ColorHelper.parseColor("&7操作: &f" + getOperationName(modifier.getOperation())));
+        lore.add(ColorHelper.parseColor("&7槽位: &f" + AttributeUtil.getSlotName(modifier.getSlotGroup())));
         lore.add("");
-        lore.add(ColorHelper.parseColor("&e左键增加等级"));
-        lore.add(ColorHelper.parseColor("&c右键减少等级"));
+        lore.add(ColorHelper.parseColor("&e左键编辑"));
         lore.add(ColorHelper.parseColor("&cCtrl+Q删除"));
         ItemStackUtil.setItemLore(item, lore);
 
         return item;
     }
 
+    private String formatValue(AttributeModifier modifier) {
+        double amount = modifier.getAmount();
+        return switch (modifier.getOperation()) {
+            case ADD_NUMBER -> String.format("%+.2f", amount);
+            case ADD_SCALAR -> String.format("%+.0f%%", amount * 100);
+            case MULTIPLY_SCALAR_1 -> String.format("×%.2f", 1 + amount);
+        };
+    }
+
+    private String getOperationName(AttributeModifier.Operation operation) {
+        return switch (operation) {
+            case ADD_NUMBER -> "加法";
+            case ADD_SCALAR -> "百分比加成";
+            case MULTIPLY_SCALAR_1 -> "乘法";
+        };
+    }
+
     @Override
     protected void handleClick(ClickType click, char key, int index, ItemStack currentItem, InventoryClickEvent event) {
-        module.debug("EnchantEditGui click: key=" + key + ", index=" + index + ", click=" + click);
+        module.debug("AttributeEditGui click: key=" + key + ", index=" + index + ", click=" + click);
 
         switch (key) {
-            case 'E' -> handleEnchantClick(click, index + page * slotsPerPage);
-            case 'A' -> handleAddEnchant();
+            case 'A' -> handleAttributeClick(click, index + page * slotsPerPage);
+            case 'N' -> handleAddAttribute();
             case 'B' -> {
-                // 返回
                 parentGui.refresh();
                 parentGui.open();
             }
@@ -170,60 +197,37 @@ public class EnchantEditGui extends AbstractInteractiveGui<EnchantEditMenuConfig
         }
     }
 
-    private void handleEnchantClick(ClickType click, int index) {
-        if (index >= enchantList.size()) return;
+    private void handleAttributeClick(ClickType click, int index) {
+        if (index >= attributeList.size()) return;
 
-        Map.Entry<Enchantment, Integer> entry = enchantList.get(index);
-        Enchantment enchant = entry.getKey();
-        int currentLevel = entry.getValue();
-
-        ItemStack item = storedItem.getItemStack();
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
+        Map.Entry<Attribute, AttributeModifier> entry = attributeList.get(index);
+        Attribute attr = entry.getKey();
+        AttributeModifier modifier = entry.getValue();
 
         if (click == ClickType.LEFT) {
-            // 左键 - 增加等级
-            int newLevel = currentLevel + 1;
-            meta.removeEnchant(enchant);
-            meta.addEnchant(enchant, newLevel, true);
-            item.setItemMeta(meta);
-            module.getDatabase().saveItem(storedItem);
-            refreshEnchantList();
-            refreshInventory();
-            ItemManagerMessages.enchant__level_increased.t(player);
-        } else if (click == ClickType.RIGHT) {
-            // 右键 - 减少等级
-            if (currentLevel > 1) {
-                int newLevel = currentLevel - 1;
-                meta.removeEnchant(enchant);
-                meta.addEnchant(enchant, newLevel, true);
+            // 左键 - 打开详情编辑菜单
+            new AttributeDetailGui(player, module.getAttributeDetailMenuConfig(), storedItem, attr, modifier, this).open();
+        } else if (click == ClickType.CONTROL_DROP) {
+            // Ctrl+Q - 删除
+            ItemStack item = storedItem.getItemStack();
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.removeAttributeModifier(attr, modifier);
                 item.setItemMeta(meta);
                 module.getDatabase().saveItem(storedItem);
-                refreshEnchantList();
+                refreshAttributeList();
                 refreshInventory();
-                ItemManagerMessages.enchant__level_decreased.t(player);
+                ItemManagerMessages.attribute__removed.t(player);
             }
-        } else if (click == ClickType.CONTROL_DROP) {
-            // Ctrl+Q - 删除附魔
-            meta.removeEnchant(enchant);
-            item.setItemMeta(meta);
-            module.getDatabase().saveItem(storedItem);
-            refreshEnchantList();
-            refreshInventory();
-            ItemManagerMessages.enchant__removed.t(player);
         }
     }
 
-    private void handleAddEnchant() {
-        // 打开附魔选择菜单
-        new EnchantSelectGui(player, module.getEnchantSelectMenuConfig(), storedItem, this).open();
+    private void handleAddAttribute() {
+        new AttributeSelectGui(player, module.getAttributeSelectMenuConfig(), storedItem, this).open();
     }
 
-    /**
-     * 刷新界面 (供附魔选择返回时调用)
-     */
     public void refresh() {
-        refreshEnchantList();
+        refreshAttributeList();
         refreshInventory();
     }
 }

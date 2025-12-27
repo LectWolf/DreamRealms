@@ -59,6 +59,15 @@ public enum ItemManagerMessages implements IHolderAccessor {
     enchant__level_increased("&a附魔等级已增加"),
     enchant__level_decreased("&c附魔等级已减少"),
 
+    // 属性编辑
+    attribute__added("&a已添加属性"),
+    attribute__removed("&c已移除属性"),
+    attribute__modified("&a属性数值已修改"),
+
+    // Flag 编辑
+    flag__added("&a已启用 Flag"),
+    flag__removed("&c已禁用 Flag"),
+
     // 输入提示
     input__category_name("&e请输入分类名称:"),
     input__identifier("&e请输入物品标识名:"),
@@ -66,6 +75,8 @@ public enum ItemManagerMessages implements IHolderAccessor {
     input__item_name("&e请输入物品名称 (支持颜色代码):"),
     input__lore_add("&e请输入新的 Lore 行 (支持颜色代码):"),
     input__lore_edit("&e请输入新的内容 (支持颜色代码):"),
+    input__attribute_value("&e请输入属性数值:"),
+    input__invalid_number("&c无效的数字"),
 
     // 操作反馈
     item__added("&a物品已添加到列表"),

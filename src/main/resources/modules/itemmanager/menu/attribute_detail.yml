@@ -1,0 +1,58 @@
+# 属性详情编辑菜单配置
+
+title: "&0编辑属性"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XXXXIXXXX"
+  - "XVXOXSXDX"
+  - "XXXXXXXXX"
+  - "XXXXXXXXX"
+  - "XXXXBXXXX"
+
+# 主图标
+items:
+  # 预览 (动态，显示分类图标)
+  I:
+    material: NETHER_STAR
+    display: "&b属性预览"
+
+  # 修改数值
+  V:
+    material: GOLD_INGOT
+    display: "&e修改数值"
+    lore:
+      - "&7点击修改属性数值"
+
+  # 修改操作类型
+  O:
+    material: COMPARATOR
+    display: "&e修改操作类型"
+    lore:
+      - "&7点击切换操作类型"
+
+  # 修改槽位
+  S:
+    material: ARMOR_STAND
+    display: "&e修改槽位"
+    lore:
+      - "&7点击切换装备槽位"
+
+  # 删除
+  D:
+    material: BARRIER
+    display: "&c删除属性"
+    lore:
+      - "&7点击删除此属性"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回属性列表"

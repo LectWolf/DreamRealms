@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.ItemCategory;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
+import cn.mcloli.dreamrealms.utils.ChatInputUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -161,14 +162,26 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
                 }
             }
             case 'R' -> {
-                // 设置分类图标 - 手持物品点击设置
+                // 设置分类图标/修改分类名
                 if (category != null) {
                     ItemStack cursor = event.getCursor();
-                    if (cursor != null && !cursor.getType().isAir()) {
-                        // 设置分类图标为手持物品的材质
+                    if (Util.notAir(cursor)) {
+                        // 手持物品 - 设置分类图标
                         category.setIcon(cursor.getType().name());
                         module.getDatabase().saveCategory(category);
                         ItemManagerMessages.category__icon_set.t(player);
+                    } else {
+                        // 空手 - 修改分类名
+                        player.closeInventory();
+                        ChatInputUtil.requestInput(player, "&e请输入新的分类名称:", input -> {
+                            if (input != null && !input.isEmpty()) {
+                                category.setName(input);
+                                module.getDatabase().saveCategory(category);
+                                ItemManagerMessages.category__renamed.t(player);
+                            }
+                            // 重新打开菜单
+                            new ItemListGui(player, config, category).open();
+                        });
                     }
                 }
             }

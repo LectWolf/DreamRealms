@@ -4,7 +4,7 @@ title: "&0编辑物品"
 
 inventory:
   - "XXXXXXXXX"
-  - "XPOXSXXXX"
+  - "XPXXSXXOX"
   - "XNLEAFDXX"
   - "XXXIGXXXX"
   - "XXXXXXXXX"
@@ -33,8 +33,13 @@ items:
     lore:
       - "&7将物品转为可编辑格式"
       - ""
-      - "&c警告: 序列化后可能无法识别"
-      - "&c特殊物品 (如 ExcellentCrate 钥匙)"
+      - "&c⚠ 警告:"
+      - "&c序列化后的物品可能无法被"
+      - "&c其他插件正常识别"
+      - "&c(如 ExcellentCrate 钥匙)"
+      - ""
+      - "&c一旦序列化就无法反序列化"
+      - "&e建议创建一份新的进行测试"
 
   # 修改名称
   N:

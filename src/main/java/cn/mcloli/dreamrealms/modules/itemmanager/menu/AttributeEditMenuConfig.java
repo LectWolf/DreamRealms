@@ -10,46 +10,34 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Lore 编辑菜单配置
+ * 属性编辑菜单配置
  */
-public class LoreEditMenuConfig extends AbstractMenuConfig<IGui> {
+public class AttributeEditMenuConfig extends AbstractMenuConfig<IGui> {
 
     private final ItemManagerModule module;
 
-    // 主图标
-    private Icon loreLineIcon;
+    private Icon attributeIcon;
     private Icon addIcon;
-    private Icon emptyLineIcon;
 
-    public LoreEditMenuConfig(DreamRealms plugin, ItemManagerModule module) {
-        super(plugin, module.getModuleMenuPath() + "/lore_edit.yml");
+    public AttributeEditMenuConfig(DreamRealms plugin, ItemManagerModule module) {
+        super(plugin, module.getModuleMenuPath() + "/attribute_edit.yml");
         this.module = module;
     }
 
-    public Icon getLoreLineIcon() {
-        return loreLineIcon;
+    public Icon getAttributeIcon() {
+        return attributeIcon;
     }
 
     public Icon getAddIcon() {
         return addIcon;
     }
 
-    public Icon getEmptyLineIcon() {
-        return emptyLineIcon;
-    }
-
-    /**
-     * 获取空的上一页图标
-     */
     @Nullable
     public ItemStack getEmptyPrevIcon(Player player) {
         Icon icon = otherIcons.get("<_empty");
         return icon != null ? icon.generateIcon(player) : null;
     }
 
-    /**
-     * 获取空的下一页图标
-     */
     @Nullable
     public ItemStack getEmptyNextIcon(Player player) {
         Icon icon = otherIcons.get(">_empty");
@@ -58,17 +46,15 @@ public class LoreEditMenuConfig extends AbstractMenuConfig<IGui> {
 
     @Override
     protected void clearMainIcons() {
-        loreLineIcon = null;
+        attributeIcon = null;
         addIcon = null;
-        emptyLineIcon = null;
     }
 
     @Override
     protected boolean loadMainIcon(ConfigurationSection section, String key, Icon icon) {
         switch (key) {
-            case "L" -> loreLineIcon = icon;
-            case "A" -> addIcon = icon;
-            case "E" -> emptyLineIcon = icon;
+            case "A" -> attributeIcon = icon;
+            case "N" -> addIcon = icon;
             default -> {
                 return false;
             }

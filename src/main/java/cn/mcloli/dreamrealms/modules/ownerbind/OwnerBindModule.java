@@ -13,6 +13,9 @@ import cn.mcloli.dreamrealms.modules.ownerbind.listener.OwnerBindListener;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.GlobalMarketPlusListener;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.QuickShopListener;
 import cn.mcloli.dreamrealms.modules.ownerbind.listener.ZAuctionHouseListener;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -223,11 +226,116 @@ public class OwnerBindModule extends AbstractModule {
         if (isEmptyItem(item) || !item.hasItemMeta()) return false;
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return false;
-        return Boolean.TRUE.equals(meta.getPersistentDataContainer().get(bindableKey, PersistentDataType.BOOLEAN));
+        
+        var pdc = meta.getPersistentDataContainer();
+        
+        // 检查默认的 bindableKey
+        if (Boolean.TRUE.equals(pdc.get(bindableKey, PersistentDataType.BOOLEAN))) {
+            return true;
+        }
+        
+        // 检查自定义 NBT 键
+        for (String customKey : config.getNbtCustomKeys()) {
+            if (customKey == null || customKey.isEmpty()) continue;
+            try {
+                String keyPart;
+                String expectedValue = null;
+                
+                // 解析键值对格式 "namespace:key=value"
+                if (customKey.contains("=")) {
+                    int eqIndex = customKey.indexOf('=');
+                    keyPart = customKey.substring(0, eqIndex);
+                    expectedValue = customKey.substring(eqIndex + 1);
+                } else {
+                    keyPart = customKey;
+                }
+                
+                NamespacedKey key;
+                if (keyPart.contains(":")) {
+                    String[] parts = keyPart.split(":", 2);
+                    key = new NamespacedKey(parts[0], parts[1]);
+                } else {
+                    key = NamespacedKey.minecraft(keyPart);
+                }
+                
+                // 如果只检查键是否存在
+                if (expectedValue == null) {
+                    if (pdc.has(key)) {
+                        debug("检测到自定义 NBT 键: " + customKey);
+                        return true;
+                    }
+                } else {
+                    // 检查键值是否匹配
+                    if (matchNbtValue(pdc, key, expectedValue)) {
+                        debug("检测到自定义 NBT 键值匹配: " + customKey);
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                debug("无效的 NBT 键: " + customKey + " - " + e.getMessage());
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * 匹配 NBT 值 (支持字符串、整数、浮点数、布尔值)
+     */
+    private boolean matchNbtValue(org.bukkit.persistence.PersistentDataContainer pdc, NamespacedKey key, String expectedValue) {
+        // 尝试字符串匹配
+        String strValue = pdc.get(key, PersistentDataType.STRING);
+        if (strValue != null && strValue.equals(expectedValue)) {
+            return true;
+        }
+        
+        // 尝试整数匹配
+        Integer intValue = pdc.get(key, PersistentDataType.INTEGER);
+        if (intValue != null && expectedValue.equals(String.valueOf(intValue))) {
+            return true;
+        }
+        
+        // 尝试长整数匹配
+        Long longValue = pdc.get(key, PersistentDataType.LONG);
+        if (longValue != null && expectedValue.equals(String.valueOf(longValue))) {
+            return true;
+        }
+        
+        // 尝试浮点数匹配
+        Double doubleValue = pdc.get(key, PersistentDataType.DOUBLE);
+        if (doubleValue != null && expectedValue.equals(String.valueOf(doubleValue))) {
+            return true;
+        }
+        
+        Float floatValue = pdc.get(key, PersistentDataType.FLOAT);
+        if (floatValue != null && expectedValue.equals(String.valueOf(floatValue))) {
+            return true;
+        }
+        
+        // 尝试布尔值匹配
+        Boolean boolValue = pdc.get(key, PersistentDataType.BOOLEAN);
+        if (boolValue != null && expectedValue.equalsIgnoreCase(String.valueOf(boolValue))) {
+            return true;
+        }
+        
+        // 尝试字节匹配
+        Byte byteValue = pdc.get(key, PersistentDataType.BYTE);
+        if (byteValue != null && expectedValue.equals(String.valueOf(byteValue))) {
+            return true;
+        }
+        
+        // 尝试短整数匹配
+        Short shortValue = pdc.get(key, PersistentDataType.SHORT);
+        if (shortValue != null && expectedValue.equals(String.valueOf(shortValue))) {
+            return true;
+        }
+        
+        return false;
     }
 
     /**
      * 检查是否有可绑定Lore
+     * 支持传统颜色代码和 MiniMessage 格式
      */
     public boolean hasBindableLore(ItemStack item) {
         if (isEmptyItem(item) || !item.hasItemMeta()) return false;
@@ -237,14 +345,42 @@ public class OwnerBindModule extends AbstractModule {
         if (lore == null || lore.isEmpty()) return false;
 
         for (String bindLore : config.getBindableLores()) {
-            String targetLore = ColorHelper.parseColor(bindLore);
+            // 将配置的 pattern 转为纯文本用于匹配
+            String targetPlain = toPlainText(bindLore);
+            
             for (String line : lore) {
-                if (ColorHelper.parseColor(line).contains(targetLore)) {
+                // 将 lore 行转为纯文本
+                String linePlain = toPlainText(line);
+                if (linePlain.contains(targetPlain)) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * 将文本转换为纯文本 (移除所有格式)
+     * 支持传统颜色代码和 MiniMessage 格式
+     */
+    private String toPlainText(String text) {
+        if (text == null || text.isEmpty()) return "";
+        
+        // 先尝试解析传统颜色代码
+        String parsed = ColorHelper.parseColor(text);
+        
+        // 如果包含 MiniMessage 标签，尝试解析
+        if (text.contains("<") && text.contains(">")) {
+            try {
+                var component = MiniMessage.miniMessage().deserialize(text);
+                return PlainTextComponentSerializer.plainText().serialize(component);
+            } catch (Exception ignored) {
+                // 解析失败，使用传统方式
+            }
+        }
+        
+        // 移除所有颜色代码 (§x 格式)
+        return parsed.replaceAll("§[0-9a-fk-or]", "").replaceAll("§x(§[0-9a-f]){6}", "");
     }
 
     /**
@@ -257,9 +393,9 @@ public class OwnerBindModule extends AbstractModule {
         List<String> lore = meta.getLore();
         if (lore == null || lore.isEmpty()) return false;
 
-        String boundPattern = ColorHelper.parseColor(config.getBoundLore().replace("%player%", ""));
+        String boundPattern = toPlainText(config.getBoundLore().replace("%player%", ""));
         for (String line : lore) {
-            if (ColorHelper.parseColor(line).contains(boundPattern)) {
+            if (toPlainText(line).contains(boundPattern)) {
                 return true;
             }
         }
@@ -359,30 +495,36 @@ public class OwnerBindModule extends AbstractModule {
         // 移除可绑定标记
         meta.getPersistentDataContainer().remove(bindableKey);
 
-        // 更新Lore
-        List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
-        
-        // 移除可绑定Lore，添加已绑定Lore
-        String boundLoreLine = ColorHelper.parseColor(config.getBoundLore().replace("%player%", playerName));
-        boolean replaced = false;
+        // 如果启用了 Lore 修改
+        if (config.isLoreEnabled()) {
+            // 更新Lore
+            List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+            
+            // 移除可绑定Lore，添加已绑定Lore
+            String boundLoreLine = ColorHelper.parseColor(config.getBoundLore().replace("%player%", playerName));
+            boolean replaced = false;
 
-        for (int i = 0; i < lore.size(); i++) {
-            String line = lore.get(i);
-            for (String bindLore : config.getBindableLores()) {
-                if (ColorHelper.parseColor(line).contains(ColorHelper.parseColor(bindLore))) {
-                    lore.set(i, boundLoreLine);
-                    replaced = true;
-                    break;
+            for (int i = 0; i < lore.size(); i++) {
+                String line = lore.get(i);
+                String linePlain = toPlainText(line);
+                for (String bindLore : config.getBindableLores()) {
+                    String bindLorePlain = toPlainText(bindLore);
+                    if (linePlain.contains(bindLorePlain)) {
+                        lore.set(i, boundLoreLine);
+                        replaced = true;
+                        break;
+                    }
                 }
+                if (replaced) break;
             }
-            if (replaced) break;
-        }
 
-        if (!replaced) {
-            lore.add(boundLoreLine);
-        }
+            if (!replaced) {
+                lore.add(boundLoreLine);
+            }
 
-        meta.setLore(lore);
+            meta.setLore(lore);
+        }
+        
         item.setItemMeta(meta);
 
         debug("物品已绑定给玩家: " + playerName);
@@ -422,16 +564,16 @@ public class OwnerBindModule extends AbstractModule {
         meta.getPersistentDataContainer().remove(ownerKey);
         meta.getPersistentDataContainer().remove(bindableKey);
 
-        // 移除绑定相关Lore
-        if (meta.hasLore()) {
+        // 如果启用了 Lore 修改，移除绑定相关Lore
+        if (config.isLoreEnabled() && meta.hasLore()) {
             List<String> lore = new ArrayList<>(Objects.requireNonNull(meta.getLore()));
-            String boundPattern = ColorHelper.parseColor(config.getBoundLore().replace("%player%", ""));
+            String boundPattern = toPlainText(config.getBoundLore().replace("%player%", ""));
             
             lore.removeIf(line -> {
-                String cleanLine = ColorHelper.parseColor(line);
-                if (cleanLine.contains(boundPattern)) return true;
+                String linePlain = toPlainText(line);
+                if (linePlain.contains(boundPattern)) return true;
                 for (String bindLore : config.getBindableLores()) {
-                    if (cleanLine.contains(ColorHelper.parseColor(bindLore))) return true;
+                    if (linePlain.contains(toPlainText(bindLore))) return true;
                 }
                 return false;
             });
@@ -448,7 +590,8 @@ public class OwnerBindModule extends AbstractModule {
      * 修复物品Lore (确保NBT和Lore一致)
      */
     public boolean repairItemLore(ItemStack item) {
-        if (!config.isRepairMode() || isEmptyItem(item) || !item.hasItemMeta()) return false;
+        // 如果 Lore 功能关闭，不进行修复
+        if (!config.isLoreEnabled() || !config.isRepairMode() || isEmptyItem(item) || !item.hasItemMeta()) return false;
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return false;
@@ -462,8 +605,9 @@ public class OwnerBindModule extends AbstractModule {
             
             // 移除可绑定Lore
             lore.removeIf(line -> {
+                String linePlain = toPlainText(line);
                 for (String bindLore : config.getBindableLores()) {
-                    if (ColorHelper.parseColor(line).contains(ColorHelper.parseColor(bindLore))) {
+                    if (linePlain.contains(toPlainText(bindLore))) {
                         return true;
                     }
                 }

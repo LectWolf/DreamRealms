@@ -14,6 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 
@@ -22,6 +23,7 @@ import java.util.List;
 
 /**
  * 附魔选择 GUI
+ * 支持分类浏览和查看所有附魔
  */
 public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuConfig> {
 
@@ -31,23 +33,42 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
     private List<Enchantment> availableEnchants;
     private int page = 0;
     private int slotsPerPage = 0;
+    
+    // 当前选中的分类 (null = 显示分类列表)
+    @Nullable
+    private EnchantSelectMenuConfig.EnchantCategory currentCategory = null;
+    private boolean showAll = false;
 
     public EnchantSelectGui(Player player, EnchantSelectMenuConfig config, StoredItem storedItem, EnchantEditGui parentGui) {
         super(player, config);
         this.module = ItemManagerModule.inst();
         this.storedItem = storedItem;
         this.parentGui = parentGui;
-        loadAvailableEnchants();
+        
+        // Debug 输出所有附魔
+        if (module.isDebug()) {
+            module.debug("=== 所有附魔列表 ===");
+            for (Enchantment enchant : EnchantmentUtil.getAllEnchantments()) {
+                module.debug("  " + enchant.getKey().getKey() + " - " + EnchantmentUtil.getEnchantmentName(enchant));
+            }
+            module.debug("=== 附魔列表结束 ===");
+        }
     }
 
     private void loadAvailableEnchants() {
-        // 获取物品当前没有的附魔
         ItemStack item = storedItem.getItemStack();
         this.availableEnchants = new ArrayList<>();
         
         for (Enchantment enchant : EnchantmentUtil.getAllEnchantments()) {
             if (!item.containsEnchantment(enchant)) {
-                availableEnchants.add(enchant);
+                // 如果有分类筛选
+                if (currentCategory != null && !showAll) {
+                    if (currentCategory.contains(enchant)) {
+                        availableEnchants.add(enchant);
+                    }
+                } else {
+                    availableEnchants.add(enchant);
+                }
             }
         }
     }
@@ -71,6 +92,8 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
     }
 
     private void refreshInventory() {
+        List<EnchantSelectMenuConfig.EnchantCategory> categories = config.getCategories();
+        
         for (int i = 0; i < inventory.getSize(); i++) {
             Character key = config.getSlotKey(i);
             if (key == null) continue;
@@ -84,7 +107,17 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
             switch (key) {
                 case 'E' -> {
                     int index = config.getKeyIndex(key, i) + page * slotsPerPage;
-                    inventory.setItem(i, getEnchantItem(index));
+                    if (currentCategory == null && !showAll) {
+                        // 显示分类
+                        inventory.setItem(i, getCategoryItem(categories, index));
+                    } else {
+                        // 显示附魔
+                        inventory.setItem(i, getEnchantItem(index));
+                    }
+                }
+                case 'A' -> {
+                    // 查看所有附魔按钮
+                    inventory.setItem(i, config.getAllIcon() != null ? config.getAllIcon().generateIcon(player) : null);
                 }
                 case '<' -> {
                     if (page > 0) {
@@ -94,7 +127,7 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
                     }
                 }
                 case '>' -> {
-                    if (hasNextPage()) {
+                    if (hasNextPage(categories)) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
                         inventory.setItem(i, config.getEmptyNextIcon(player));
@@ -105,8 +138,27 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
         }
     }
 
-    private boolean hasNextPage() {
+    private boolean hasNextPage(List<EnchantSelectMenuConfig.EnchantCategory> categories) {
+        if (currentCategory == null && !showAll) {
+            return (page + 1) * slotsPerPage < categories.size();
+        }
         return (page + 1) * slotsPerPage < availableEnchants.size();
+    }
+
+    private ItemStack getCategoryItem(List<EnchantSelectMenuConfig.EnchantCategory> categories, int index) {
+        if (index >= categories.size()) {
+            return null;
+        }
+
+        EnchantSelectMenuConfig.EnchantCategory category = categories.get(index);
+        ItemStack item = new ItemStack(category.icon());
+        ItemStackUtil.setItemDisplayName(item, ColorHelper.parseColor("&e" + category.displayName()));
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ColorHelper.parseColor("&7点击查看该分类的附魔"));
+        ItemStackUtil.setItemLore(item, lore);
+
+        return item;
     }
 
     private ItemStack getEnchantItem(int index) {
@@ -115,7 +167,15 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
         }
 
         Enchantment enchant = availableEnchants.get(index);
-        ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
+        String enchantKey = enchant.getKey().getKey();
+        
+        // 尝试获取分类图标材质
+        Material iconMaterial = config.getCategoryIconForEnchant(enchantKey);
+        if (iconMaterial == null) {
+            iconMaterial = Material.ENCHANTED_BOOK;
+        }
+        
+        ItemStack item = new ItemStack(iconMaterial);
         String enchantName = EnchantmentUtil.getEnchantmentName(enchant);
         ItemStackUtil.setItemDisplayName(item, ColorHelper.parseColor("&b" + enchantName));
 
@@ -132,12 +192,39 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
     protected void handleClick(ClickType click, char key, int index, ItemStack currentItem, InventoryClickEvent event) {
         module.debug("EnchantSelectGui click: key=" + key + ", index=" + index + ", click=" + click);
 
+        List<EnchantSelectMenuConfig.EnchantCategory> categories = config.getCategories();
+
         switch (key) {
-            case 'E' -> handleEnchantClick(index + page * slotsPerPage);
+            case 'E' -> {
+                int realIndex = index + page * slotsPerPage;
+                if (currentCategory == null && !showAll) {
+                    // 点击分类
+                    handleCategoryClick(categories, realIndex);
+                } else {
+                    // 点击附魔
+                    handleEnchantClick(realIndex);
+                }
+            }
+            case 'A' -> {
+                // 查看所有附魔
+                showAll = true;
+                currentCategory = null;
+                page = 0;
+                loadAvailableEnchants();
+                refreshInventory();
+            }
             case 'B' -> {
-                // 返回
-                parentGui.refresh();
-                parentGui.open();
+                if (currentCategory != null || showAll) {
+                    // 返回分类列表
+                    currentCategory = null;
+                    showAll = false;
+                    page = 0;
+                    refreshInventory();
+                } else {
+                    // 返回附魔编辑页
+                    parentGui.refresh();
+                    parentGui.open();
+                }
             }
             case '<' -> {
                 if (page > 0) {
@@ -146,13 +233,23 @@ public class EnchantSelectGui extends AbstractInteractiveGui<EnchantSelectMenuCo
                 }
             }
             case '>' -> {
-                if (hasNextPage()) {
+                if (hasNextPage(categories)) {
                     page++;
                     refreshInventory();
                 }
             }
             default -> config.handleOtherIconClick(player, click, key);
         }
+    }
+
+    private void handleCategoryClick(List<EnchantSelectMenuConfig.EnchantCategory> categories, int index) {
+        if (index >= categories.size()) return;
+
+        currentCategory = categories.get(index);
+        showAll = false;
+        page = 0;
+        loadAvailableEnchants();
+        refreshInventory();
     }
 
     private void handleEnchantClick(int index) {

@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.mrxiaom.pluginbase.utils.AdventureUtil;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 
 import java.util.*;
@@ -91,9 +92,7 @@ public class DebugCommand implements ISubCommandHandler {
         JsonObject json = serializeItem(item);
         String jsonStr = getGson().toJson(json);
 
-        player.sendMessage(ColorHelper.parseColor("&a===== 物品序列化信息 ====="));
-        player.sendMessage(jsonStr);
-        player.sendMessage(ColorHelper.parseColor("&a========================"));
+        sendJsonOutput(player, "物品", jsonStr);
 
         module.debug("玩家 " + player.getName() + " 查询物品: " + item.getType());
         return true;
@@ -117,9 +116,7 @@ public class DebugCommand implements ISubCommandHandler {
         JsonObject json = serializeEntity(entity);
         String jsonStr = getGson().toJson(json);
 
-        player.sendMessage(ColorHelper.parseColor("&a===== 实体序列化信息 ====="));
-        player.sendMessage(jsonStr);
-        player.sendMessage(ColorHelper.parseColor("&a========================"));
+        sendJsonOutput(player, "实体", jsonStr);
 
         module.debug("玩家 " + player.getName() + " 查询实体: " + entity.getType());
         return true;
@@ -138,12 +135,28 @@ public class DebugCommand implements ISubCommandHandler {
         JsonObject json = serializeBlock(block);
         String jsonStr = getGson().toJson(json);
 
-        player.sendMessage(ColorHelper.parseColor("&a===== 方块序列化信息 ====="));
-        player.sendMessage(jsonStr);
-        player.sendMessage(ColorHelper.parseColor("&a========================"));
+        sendJsonOutput(player, "方块", jsonStr);
 
         module.debug("玩家 " + player.getName() + " 查询方块: " + block.getType());
         return true;
+    }
+
+    /**
+     * 发送 JSON 输出并提供复制功能
+     */
+    private void sendJsonOutput(Player player, String type, String jsonStr) {
+        // 压缩 JSON 用于复制 (单行)
+        String compactJson = gsonCompact.toJson(gsonCompact.fromJson(jsonStr, JsonObject.class));
+        // 转义单引号用于 MiniMessage
+        String escapedJson = compactJson.replace("'", "\\'");
+
+        player.sendMessage(ColorHelper.parseColor("&a===== " + type + "序列化信息 ====="));
+        player.sendMessage(jsonStr);
+        player.sendMessage(ColorHelper.parseColor("&a========================"));
+
+        // 发送可点击的复制按钮
+        String copyMessage = "<green><click:copy_to_clipboard:'" + escapedJson + "'><hover:show_text:'<gray>点击复制到剪贴板'>[复制JSON]</hover></click></green>";
+        AdventureUtil.sendMessage(player, copyMessage);
     }
 
     private JsonObject serializeItem(ItemStack item) {

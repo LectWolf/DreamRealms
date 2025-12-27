@@ -9,9 +9,13 @@ import cn.mcloli.dreamrealms.modules.itemmanager.command.ItemManagerCommands;
 import cn.mcloli.dreamrealms.modules.itemmanager.config.ItemManagerConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.database.ItemManagerDatabase;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.AttributeDetailMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.AttributeEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.AttributeSelectMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.CategoryMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantSelectMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.FlagEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.LoreEditMenuConfig;
@@ -34,6 +38,10 @@ public class ItemManagerModule extends AbstractModule {
     private LoreEditMenuConfig loreEditMenuConfig;
     private EnchantEditMenuConfig enchantEditMenuConfig;
     private EnchantSelectMenuConfig enchantSelectMenuConfig;
+    private AttributeEditMenuConfig attributeEditMenuConfig;
+    private AttributeDetailMenuConfig attributeDetailMenuConfig;
+    private AttributeSelectMenuConfig attributeSelectMenuConfig;
+    private FlagEditMenuConfig flagEditMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -78,6 +86,22 @@ public class ItemManagerModule extends AbstractModule {
 
     public EnchantSelectMenuConfig getEnchantSelectMenuConfig() {
         return enchantSelectMenuConfig;
+    }
+
+    public AttributeEditMenuConfig getAttributeEditMenuConfig() {
+        return attributeEditMenuConfig;
+    }
+
+    public AttributeDetailMenuConfig getAttributeDetailMenuConfig() {
+        return attributeDetailMenuConfig;
+    }
+
+    public AttributeSelectMenuConfig getAttributeSelectMenuConfig() {
+        return attributeSelectMenuConfig;
+    }
+
+    public FlagEditMenuConfig getFlagEditMenuConfig() {
+        return flagEditMenuConfig;
     }
 
     @Override
@@ -135,6 +159,26 @@ public class ItemManagerModule extends AbstractModule {
             enchantSelectMenuConfig = new EnchantSelectMenuConfig(plugin, this);
         }
         enchantSelectMenuConfig.reloadConfig(cfg);
+
+        if (attributeEditMenuConfig == null) {
+            attributeEditMenuConfig = new AttributeEditMenuConfig(plugin, this);
+        }
+        attributeEditMenuConfig.reloadConfig(cfg);
+
+        if (attributeDetailMenuConfig == null) {
+            attributeDetailMenuConfig = new AttributeDetailMenuConfig(plugin, this);
+        }
+        attributeDetailMenuConfig.reloadConfig(cfg);
+
+        if (attributeSelectMenuConfig == null) {
+            attributeSelectMenuConfig = new AttributeSelectMenuConfig(plugin, this);
+        }
+        attributeSelectMenuConfig.reloadConfig(cfg);
+
+        if (flagEditMenuConfig == null) {
+            flagEditMenuConfig = new FlagEditMenuConfig(plugin, this);
+        }
+        flagEditMenuConfig.reloadConfig(cfg);
 
         // 注册命令到 /dr itemmanager
         if (command == null) {

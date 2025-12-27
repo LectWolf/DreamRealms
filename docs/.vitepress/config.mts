@@ -40,6 +40,7 @@ export default defineConfig({
             { text: "ShiftF 快捷键", link: "/modules/shiftf" },
             { text: "OwnerBind 物主绑定", link: "/modules/ownerbind" },
             { text: "Debug 调试工具", link: "/modules/debug" },
+            { text: "ItemManager 物品管理器", link: "/modules/itemmanager" },
           ],
         },
       ],

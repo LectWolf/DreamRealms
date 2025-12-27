@@ -14,22 +14,41 @@ bind-detection:
     # 是否启用 Lore 识别
     enabled: true
     # 可绑定物品的 Lore 特征 (包含任意一个即可)
-    # 支持颜色代码
+    # 支持传统颜色代码 (&7) 和 MiniMessage 格式 (<gray>)
     patterns:
       - "&7⛓ 不可转手"
       - "&c✘ 未绑定"
   
   # NBT 识别 - 通过 NBT 标记识别可绑定物品
-  # NBT Key: dreamrealms:ownerbind_bindable (Boolean: true)
-  # 可通过命令或其他插件设置此 NBT 标记
   nbt:
     # 是否启用 NBT 识别
     enabled: true
+    # 自定义 NBT 键列表 (包含任意一个即可)
+    # 默认会检查 dreamrealms:ownerbind_bindable (Boolean: true)
+    # 
+    # 格式说明:
+    # - 仅键名: "namespace:key" - 只检查键是否存在
+    # - 键值对: "namespace:key=value" - 检查键的值是否匹配
+    # 
+    # 支持的值类型: 字符串、整数、浮点数、布尔值
+    # 
+    # 示例:
+    # - "divinity:item_module"           # 只要有这个键就匹配
+    # - "divinity:item_module=gems"      # 字符串匹配
+    # - "divinity:item_level=10"         # 整数匹配
+    # - "myplugin:rate=0.5"              # 浮点数匹配
+    # - "myplugin:bindable=true"         # 布尔值匹配
+    custom-keys:
+      # - "divinity:item_module=gems"
 
 # ====================================
 # Lore 配置
 # ====================================
 lore:
+  # 是否启用绑定后修改 Lore
+  # 关闭后只添加 NBT，不修改 Lore 显示
+  # 注意: 关闭此选项后 repair-mode 将无效
+  enabled: true
   # 绑定后显示的 Lore (替换原有的可绑定 Lore)
   # 占位符: %player% - 绑定玩家名
   bound: "&7⛓ 已绑定: &f%player%"

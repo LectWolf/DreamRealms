@@ -7,12 +7,14 @@ import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
 import cn.mcloli.dreamrealms.utils.Util;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import top.mrxiaom.pluginbase.utils.AdventureUtil;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
 import top.mrxiaom.pluginbase.utils.Pair;
@@ -188,13 +190,28 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
         ChatInputUtil.requestInput(player, ItemManagerMessages.input__item_name.str(), input -> {
             if (input != null) {
                 ItemStack itemStack = storedItem.getItemStack();
-                ItemStackUtil.setItemDisplayName(itemStack, ColorHelper.parseColor(input));
+                // 支持 MiniMessage 和传统颜色代码
+                String parsed = parseColorInput(input);
+                ItemStackUtil.setItemDisplayName(itemStack, parsed);
                 module.getDatabase().saveItem(storedItem);
                 ItemManagerMessages.edit__name_success.t(player);
             }
             // 重新打开菜单
             new ItemEditGui(player, config, storedItem, parentGui).open();
         });
+    }
+
+    /**
+     * 解析颜色输入 (支持 MiniMessage 和传统颜色代码)
+     */
+    private String parseColorInput(String input) {
+        // 如果包含 MiniMessage 标签，使用 MiniMessage 解析后转为传统格式
+        if (input.contains("<") && input.contains(">")) {
+            return LegacyComponentSerializer.legacySection()
+                    .serialize(AdventureUtil.miniMessage(input));
+        }
+        // 否则使用传统颜色代码解析
+        return ColorHelper.parseColor(input);
     }
 
     private void handleEditLore() {
@@ -211,12 +228,14 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
 
     private void handleEditAttribute() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__attribute_wip.t(player);
+        // 打开属性编辑菜单
+        new AttributeEditGui(player, module.getAttributeEditMenuConfig(), storedItem, this).open();
     }
 
     private void handleEditFlag() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__flag_wip.t(player);
+        // 打开 Flag 编辑菜单
+        new FlagEditGui(player, module.getFlagEditMenuConfig(), storedItem, this).open();
     }
 
     private void handleEditDurability() {

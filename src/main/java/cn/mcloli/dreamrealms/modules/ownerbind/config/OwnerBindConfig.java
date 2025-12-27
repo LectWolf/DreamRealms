@@ -19,8 +19,10 @@ public class OwnerBindConfig {
     private boolean loreBindEnabled;
     private List<String> bindableLores;
     private boolean nbtBindEnabled;
+    private List<String> nbtCustomKeys;
     
     // Lore 配置
+    private boolean loreEnabled;
     private String boundLore;
     
     // 功能开关
@@ -60,8 +62,10 @@ public class OwnerBindConfig {
         loreBindEnabled = config.getBoolean("bind-detection.lore.enabled", true);
         bindableLores = config.getStringList("bind-detection.lore.patterns");
         nbtBindEnabled = config.getBoolean("bind-detection.nbt.enabled", true);
+        nbtCustomKeys = config.getStringList("bind-detection.nbt.custom-keys");
         
         // Lore 配置
+        loreEnabled = config.getBoolean("lore.enabled", true);
         boundLore = config.getString("lore.bound", "&7⛓ 已绑定: &f%player%");
         
         // 功能开关
@@ -90,7 +94,9 @@ public class OwnerBindConfig {
     public boolean isLoreBindEnabled() { return loreBindEnabled; }
     public List<String> getBindableLores() { return bindableLores; }
     public boolean isNbtBindEnabled() { return nbtBindEnabled; }
+    public List<String> getNbtCustomKeys() { return nbtCustomKeys; }
     
+    public boolean isLoreEnabled() { return loreEnabled; }
     public String getBoundLore() { return boundLore; }
     
     public boolean isAntiDrop() { return antiDrop; }
