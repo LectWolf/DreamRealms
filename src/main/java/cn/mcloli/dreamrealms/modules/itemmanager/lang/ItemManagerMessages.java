@@ -49,6 +49,10 @@ public enum ItemManagerMessages implements IHolderAccessor {
     input__identifier("&e请输入物品标识名:"),
     input__category_icon("&e请输入分类图标 (材质名或 craftengine:xxx):"),
 
+    // 操作反馈
+    item__added("&a物品已添加到列表"),
+    category__renamed("&a分类名称已更新"),
+
     // 聊天消息 (MiniMessage 格式)
     chat__copy_cmd("<green><click:copy_to_clipboard:{command}><hover:show_text:'<gray>点击复制'>点击复制获取命令</hover></click>"),
 

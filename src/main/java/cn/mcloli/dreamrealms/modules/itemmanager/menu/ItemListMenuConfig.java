@@ -23,8 +23,6 @@ public class ItemListMenuConfig extends AbstractMenuConfig<IGui> {
     public ItemListMenuConfig(DreamRealms plugin, ItemManagerModule module) {
         super(plugin, module.getModuleMenuPath() + "/item_list.yml");
         this.module = module;
-        // 标记添加按钮为可交互
-        markInteractive('A');
     }
 
     public Icon getItemSlotIcon() {

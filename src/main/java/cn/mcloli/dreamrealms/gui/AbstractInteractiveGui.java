@@ -62,13 +62,19 @@ public abstract class AbstractInteractiveGui<C extends AbstractMenuConfig<?>> im
                         ItemStack currentItem, ItemStack cursor,
                         InventoryView view, InventoryClickEvent event) {
 
-        // 玩家背包区域 - 允许自由操作
+        // 玩家背包区域
         if (slotType == InventoryType.SlotType.CONTAINER && slot >= inventory.getSize()) {
-            // 点击的是玩家背包，允许
+            // Shift 点击会尝试移动物品到 GUI，需要取消
+            if (click.isShiftClick()) {
+                event.setCancelled(true);
+            }
             return;
         }
         if (slotType == InventoryType.SlotType.QUICKBAR) {
-            // 点击的是快捷栏，允许
+            // Shift 点击会尝试移动物品到 GUI，需要取消
+            if (click.isShiftClick()) {
+                event.setCancelled(true);
+            }
             return;
         }
 

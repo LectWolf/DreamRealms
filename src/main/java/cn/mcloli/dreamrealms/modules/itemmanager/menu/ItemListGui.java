@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.ItemCategory;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
+import cn.mcloli.dreamrealms.utils.ChatInputUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -114,6 +115,9 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
 
         StoredItem storedItem = items.get(index);
         ItemStack display = storedItem.getItemStack().clone();
+        
+        // 统一显示数量为 1
+        display.setAmount(1);
 
         // 添加操作提示到 Lore
         List<String> lore = ItemStackUtil.getItemLore(display);
@@ -139,8 +143,39 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
         switch (key) {
             case 'I' -> handleItemClick(click, index + page * slotsPerPage);
             case 'A' -> {
-                // 添加按钮 - 检查是否有物品放入
-                // 由 onItemPlaced 处理
+                // 添加按钮 - 点击添加手持物品
+                ItemStack cursor = event.getCursor();
+                if (cursor != null && !cursor.getType().isAir()) {
+                    // 手持有物品，添加到列表
+                    StoredItem storedItem = StoredItem.create(cursor.clone());
+                    if (category != null) {
+                        storedItem.setCategoryId(category.getId());
+                    }
+                    storedItem.setSortOrder(items.size());
+                    module.getDatabase().saveItem(storedItem);
+                    items.add(storedItem);
+                    
+                    // 清空手持物品
+                    event.getWhoClicked().setItemOnCursor(null);
+                    
+                    refreshInventory();
+                    ItemManagerMessages.item__added.t(player);
+                }
+            }
+            case 'R' -> {
+                // 重命名分类
+                if (category != null) {
+                    player.closeInventory();
+                    ChatInputUtil.requestInput(player, ItemManagerMessages.input__category_name.str(), input -> {
+                        if (input != null) {
+                            category.setName(input);
+                            module.getDatabase().saveCategory(category);
+                            ItemManagerMessages.category__renamed.t(player);
+                        }
+                        // 重新打开菜单
+                        new ItemListGui(player, config, category).open();
+                    });
+                }
             }
             case 'B' -> {
                 // 返回按钮
@@ -171,8 +206,9 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
             // 左键 - 编辑
             new ItemEditGui(player, module.getItemEditMenuConfig(), storedItem, this).open();
         } else if (click == ClickType.RIGHT) {
-            // 右键 - 获取
+            // 右键 - 获取 (只给 1 个)
             ItemStack item = storedItem.getItemStack().clone();
+            item.setAmount(1);
             Util.giveItem(player, item);
         } else if (click == ClickType.DROP) {
             // Q键 - 删除

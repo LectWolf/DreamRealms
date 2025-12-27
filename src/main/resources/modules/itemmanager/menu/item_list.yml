@@ -7,7 +7,7 @@ inventory:
   - "XIIIIIIIX"
   - "XIIIIIIIX"
   - "XIIIIIIIX"
-  - "X<XBA>XPX"
+  - "X<XBA>XRX"
 
 # 主图标
 items:
@@ -16,13 +16,12 @@ items:
     material: STONE
     display: "&f物品"
 
-  # 添加物品按钮 (可交互)
+  # 添加物品按钮
   A:
     material: LIME_DYE
     display: "&a添加物品"
     lore:
-      - "&7将物品拖放到此处"
-      - "&7或点击添加手持物品"
+      - "&7手持物品点击此处添加"
 
 # 其他图标
 other-items:
@@ -36,15 +35,16 @@ other-items:
     lore:
       - "&7返回分类列表"
 
-  P:
-    material: PLAYER_HEAD
-    skull-owner: "%player_name%"
-    display: "&e%player_name%"
+  R:
+    material: NAME_TAG
+    display: "&e重命名分类"
+    lore:
+      - "&7点击修改分类名称"
 
-  <:
+  "<":
     material: ARROW
     display: "&7上一页"
 
-  >:
+  ">":
     material: ARROW
     display: "&7下一页"

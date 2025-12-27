@@ -342,9 +342,23 @@ public abstract class AbstractMenuConfig<T extends IGui> extends AbstractPluginH
             plugin.saveResource(resourcePath, configFile);
         }
 
+        // 检查文件是否成功创建
+        if (!configFile.exists()) {
+            plugin.warn("菜单配置文件不存在: " + resourcePath);
+            // 设置默认值防止 NPE
+            title = "菜单";
+            inventory = new char[0];
+            return;
+        }
+
         config = YamlConfiguration.loadConfiguration(configFile);
         title = config.getString("title", "菜单");
         inventory = String.join("", config.getStringList("inventory")).toCharArray();
+
+        // 检查 inventory 是否有效
+        if (inventory.length == 0) {
+            plugin.warn("菜单配置无效 (inventory 为空): " + resourcePath);
+        }
 
         // 加载主图标
         clearMainIcons();
