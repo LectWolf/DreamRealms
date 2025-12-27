@@ -1,5 +1,25 @@
 # 更新日志
 
+## v1.0.5
+
+### 新增
+
+- OwnerBind API 和事件系统
+  - `OwnerBindAPI` 对外 API 类
+  - `OwnerBindEvent` / `OwnerBindMarkEvent` / `OwnerUnbindEvent` 事件
+  - 支持其他插件监听和取消绑定操作
+- Welcome API
+  - `WelcomeAPI` 对外 API 类
+  - 查询新玩家状态、会话信息、欢迎者数据
+- OwnerBind 挂钩 QuickShop-Hikari
+  - 禁止使用绑定物品创建箱子商店
+- API 文档目录 (`docs/api/`)
+- 导航栏 API 菜单
+
+### 修复
+
+- 移除 Vault 硬依赖，插件不再因缺少经济接口而卸载
+
 ## v1.0.4
 
 ### 新增
