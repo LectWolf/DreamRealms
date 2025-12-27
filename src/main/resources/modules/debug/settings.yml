@@ -1,0 +1,7 @@
+# Debug 模块配置
+
+# 是否开启调试日志
+debug: false
+
+# 射线追踪距离 (格)
+ray-trace-distance: 10

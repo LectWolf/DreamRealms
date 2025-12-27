@@ -39,6 +39,7 @@ export default defineConfig({
             { text: "DogTag 狗牌系统", link: "/modules/dogtag" },
             { text: "ShiftF 快捷键", link: "/modules/shiftf" },
             { text: "OwnerBind 物主绑定", link: "/modules/ownerbind" },
+            { text: "Debug 调试工具", link: "/modules/debug" },
           ],
         },
       ],
