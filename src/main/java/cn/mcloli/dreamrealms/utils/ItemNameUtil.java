@@ -5,6 +5,7 @@ import cn.mcloli.dreamrealms.hook.CraftEngineHook;
 import cn.mcloli.dreamrealms.hook.ItemsAdderHook;
 import cn.mcloli.dreamrealms.lang.ItemLanguage;
 import dev.lone.itemsadder.api.CustomStack;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.momirealms.craftengine.bukkit.api.CraftEngineItems;
 import net.momirealms.craftengine.core.item.CustomItem;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.mrxiaom.pluginbase.utils.AdventureUtil;
 
 /**
  * 物品名称工具类
@@ -74,12 +76,32 @@ public class ItemNameUtil {
         try {
             CustomItem<ItemStack> customItem = CraftEngineItems.byItemStack(item);
             if (customItem != null) {
+                // 获取物品 ID (如 dreamrealms:my_sword)
+                String itemId = customItem.id().toString();
+                
+                // 尝试从语言文件获取翻译 (格式: item.namespace.item_id)
+                ItemLanguage lang = DreamRealms.getInstance().getItemLanguage();
+                if (lang != null && lang.isLoaded()) {
+                    // 转换 namespace:item_id 为 item.namespace.item_id
+                    String langKey = "item." + itemId.replace(":", ".").replace("/", ".");
+                    String translated = lang.get(langKey);
+                    if (translated != null) {
+                        return translated;
+                    }
+                }
+                
                 // 尝试从物品的 ItemMeta 获取显示名称
                 ItemStack built = customItem.buildItemStack(1);
                 if (built != null && built.hasItemMeta()) {
                     ItemMeta meta = built.getItemMeta();
                     if (meta != null && meta.hasDisplayName()) {
-                        return meta.getDisplayName();
+                        String displayName = meta.getDisplayName();
+                        // 如果是 MiniMessage 格式，转换为传统格式 (§ 颜色代码)
+                        if (displayName.contains("<") && displayName.contains(">")) {
+                            return LegacyComponentSerializer.legacySection()
+                                    .serialize(AdventureUtil.miniMessage(displayName));
+                        }
+                        return displayName;
                     }
                 }
             }
