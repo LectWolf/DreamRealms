@@ -133,6 +133,18 @@ items:
       - "&e点击切换"
       - "&7右键清除"
 
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品编辑"
+
   # === 复杂组件 ===
 
   # 食物组件
@@ -172,15 +184,3 @@ items:
     display: "&7伤害抗性"
     lore:
       - "&8开发中..."
-
-# 其他图标
-other-items:
-  X:
-    material: BLACK_STAINED_GLASS_PANE
-    display: " "
-
-  B:
-    material: ARROW
-    display: "&7返回"
-    lore:
-      - "&7返回物品编辑"
