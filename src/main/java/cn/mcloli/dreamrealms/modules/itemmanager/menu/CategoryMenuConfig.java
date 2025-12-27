@@ -26,6 +26,10 @@ public class CategoryMenuConfig extends AbstractMenuConfig<IGui> {
         this.module = module;
     }
 
+    public ItemManagerModule getModule() {
+        return module;
+    }
+
     public Icon getCategoryIcon() {
         return categoryIcon;
     }

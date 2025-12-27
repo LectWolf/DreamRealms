@@ -34,7 +34,7 @@ public class CategorySelectGui extends AbstractInteractiveGui<CategoryMenuConfig
 
     public CategorySelectGui(Player player, CategoryMenuConfig config, StoredItem storedItem, ItemEditGui parentGui) {
         super(player, config);
-        this.module = ItemManagerModule.inst();
+        this.module = config.getModule();
         this.storedItem = storedItem;
         this.parentGui = parentGui;
     }

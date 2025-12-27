@@ -33,7 +33,7 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
 
     public CategoryGui(Player player, CategoryMenuConfig config) {
         super(player, config);
-        this.module = ItemManagerModule.inst();
+        this.module = config.getModule();
     }
 
     @Override

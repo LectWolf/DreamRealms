@@ -25,6 +25,10 @@ public class ItemListMenuConfig extends AbstractMenuConfig<IGui> {
         this.module = module;
     }
 
+    public ItemManagerModule getModule() {
+        return module;
+    }
+
     public Icon getItemSlotIcon() {
         return itemSlotIcon;
     }

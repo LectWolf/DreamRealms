@@ -25,6 +25,10 @@ public class LoreEditMenuConfig extends AbstractMenuConfig<IGui> {
         this.module = module;
     }
 
+    public ItemManagerModule getModule() {
+        return module;
+    }
+
     public Icon getLoreLineIcon() {
         return loreLineIcon;
     }
