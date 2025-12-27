@@ -4,9 +4,10 @@ DreamRealms 提供 API 供其他插件调用模块功能。
 
 ## 可用 API
 
-| 模块                        | API 类         | 说明         |
-| --------------------------- | -------------- | ------------ |
-| [OwnerBind](/api/ownerbind) | `OwnerBindAPI` | 物品绑定功能 |
+| 模块                        | API 类         | 说明           |
+| --------------------------- | -------------- | -------------- |
+| [OwnerBind](/api/ownerbind) | `OwnerBindAPI` | 物品绑定功能   |
+| [Welcome](/api/welcome)     | `WelcomeAPI`   | 新玩家欢迎功能 |
 
 ## 使用方式
 

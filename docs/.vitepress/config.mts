@@ -48,6 +48,7 @@ export default defineConfig({
           items: [
             { text: "概述", link: "/api/" },
             { text: "OwnerBind", link: "/api/ownerbind" },
+            { text: "Welcome", link: "/api/welcome" },
           ],
         },
       ],
