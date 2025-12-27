@@ -5,6 +5,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
+import cn.mcloli.dreamrealms.utils.ItemNameUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +71,7 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
                 case 'I' -> inventory.setItem(i, getItemModelIcon(meta));
                 case 'E' -> inventory.setItem(i, getEnchantableIcon(meta));
                 case 'R' -> inventory.setItem(i, getRarityIcon(meta));
+                case 'T' -> inventory.setItem(i, getMaterialIcon(item));
                 default -> config.applyIcon(this, inventory, player, i);
             }
         }
@@ -280,6 +283,19 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
         return icon;
     }
 
+    private ItemStack getMaterialIcon(ItemStack item) {
+        ItemStack icon = new ItemStack(Material.CRAFTING_TABLE);
+        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e切换材质"));
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ColorHelper.parseColor("&7当前: &f" + item.getType().name()));
+        lore.add("");
+        lore.add(ColorHelper.parseColor("&e手持物品点击切换"));
+        lore.add(ColorHelper.parseColor("&7空手点击输入材质名"));
+        ItemStackUtil.setItemLore(icon, lore);
+        return icon;
+    }
+
 
     @Override
     protected void handleClick(ClickType click, char key, int index, ItemStack currentItem, InventoryClickEvent event) {
@@ -299,6 +315,7 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
             case 'I' -> handleItemModelEdit(click);
             case 'E' -> handleEnchantableEdit(click);
             case 'R' -> handleRarityToggle(click);
+            case 'T' -> handleMaterialChange(event);
             case '1' -> handleFoodEdit();
             case '2', '3', '4', '5' -> ItemManagerMessages.properties__wip.t(player);
             case 'B' -> {
@@ -632,5 +649,53 @@ public class ItemPropertiesGui extends AbstractInteractiveGui<ItemPropertiesMenu
         module.getDatabase().saveItem(storedItem);
         refreshInventory();
         ItemManagerMessages.properties__rarity_toggled.t(player);
+    }
+
+    private void handleMaterialChange(InventoryClickEvent event) {
+        ItemStack cursor = event.getCursor();
+        
+        if (Util.notAir(cursor)) {
+            // 手持物品 - 直接切换为该物品的材质
+            Material newMaterial = cursor.getType();
+            changeMaterial(newMaterial);
+        } else {
+            // 空手 - 聊天输入材质名
+            player.closeInventory();
+            ChatInputUtil.requestInput(player, ItemManagerMessages.input__material.str(), input -> {
+                if (input != null) {
+                    Material material = Material.matchMaterial(input.toUpperCase());
+                    if (material != null && material.isItem()) {
+                        changeMaterial(material);
+                    } else {
+                        ItemManagerMessages.properties__material_invalid.t(player, 
+                            Pair.of("{material}", input));
+                    }
+                }
+                new ItemPropertiesGui(player, config, storedItem, parentGui).open();
+            });
+        }
+    }
+
+    private void changeMaterial(Material newMaterial) {
+        ItemStack item = storedItem.getItemStack();
+        ItemMeta oldMeta = item.getItemMeta();
+        
+        // 更改材质
+        item.setType(newMaterial);
+        
+        // 尝试保留元数据 (如果兼容)
+        if (oldMeta != null) {
+            try {
+                item.setItemMeta(oldMeta);
+            } catch (Exception e) {
+                // 元数据不兼容，忽略
+                module.debug("材质切换时元数据不兼容: " + e.getMessage());
+            }
+        }
+        
+        module.getDatabase().saveItem(storedItem);
+        refreshInventory();
+        ItemManagerMessages.properties__material_changed.t(player, 
+            Pair.of("{material}", newMaterial.name()));
     }
 }

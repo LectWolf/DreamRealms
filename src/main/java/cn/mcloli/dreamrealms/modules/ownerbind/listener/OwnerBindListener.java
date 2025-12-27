@@ -3,6 +3,7 @@ package cn.mcloli.dreamrealms.modules.ownerbind.listener;
 import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
 import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindEvent;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
+import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,6 +19,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import top.mrxiaom.pluginbase.utils.Pair;
@@ -560,14 +562,28 @@ public class OwnerBindListener implements Listener {
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
+        restoreDeathKeepItems(player);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        // 处理玩家死亡后退出再登录的情况
+        Player player = event.getPlayer();
+        restoreDeathKeepItems(player);
+    }
+
+    /**
+     * 归还死亡保留的绑定物品
+     */
+    private void restoreDeathKeepItems(Player player) {
         List<ItemStack> items = deathKeepItems.remove(player.getUniqueId());
         if (items != null && !items.isEmpty()) {
-            // 延迟1tick归还物品，确保玩家已完全重生
-            cn.mcloli.dreamrealms.utils.Util.runLater(() -> {
+            // 延迟1tick归还物品，确保玩家已完全重生/加入
+            Util.runLater(() -> {
                 for (ItemStack item : items) {
-                    cn.mcloli.dreamrealms.utils.Util.giveItem(player, item);
+                    Util.giveItem(player, item);
                 }
-                module.debug("重生归还绑定物品数量: " + items.size());
+                module.debug("归还绑定物品数量: " + items.size() + ", 玩家: " + player.getName());
             }, 1L);
         }
     }

@@ -95,6 +95,16 @@ public enum ItemManagerMessages implements IHolderAccessor {
     properties__food_eat_time_set("&a食用时间已设置"),
     properties__food_can_always_eat_toggled("&a可以一直吃状态已切换"),
     properties__food_removed("&a食物组件已移除"),
+    properties__food_converts_to_set("&a使用后转换物品已设置为: &f{item}"),
+    properties__food_converts_to_cleared("&a使用后转换物品已清除"),
+    properties__food_converts_to_hint("&e请手持物品后点击设置"),
+    properties__food_effect_added("&a已添加食用效果"),
+    properties__food_effect_removed("&c已移除食用效果"),
+    properties__food_effect_modified("&a食用效果已修改"),
+    properties__material_changed("&a物品材质已更改为: &f{material}"),
+    properties__material_hint("&e请手持物品后点击，或空手点击输入材质名"),
+    properties__material_invalid("&c无效的材质名: &f{material}"),
+    properties__need_paper("&c此功能需要 Paper 服务端"),
 
     // 输入提示
     input__category_name("&e请输入分类名称:"),
@@ -116,6 +126,10 @@ public enum ItemManagerMessages implements IHolderAccessor {
     input__nutrition("&e请输入营养值 (整数):"),
     input__saturation("&e请输入饱和度 (小数):"),
     input__eat_time("&e请输入食用时间 (秒):"),
+    input__effect_duration("&e请输入效果持续时间 (秒):"),
+    input__effect_amplifier("&e请输入效果等级 (1-255):"),
+    input__effect_probability("&e请输入触发概率 (0-100):"),
+    input__material("&e请输入材质名 (如 DIAMOND_SWORD):"),
 
     // 操作反馈
     item__added("&a物品已添加到列表"),

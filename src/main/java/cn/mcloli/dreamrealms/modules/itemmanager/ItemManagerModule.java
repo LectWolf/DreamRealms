@@ -17,6 +17,9 @@ import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantSelectMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.FlagEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.FoodEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.FoodEffectDetailMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.FoodEffectEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.FoodEffectSelectMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemPropertiesMenuConfig;
@@ -46,6 +49,9 @@ public class ItemManagerModule extends AbstractModule {
     private FlagEditMenuConfig flagEditMenuConfig;
     private ItemPropertiesMenuConfig itemPropertiesMenuConfig;
     private FoodEditMenuConfig foodEditMenuConfig;
+    private FoodEffectEditMenuConfig foodEffectEditMenuConfig;
+    private FoodEffectSelectMenuConfig foodEffectSelectMenuConfig;
+    private FoodEffectDetailMenuConfig foodEffectDetailMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -114,6 +120,18 @@ public class ItemManagerModule extends AbstractModule {
 
     public FoodEditMenuConfig getFoodEditMenuConfig() {
         return foodEditMenuConfig;
+    }
+
+    public FoodEffectEditMenuConfig getFoodEffectEditMenuConfig() {
+        return foodEffectEditMenuConfig;
+    }
+
+    public FoodEffectSelectMenuConfig getFoodEffectSelectMenuConfig() {
+        return foodEffectSelectMenuConfig;
+    }
+
+    public FoodEffectDetailMenuConfig getFoodEffectDetailMenuConfig() {
+        return foodEffectDetailMenuConfig;
     }
 
     @Override
@@ -201,6 +219,21 @@ public class ItemManagerModule extends AbstractModule {
             foodEditMenuConfig = new FoodEditMenuConfig(plugin, this);
         }
         foodEditMenuConfig.reloadConfig(cfg);
+
+        if (foodEffectEditMenuConfig == null) {
+            foodEffectEditMenuConfig = new FoodEffectEditMenuConfig(plugin, this);
+        }
+        foodEffectEditMenuConfig.reloadConfig(cfg);
+
+        if (foodEffectSelectMenuConfig == null) {
+            foodEffectSelectMenuConfig = new FoodEffectSelectMenuConfig(plugin, this);
+        }
+        foodEffectSelectMenuConfig.reloadConfig(cfg);
+
+        if (foodEffectDetailMenuConfig == null) {
+            foodEffectDetailMenuConfig = new FoodEffectDetailMenuConfig(plugin, this);
+        }
+        foodEffectDetailMenuConfig.reloadConfig(cfg);
 
         // 注册命令到 /dr itemmanager
         if (command == null) {

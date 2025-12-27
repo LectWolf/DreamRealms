@@ -7,7 +7,7 @@ inventory:
   - "XPXXXXXXX"
   - "XDMSUHGFX"
   - "XRCNIE12X"
-  - "X345XXXXX"
+  - "X345TXXXX"
   - "XXXXBXXXX"
 
 # 主图标
@@ -184,3 +184,13 @@ other-items:
     display: "&7伤害抗性"
     lore:
       - "&8开发中..."
+
+  # 材质切换
+  T:
+    material: CRAFTING_TABLE
+    display: "&e切换材质"
+    lore:
+      - "&7当前: &f%material%"
+      - ""
+      - "&e手持物品点击切换"
+      - "&7空手点击输入材质名"

@@ -1,0 +1,38 @@
+# 食物效果选择菜单配置
+
+title: "&0选择效果类型"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XEEEEEEEX"
+  - "XEEEEEEEX"
+  - "XEEEEEEEX"
+  - "XEEEEEEEX"
+  - "X<XXBXX>X"
+
+# 主图标 (由代码动态生成)
+items: {}
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  E:
+    material: POTION
+    display: "&7效果槽位"
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回效果列表"
+
+  "<":
+    material: ARROW
+    display: "&e◀ 上一页"
+
+  ">":
+    material: ARROW
+    display: "&e下一页 ▶"

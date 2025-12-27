@@ -5,6 +5,8 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
+import cn.mcloli.dreamrealms.utils.ItemNameUtil;
+import cn.mcloli.dreamrealms.utils.PaperUtil;
 import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,6 +19,7 @@ import org.bukkit.inventory.meta.components.FoodComponent;
 import org.jetbrains.annotations.NotNull;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 import top.mrxiaom.pluginbase.utils.ItemStackUtil;
+import top.mrxiaom.pluginbase.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +61,7 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
                 case 'P' -> inventory.setItem(i, item.clone());
                 case 'N' -> inventory.setItem(i, getNutritionIcon(food));
                 case 'S' -> inventory.setItem(i, getSaturationIcon(food));
-                case 'T' -> inventory.setItem(i, getEatTimeIcon(food));
+                case 'T' -> inventory.setItem(i, getEatTimeIcon());
                 case 'C' -> inventory.setItem(i, getCanAlwaysEatIcon(food));
                 case 'U' -> inventory.setItem(i, getUsingConvertsToIcon(food));
                 case 'A' -> inventory.setItem(i, getEffectsIcon(food));
@@ -100,14 +103,23 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
         return icon;
     }
 
-    private ItemStack getEatTimeIcon(FoodComponent food) {
+    private ItemStack getEatTimeIcon() {
         ItemStack icon = new ItemStack(Material.CLOCK);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&7食用时间"));
+        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e食用时间"));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7食用时间由消耗组件控制"));
-        lore.add("");
-        lore.add(ColorHelper.parseColor("&8开发中..."));
+        if (PaperUtil.isPaper()) {
+            Float seconds = PaperUtil.getConsumeSeconds(storedItem.getItemStack());
+            if (seconds != null) {
+                lore.add(ColorHelper.parseColor("&7当前: &f" + String.format("%.2f", seconds) + " &7秒"));
+            } else {
+                lore.add(ColorHelper.parseColor("&7当前: &7未设置消耗组件"));
+            }
+            lore.add("");
+            lore.add(ColorHelper.parseColor("&e点击修改"));
+        } else {
+            lore.add(ColorHelper.parseColor("&c需要 Paper 服务端"));
+        }
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
     }
@@ -128,25 +140,45 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
 
     private ItemStack getUsingConvertsToIcon(FoodComponent food) {
         ItemStack icon = new ItemStack(Material.BOWL);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&7使用后转换"));
+        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e使用后转换"));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7吃完后转换为其他物品"));
-        lore.add(ColorHelper.parseColor("&7(如碗、玻璃瓶)"));
-        lore.add("");
-        lore.add(ColorHelper.parseColor("&8开发中..."));
+        if (PaperUtil.isPaper()) {
+            ItemStack convertsTo = PaperUtil.getUsingConvertsTo(food);
+            if (convertsTo != null && !Util.isAir(convertsTo)) {
+                lore.add(ColorHelper.parseColor("&7当前: &f" + ItemNameUtil.getItemName(convertsTo)));
+                icon = convertsTo.clone();
+                ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e使用后转换"));
+            } else {
+                lore.add(ColorHelper.parseColor("&7当前: &7无"));
+            }
+            lore.add("");
+            lore.add(ColorHelper.parseColor("&e手持物品点击设置"));
+            lore.add(ColorHelper.parseColor("&7右键清除"));
+        } else {
+            lore.add(ColorHelper.parseColor("&c需要 Paper 服务端"));
+        }
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
     }
 
     private ItemStack getEffectsIcon(FoodComponent food) {
         ItemStack icon = new ItemStack(Material.POTION);
-        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&7食用效果"));
+        ItemStackUtil.setItemDisplayName(icon, ColorHelper.parseColor("&e食用效果"));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ColorHelper.parseColor("&7吃完后获得的药水效果"));
-        lore.add("");
-        lore.add(ColorHelper.parseColor("&8开发中..."));
+        if (PaperUtil.isPaper()) {
+            int effectCount = PaperUtil.getFoodEffectCount(food);
+            if (effectCount > 0) {
+                lore.add(ColorHelper.parseColor("&7当前效果数: &f" + effectCount));
+            } else {
+                lore.add(ColorHelper.parseColor("&7当前: &7无效果"));
+            }
+            lore.add("");
+            lore.add(ColorHelper.parseColor("&e点击编辑效果"));
+        } else {
+            lore.add(ColorHelper.parseColor("&c需要 Paper 服务端"));
+        }
         ItemStackUtil.setItemLore(icon, lore);
         return icon;
     }
@@ -174,8 +206,10 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
             case 'P' -> handlePreviewClick(click);
             case 'N' -> handleNutritionEdit();
             case 'S' -> handleSaturationEdit();
-            case 'T', 'U', 'A' -> ItemManagerMessages.properties__wip.t(player);
+            case 'T' -> handleEatTimeEdit();
             case 'C' -> handleCanAlwaysEatToggle();
+            case 'U' -> handleUsingConvertsToEdit(click, event);
+            case 'A' -> handleEffectsEdit();
             case 'R' -> handleRemoveFood();
             case 'B' -> {
                 parentGui.refresh();
@@ -282,6 +316,81 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
         module.getDatabase().saveItem(storedItem);
         refreshInventory();
         ItemManagerMessages.properties__food_removed.t(player);
+    }
+    
+    private void handleEatTimeEdit() {
+        if (!PaperUtil.isPaper()) {
+            ItemManagerMessages.properties__need_paper.t(player);
+            return;
+        }
+        
+        player.closeInventory();
+        ChatInputUtil.requestInput(player, ItemManagerMessages.input__eat_time.str(), input -> {
+            if (input != null) {
+                Util.parseFloat(input).ifPresent(value -> {
+                    ItemStack item = storedItem.getItemStack();
+                    if (PaperUtil.setConsumeSeconds(item, Math.max(0, value))) {
+                        module.getDatabase().saveItem(storedItem);
+                        ItemManagerMessages.properties__food_eat_time_set.t(player);
+                    }
+                });
+            }
+            new FoodEditGui(player, config, storedItem, parentGui).open();
+        });
+    }
+    
+    private void handleUsingConvertsToEdit(ClickType click, InventoryClickEvent event) {
+        if (!PaperUtil.isPaper()) {
+            ItemManagerMessages.properties__need_paper.t(player);
+            return;
+        }
+        
+        ItemStack item = storedItem.getItemStack();
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+        
+        if (click == ClickType.RIGHT) {
+            // 右键清除
+            FoodComponent food = getOrCreateFood();
+            if (food != null && PaperUtil.setUsingConvertsTo(food, null)) {
+                meta.setFood(food);
+                item.setItemMeta(meta);
+                module.getDatabase().saveItem(storedItem);
+                refreshInventory();
+                ItemManagerMessages.properties__food_converts_to_cleared.t(player);
+            }
+            return;
+        }
+        
+        // 左键 - 检查玩家手持物品
+        ItemStack cursor = event.getCursor();
+        if (Util.notAir(cursor)) {
+            // 手持物品 - 设置为转换物品
+            FoodComponent food = getOrCreateFood();
+            if (food != null) {
+                ItemStack convertsTo = cursor.clone();
+                convertsTo.setAmount(1);
+                if (PaperUtil.setUsingConvertsTo(food, convertsTo)) {
+                    meta.setFood(food);
+                    item.setItemMeta(meta);
+                    module.getDatabase().saveItem(storedItem);
+                    refreshInventory();
+                    ItemManagerMessages.properties__food_converts_to_set.t(player, 
+                        Pair.of("{item}", ItemNameUtil.getItemName(convertsTo)));
+                }
+            }
+        } else {
+            ItemManagerMessages.properties__food_converts_to_hint.t(player);
+        }
+    }
+    
+    private void handleEffectsEdit() {
+        if (!PaperUtil.isPaper()) {
+            ItemManagerMessages.properties__need_paper.t(player);
+            return;
+        }
+        // 打开效果编辑菜单
+        new FoodEffectEditGui(player, module.getFoodEffectEditMenuConfig(), storedItem, this).open();
     }
 
     public void refresh() {
