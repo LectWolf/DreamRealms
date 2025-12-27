@@ -25,13 +25,19 @@ import java.util.*;
 public class DebugCommand implements ISubCommandHandler {
 
     private final DebugModule module;
-    private final Gson gson;
+    private Gson gson;
+    private Gson gsonCompact;
 
     private static final List<String> SUB_COMMANDS = Lists.newArrayList("item", "entity", "block");
 
     public DebugCommand(DebugModule module) {
         this.module = module;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.gsonCompact = new Gson();
+    }
+
+    private Gson getGson() {
+        return module.getModuleConfig().isPrettyPrint() ? gson : gsonCompact;
     }
 
     @Override
@@ -83,7 +89,7 @@ public class DebugCommand implements ISubCommandHandler {
         }
 
         JsonObject json = serializeItem(item);
-        String jsonStr = gson.toJson(json);
+        String jsonStr = getGson().toJson(json);
 
         player.sendMessage(ColorHelper.parseColor("&a===== 物品序列化信息 ====="));
         player.sendMessage(jsonStr);
@@ -109,7 +115,7 @@ public class DebugCommand implements ISubCommandHandler {
 
         Entity entity = result.getHitEntity();
         JsonObject json = serializeEntity(entity);
-        String jsonStr = gson.toJson(json);
+        String jsonStr = getGson().toJson(json);
 
         player.sendMessage(ColorHelper.parseColor("&a===== 实体序列化信息 ====="));
         player.sendMessage(jsonStr);
@@ -130,7 +136,7 @@ public class DebugCommand implements ISubCommandHandler {
 
         Block block = result.getHitBlock();
         JsonObject json = serializeBlock(block);
-        String jsonStr = gson.toJson(json);
+        String jsonStr = getGson().toJson(json);
 
         player.sendMessage(ColorHelper.parseColor("&a===== 方块序列化信息 ====="));
         player.sendMessage(jsonStr);

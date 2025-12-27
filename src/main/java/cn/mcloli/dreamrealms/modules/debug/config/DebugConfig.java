@@ -15,6 +15,7 @@ public class DebugConfig {
 
     private boolean debug;
     private int rayTraceDistance;
+    private boolean prettyPrint;
 
     public DebugConfig(DreamRealms plugin, DebugModule module) {
         this.plugin = plugin;
@@ -30,6 +31,7 @@ public class DebugConfig {
 
         debug = config.getBoolean("debug", false);
         rayTraceDistance = config.getInt("ray-trace-distance", 10);
+        prettyPrint = config.getBoolean("pretty-print", false);
     }
 
     public boolean isDebug() {
@@ -38,5 +40,9 @@ public class DebugConfig {
 
     public int getRayTraceDistance() {
         return rayTraceDistance;
+    }
+
+    public boolean isPrettyPrint() {
+        return prettyPrint;
     }
 }
