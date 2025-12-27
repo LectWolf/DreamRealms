@@ -4,6 +4,8 @@ import cn.mcloli.dreamrealms.DreamRealms;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -161,6 +164,97 @@ public class ItemLanguage {
 
     public String getCurrentLang() {
         return currentLang;
+    }
+
+    /**
+     * 加载 CraftEngine 翻译文件
+     * @param namespaces 要加载的命名空间列表，空列表或包含 "*" 表示加载所有
+     */
+    public void loadCraftEngineTranslations(List<String> namespaces) {
+        // 获取 plugins 目录 (plugin.getDataFolder() 的父目录)
+        File pluginsDir = plugin.getDataFolder().getParentFile();
+        File ceResourcesDir = new File(pluginsDir, "CraftEngine/resources");
+        if (!ceResourcesDir.exists()) {
+            plugin.warn("CraftEngine resources 目录不存在: " + ceResourcesDir.getPath());
+            return;
+        }
+
+        // 如果 namespaces 为空或包含 "*"，则加载所有命名空间
+        List<String> namespacesToLoad;
+        if (namespaces == null || namespaces.isEmpty() || namespaces.contains("*")) {
+            // 获取所有子目录作为命名空间
+            File[] dirs = ceResourcesDir.listFiles(File::isDirectory);
+            if (dirs == null || dirs.length == 0) {
+                plugin.warn("CraftEngine resources 目录下没有命名空间");
+                return;
+            }
+            namespacesToLoad = new java.util.ArrayList<>();
+            for (File dir : dirs) {
+                namespacesToLoad.add(dir.getName());
+            }
+            plugin.info("自动检测到 " + namespacesToLoad.size() + " 个 CraftEngine 命名空间");
+        } else {
+            namespacesToLoad = namespaces;
+        }
+
+        int totalLoaded = 0;
+        for (String namespace : namespacesToLoad) {
+            File translationsFile = new File(ceResourcesDir, namespace + "/configuration/translations.yml");
+            if (!translationsFile.exists()) {
+                // 不警告，因为不是所有命名空间都有翻译文件
+                continue;
+            }
+
+            int count = loadCraftEngineTranslationFile(translationsFile);
+            if (count > 0) {
+                plugin.info("已加载 CraftEngine 翻译 [" + namespace + "]: " + count + " 条");
+                totalLoaded += count;
+            }
+        }
+
+        if (totalLoaded > 0) {
+            plugin.info("CraftEngine 翻译加载完成，共 " + totalLoaded + " 条");
+        }
+    }
+
+    /**
+     * 加载单个 CraftEngine 翻译文件
+     */
+    private int loadCraftEngineTranslationFile(File file) {
+        try {
+            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+            ConfigurationSection translations = yaml.getConfigurationSection("translations");
+            if (translations == null) {
+                return 0;
+            }
+
+            // 获取当前语言的翻译
+            ConfigurationSection langSection = translations.getConfigurationSection(currentLang);
+            if (langSection == null) {
+                // 尝试 en 作为回退
+                langSection = translations.getConfigurationSection("en");
+            }
+            if (langSection == null) {
+                return 0;
+            }
+
+            int count = 0;
+            // 使用 getKeys(true) 获取所有键（包括嵌套的）
+            for (String key : langSection.getKeys(true)) {
+                // 只获取叶子节点（字符串值）
+                if (langSection.isString(key)) {
+                    String value = langSection.getString(key);
+                    if (value != null && !value.isEmpty()) {
+                        langMap.put(key, value);
+                        count++;
+                    }
+                }
+            }
+            return count;
+        } catch (Exception e) {
+            plugin.warn("加载 CraftEngine 翻译文件失败: " + e.getMessage());
+            return 0;
+        }
     }
 
 

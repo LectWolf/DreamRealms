@@ -28,6 +28,11 @@ public class TimeSyncModule extends AbstractModule {
     public TimeSyncModule(DreamRealms plugin) {
         super(plugin, "timesync");
     }
+    
+    @Override
+    protected String getModuleDescription() {
+        return "时间同步模块 - 同步游戏时间与现实时间";
+    }
 
     public static TimeSyncModule inst() {
         return instanceOf(TimeSyncModule.class);

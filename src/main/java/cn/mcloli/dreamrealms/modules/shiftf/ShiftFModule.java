@@ -21,6 +21,11 @@ public class ShiftFModule extends AbstractModule {
     public static ShiftFModule inst() {
         return instanceOf(ShiftFModule.class);
     }
+    
+    @Override
+    protected String getModuleDescription() {
+        return "Shift+F 模块 - 快捷键执行命令";
+    }
 
     public ShiftFConfig getModuleConfig() {
         return config;

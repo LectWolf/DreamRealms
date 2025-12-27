@@ -103,6 +103,14 @@ public abstract class AbstractModule extends top.mrxiaom.pluginbase.func.Abstrac
         
         return this.enabled;
     }
+    
+    /**
+     * 获取模块描述，子类可重写
+     * @return 模块描述，用于在 config.yml 中添加注释
+     */
+    protected String getModuleDescription() {
+        return null;
+    }
 
     /**
      * 将模块开关添加到 config.yml
@@ -114,14 +122,53 @@ public abstract class AbstractModule extends top.mrxiaom.pluginbase.func.Abstrac
         }
         
         try {
-            YamlConfiguration yaml = YamlConfiguration.loadConfiguration(configFile);
-            String key = "modules." + moduleId;
+            // 读取文件内容
+            java.util.List<String> lines = java.nio.file.Files.readAllLines(configFile.toPath(), java.nio.charset.StandardCharsets.UTF_8);
             
-            if (!yaml.contains(key)) {
-                yaml.set(key, false);
-                yaml.save(configFile);
-                info("已自动添加模块开关到 config.yml (默认禁用)");
+            // 查找 modules: 行的位置
+            int modulesIndex = -1;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i).trim().equals("modules:")) {
+                    modulesIndex = i;
+                    break;
+                }
             }
+            
+            if (modulesIndex == -1) {
+                // 没有 modules 节点，使用 YamlConfiguration 添加
+                YamlConfiguration yaml = YamlConfiguration.loadConfiguration(configFile);
+                yaml.set("modules." + moduleId, false);
+                yaml.save(configFile);
+            } else {
+                // 在 modules: 下添加新模块
+                String description = getModuleDescription();
+                java.util.List<String> newLines = new java.util.ArrayList<>(lines);
+                
+                // 找到插入位置 (modules: 的下一行)
+                int insertIndex = modulesIndex + 1;
+                
+                // 跳过已有的注释和模块
+                while (insertIndex < newLines.size()) {
+                    String line = newLines.get(insertIndex);
+                    if (line.trim().isEmpty() || line.trim().startsWith("#") || line.startsWith("  ")) {
+                        insertIndex++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // 添加模块描述注释和开关
+                if (description != null && !description.isEmpty()) {
+                    newLines.add(insertIndex, "  # " + description);
+                    insertIndex++;
+                }
+                newLines.add(insertIndex, "  " + moduleId + ": false");
+                
+                // 写回文件
+                java.nio.file.Files.write(configFile.toPath(), newLines, java.nio.charset.StandardCharsets.UTF_8);
+            }
+            
+            info("已自动添加模块开关到 config.yml (默认禁用)");
         } catch (IOException e) {
             warn("无法保存模块开关到 config.yml: " + e.getMessage());
         }

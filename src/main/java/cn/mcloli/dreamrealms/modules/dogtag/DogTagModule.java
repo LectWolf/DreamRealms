@@ -21,6 +21,11 @@ public class DogTagModule extends AbstractModule {
     public static DogTagModule inst() {
         return instanceOf(DogTagModule.class);
     }
+    
+    @Override
+    protected String getModuleDescription() {
+        return "狗牌模块 - 玩家死亡时掉落狗牌";
+    }
 
     public DogTagConfig getModuleConfig() {
         return config;

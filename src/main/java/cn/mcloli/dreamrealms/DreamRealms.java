@@ -98,9 +98,17 @@ public class DreamRealms extends BukkitPlugin {
     @Override
     protected void beforeReloadConfig(FileConfiguration config) {
         // 加载物品语言
-        String lang = config.getString("item-language", "zh_cn");
+        String lang = config.getString("item-language.lang", "zh_cn");
         if (itemLanguage != null) {
             itemLanguage.load(lang);
+            
+            // 加载 CraftEngine 翻译 (需要 CraftEngine 插件已加载)
+            if (config.getBoolean("item-language.craftengine.enabled", false)) {
+                if (cn.mcloli.dreamrealms.hook.CraftEngineHook.isAvailable()) {
+                    java.util.List<String> namespaces = config.getStringList("item-language.craftengine.namespaces");
+                    itemLanguage.loadCraftEngineTranslations(namespaces);
+                }
+            }
         }
     }
 

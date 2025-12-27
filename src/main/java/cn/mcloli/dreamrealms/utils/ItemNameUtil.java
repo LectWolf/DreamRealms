@@ -70,44 +70,124 @@ public class ItemNameUtil {
 
     /**
      * 获取 CraftEngine 物品名称
+     * 解析 item-name 中的 <l10n:xxx> 标签并替换为翻译
      */
     @Nullable
     private static String getCraftEngineName(ItemStack item) {
         try {
             CustomItem<ItemStack> customItem = CraftEngineItems.byItemStack(item);
             if (customItem != null) {
-                // 获取物品 ID (如 dreamrealms:my_sword)
+                // 获取物品 ID (如 dreamrealms:normal_key)
                 String itemId = customItem.id().toString();
                 
-                // 尝试从语言文件获取翻译 (格式: item.namespace.item_id)
+                // 尝试从物品的 ItemMeta 获取显示名称 (包含 MiniMessage 格式)
+                ItemStack built = customItem.buildItemStack(1);
+                if (built != null && built.hasItemMeta()) {
+                    ItemMeta meta = built.getItemMeta();
+                    if (meta != null && meta.hasDisplayName()) {
+                        String displayName = meta.getDisplayName();
+                        
+                        // 解析 <l10n:xxx> 标签
+                        String resolved = resolveL10nTags(displayName);
+                        
+                        // 转换 MiniMessage 为传统格式
+                        if (resolved.contains("<") && resolved.contains(">")) {
+                            return LegacyComponentSerializer.legacySection()
+                                    .serialize(AdventureUtil.miniMessage(resolved));
+                        }
+                        return resolved;
+                    }
+                }
+                
+                // 回退：尝试从语言文件获取翻译
                 ItemLanguage lang = DreamRealms.getInstance().getItemLanguage();
                 if (lang != null && lang.isLoaded()) {
-                    // 转换 namespace:item_id 为 item.namespace.item_id
-                    String langKey = "item." + itemId.replace(":", ".").replace("/", ".");
+                    String itemName = itemId.contains(":") ? itemId.substring(itemId.indexOf(":") + 1) : itemId;
+                    String langKey = "item." + itemName;
                     String translated = lang.get(langKey);
                     if (translated != null) {
                         return translated;
                     }
                 }
                 
-                // 尝试从物品的 ItemMeta 获取显示名称
-                ItemStack built = customItem.buildItemStack(1);
-                if (built != null && built.hasItemMeta()) {
-                    ItemMeta meta = built.getItemMeta();
-                    if (meta != null && meta.hasDisplayName()) {
-                        String displayName = meta.getDisplayName();
-                        // 如果是 MiniMessage 格式，转换为传统格式 (§ 颜色代码)
-                        if (displayName.contains("<") && displayName.contains(">")) {
-                            return LegacyComponentSerializer.legacySection()
-                                    .serialize(AdventureUtil.miniMessage(displayName));
-                        }
-                        return displayName;
-                    }
-                }
+                // 最终回退：格式化物品 ID (normal_key -> Normal Key)
+                String itemName = itemId.contains(":") ? itemId.substring(itemId.indexOf(":") + 1) : itemId;
+                return formatItemId(itemName);
             }
         } catch (Throwable ignored) {
         }
         return null;
+    }
+    
+    /**
+     * 解析字符串中的 <l10n:xxx> 标签，替换为翻译
+     */
+    @NotNull
+    private static String resolveL10nTags(String text) {
+        if (text == null || !text.contains("<l10n:")) {
+            return text != null ? text : "";
+        }
+        
+        ItemLanguage lang = DreamRealms.getInstance().getItemLanguage();
+        if (lang == null || !lang.isLoaded()) {
+            return text;
+        }
+        
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        while (i < text.length()) {
+            int start = text.indexOf("<l10n:", i);
+            if (start == -1) {
+                result.append(text.substring(i));
+                break;
+            }
+            
+            // 添加 <l10n: 之前的内容
+            result.append(text.substring(i, start));
+            
+            // 查找结束的 >
+            int end = text.indexOf(">", start);
+            if (end == -1) {
+                result.append(text.substring(start));
+                break;
+            }
+            
+            // 提取翻译 key
+            String key = text.substring(start + 6, end); // 6 = "<l10n:".length()
+            String translated = lang.get(key);
+            if (translated != null) {
+                result.append(translated);
+            } else {
+                // 没有翻译，保留原始标签或使用 key
+                result.append(key);
+            }
+            
+            i = end + 1;
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * 格式化物品 ID (normal_key -> Normal Key)
+     */
+    @NotNull
+    private static String formatItemId(@NotNull String itemId) {
+        String name = itemId.toLowerCase().replace("_", " ");
+        StringBuilder result = new StringBuilder();
+        boolean capitalizeNext = true;
+        for (char c : name.toCharArray()) {
+            if (c == ' ') {
+                result.append(c);
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                result.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
     }
 
     /**

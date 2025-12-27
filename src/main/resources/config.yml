@@ -1,8 +1,17 @@
 # DreamRealms 主配置
 
-# 物品名称语言 (从 Minecraft 官方资源下载)
-# 支持: zh_cn, zh_tw, en_us, ja_jp, ko_kr 等
-item-language: zh_cn
+# 物品名称语言配置
+item-language:
+  # 语言代码 (从 Minecraft 官方资源下载)
+  # 支持: zh_cn, zh_tw, en_us, ja_jp, ko_kr 等
+  lang: zh_cn
+  # CraftEngine 翻译加载
+  craftengine:
+    # 是否启用
+    enabled: true
+    # 要加载的命名空间列表 (对应 plugins/CraftEngine/resources/{namespace}/)
+    # 设置为 [] 或 ['*'] 表示加载所有命名空间
+    namespaces: []
 
 # 模块开关 (默认禁用，模块会自动添加开关到此处)
 modules:

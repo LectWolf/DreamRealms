@@ -33,6 +33,11 @@ public class WelcomeModule extends AbstractModule {
     public WelcomeModule(DreamRealms plugin) {
         super(plugin, "welcome");
     }
+    
+    @Override
+    protected String getModuleDescription() {
+        return "欢迎模块 - 新玩家欢迎引导流程";
+    }
 
     public static WelcomeModule inst() {
         return instanceOf(WelcomeModule.class);
