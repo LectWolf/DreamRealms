@@ -19,6 +19,8 @@ public class DogTagConfig {
     private boolean debug;
     private boolean pvpOnly;
     private String dateFormat;
+    private String bareHandName;
+    private String unknownKillerName;
     private List<String> bypassPermissions;
     private final Map<String, DogTagData> dogTags = new LinkedHashMap<>();
     private final List<DogTagData> sortedDogTags = new ArrayList<>();
@@ -38,6 +40,8 @@ public class DogTagConfig {
         debug = config.getBoolean("debug", false);
         pvpOnly = config.getBoolean("pvp-only", true);
         dateFormat = config.getString("date-format", "yyyy-MM-dd HH:mm:ss");
+        bareHandName = config.getString("bare-hand-name", "🐾 爪子");
+        unknownKillerName = config.getString("unknown-killer-name", "未知");
         bypassPermissions = config.getStringList("bypass-permissions");
 
         // 加载狗牌配置
@@ -69,6 +73,14 @@ public class DogTagConfig {
 
     public String getDateFormat() {
         return dateFormat;
+    }
+
+    public String getBareHandName() {
+        return bareHandName;
+    }
+
+    public String getUnknownKillerName() {
+        return unknownKillerName;
     }
 
     public List<String> getBypassPermissions() {

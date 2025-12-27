@@ -11,6 +11,12 @@ pvp-only: true
 # 日期格式化 (Java SimpleDateFormat)
 date-format: "yyyy-MM-dd HH:mm:ss"
 
+# 空手击杀时显示的武器名称
+bare-hand-name: "爪子"
+
+# 非 PVP 死亡时显示的击杀者名称
+unknown-killer-name: "未知"
+
 # 绕过权限列表 (拥有这些权限的玩家死亡不掉落狗牌)
 bypass-permissions:
   - "dreamrealms.dogtag.bypass"

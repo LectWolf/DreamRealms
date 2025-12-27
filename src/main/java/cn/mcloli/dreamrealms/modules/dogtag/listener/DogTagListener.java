@@ -4,15 +4,19 @@ import cn.mcloli.dreamrealms.hook.PAPI;
 import cn.mcloli.dreamrealms.modules.dogtag.DogTagModule;
 import cn.mcloli.dreamrealms.modules.dogtag.config.DogTagConfig;
 import cn.mcloli.dreamrealms.modules.dogtag.data.DogTagData;
+import cn.mcloli.dreamrealms.utils.EntityNameUtil;
 import cn.mcloli.dreamrealms.utils.ItemBuilder;
 import cn.mcloli.dreamrealms.utils.ItemNameUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -102,9 +106,10 @@ public class DogTagListener implements Listener {
 
         // 准备变量
         Location loc = victim.getLocation();
-        String killerName = killer != null ? killer.getName() : "未知";
+        DogTagConfig config = module.getModuleConfig();
+        String killerName = getKillerName(victim, killer, config);
         String killerLevel = killer != null ? String.valueOf(killer.getLevel()) : "0";
-        String weapon = getWeaponName(killer);
+        String weapon = getWeaponName(killer, config);
         String deathTime = new SimpleDateFormat(dateFormat).format(new Date());
 
         // 替换变量
@@ -155,15 +160,35 @@ public class DogTagListener implements Listener {
     }
 
     /**
+     * 获取击杀者名称
+     */
+    private String getKillerName(Player victim, @Nullable Player killer, DogTagConfig config) {
+        // 如果是玩家击杀
+        if (killer != null) {
+            return killer.getName();
+        }
+        
+        // 尝试获取最后伤害来源实体
+        EntityDamageEvent lastDamage = victim.getLastDamageCause();
+        if (lastDamage instanceof EntityDamageByEntityEvent entityDamageEvent) {
+            Entity damager = entityDamageEvent.getDamager();
+            return EntityNameUtil.getEntityName(damager);
+        }
+        
+        // 回退到配置的未知击杀者名称
+        return config.getUnknownKillerName();
+    }
+
+    /**
      * 获取武器名称
      */
-    private String getWeaponName(@Nullable Player killer) {
+    private String getWeaponName(@Nullable Player killer, DogTagConfig config) {
         if (killer == null) {
-            return "无";
+            return config.getBareHandName();
         }
         ItemStack weapon = killer.getInventory().getItemInMainHand();
         if (weapon.getType() == Material.AIR) {
-            return "拳头";
+            return config.getBareHandName();
         }
         return ItemNameUtil.getItemName(weapon);
     }
