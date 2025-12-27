@@ -36,6 +36,7 @@ repositories {
     maven("https://repo.momirealms.net/releases/")
     maven("https://repo.momirealms.net/snapshots/")
     maven("https://libraries.minecraft.net/") // Mojang authlib
+    maven("https://repo.hibiscusmc.com/releases/") // HMCWraps
 }
 
 dependencies {
@@ -50,6 +51,11 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-core:0.0.66.10-SNAPSHOT")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.66.10-SNAPSHOT")
     compileOnly("com.github.LoneDev6:api-itemsadder:3.6.1")
+    
+    // OwnerBind 软依赖
+    compileOnly("com.github.MrXiaoM:SweetMail:1.1.2")
+    compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.1.3.0")
+    compileOnly(files("libs/GlobalMarketPlus-v1.2.12.1.jar")) // GlobalMarketPlus 本地依赖
 
 
     base.library("net.kyori:adventure-api:4.22.0")

@@ -9,6 +9,9 @@ softdepend:
   - PlayerPoints
   - CraftEngine
   - ItemsAdder
+  - SweetMail
+  - GlobalMarketPlus
+  - zAuctionHouse
 authors: [ LectWolf ]
 folia-supported: true
 commands:

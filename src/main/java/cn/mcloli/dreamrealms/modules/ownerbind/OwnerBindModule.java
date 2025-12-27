@@ -1,0 +1,409 @@
+package cn.mcloli.dreamrealms.modules.ownerbind;
+
+import cn.mcloli.dreamrealms.DreamRealms;
+import cn.mcloli.dreamrealms.command.CommandMain;
+import cn.mcloli.dreamrealms.func.AbstractModule;
+import cn.mcloli.dreamrealms.modules.ownerbind.command.OwnerBindCommand;
+import cn.mcloli.dreamrealms.modules.ownerbind.config.OwnerBindConfig;
+import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
+import cn.mcloli.dreamrealms.modules.ownerbind.listener.OwnerBindListener;
+import cn.mcloli.dreamrealms.modules.ownerbind.listener.GlobalMarketPlusListener;
+import cn.mcloli.dreamrealms.modules.ownerbind.listener.ZAuctionHouseListener;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import top.mrxiaom.pluginbase.func.AutoRegister;
+import top.mrxiaom.pluginbase.utils.ColorHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+@AutoRegister
+public class OwnerBindModule extends AbstractModule {
+
+    private OwnerBindConfig config;
+    private OwnerBindMessages.Holder lang;
+    private OwnerBindCommand command;
+    private OwnerBindListener listener;
+    private GlobalMarketPlusListener globalMarketPlusListener;
+    private ZAuctionHouseListener zAuctionHouseListener;
+
+    // NBT Keys
+    private NamespacedKey ownerKey;        // 存储绑定玩家名
+    private NamespacedKey bindableKey;     // 标记物品可绑定
+
+    public OwnerBindModule(DreamRealms plugin) {
+        super(plugin, "ownerbind");
+        ownerKey = new NamespacedKey(plugin, "ownerbind_owner");
+        bindableKey = new NamespacedKey(plugin, "ownerbind_bindable");
+    }
+
+    public static OwnerBindModule inst() {
+        return instanceOf(OwnerBindModule.class);
+    }
+
+    @Override
+    protected String getModuleDescription() {
+        return "物主绑定模块 - 物品绑定后禁止转手";
+    }
+
+    public OwnerBindConfig getModuleConfig() {
+        return config;
+    }
+
+    public NamespacedKey getOwnerKey() {
+        return ownerKey;
+    }
+
+    public NamespacedKey getBindableKey() {
+        return bindableKey;
+    }
+
+    @Override
+    public void reloadConfig(MemoryConfiguration cfg) {
+        if (!checkModuleEnabled(cfg)) {
+            info("模块已禁用");
+            disableModule();
+            return;
+        }
+
+        if (lang == null) {
+            lang = OwnerBindMessages.register();
+        }
+
+        if (config == null) {
+            config = new OwnerBindConfig(plugin, this);
+        }
+        config.reload();
+        setDebug(config.isDebug());
+
+        // 注册命令
+        if (command == null) {
+            command = new OwnerBindCommand(this);
+            CommandMain.inst().registerHandler(command);
+        }
+
+        enableModule();
+        info("模块已加载");
+    }
+
+    private void enableModule() {
+        if (listener == null) {
+            listener = new OwnerBindListener(this);
+            registerEvents(listener);
+        }
+
+        // GlobalMarketPlus Hook
+        if (config.isHookGlobalMarketPlus() && Bukkit.getPluginManager().isPluginEnabled("GlobalMarketPlus")) {
+            if (globalMarketPlusListener == null) {
+                globalMarketPlusListener = new GlobalMarketPlusListener(this);
+                registerEvents(globalMarketPlusListener);
+                info("已挂钩 GlobalMarketPlus");
+            }
+        } else if (globalMarketPlusListener != null) {
+            HandlerList.unregisterAll(globalMarketPlusListener);
+            globalMarketPlusListener = null;
+        }
+
+        // ZAuctionHouse Hook
+        if (config.isHookZAuctionHouse() && Bukkit.getPluginManager().isPluginEnabled("zAuctionHouse")) {
+            if (zAuctionHouseListener == null) {
+                zAuctionHouseListener = new ZAuctionHouseListener(this);
+                registerEvents(zAuctionHouseListener);
+                info("已挂钩 zAuctionHouse");
+            }
+        } else if (zAuctionHouseListener != null) {
+            HandlerList.unregisterAll(zAuctionHouseListener);
+            zAuctionHouseListener = null;
+        }
+    }
+
+    private void disableModule() {
+        if (listener != null) {
+            HandlerList.unregisterAll(listener);
+            listener = null;
+        }
+        if (globalMarketPlusListener != null) {
+            HandlerList.unregisterAll(globalMarketPlusListener);
+            globalMarketPlusListener = null;
+        }
+        if (zAuctionHouseListener != null) {
+            HandlerList.unregisterAll(zAuctionHouseListener);
+            zAuctionHouseListener = null;
+        }
+    }
+
+    // ================ 物品状态检查 ================
+
+    /**
+     * 检查物品是否为空
+     */
+    public boolean isEmptyItem(ItemStack item) {
+        return item == null || item.getType() == Material.AIR;
+    }
+
+    /**
+     * 检查物品是否有任何绑定信息 (已绑定或可绑定)
+     */
+    public boolean hasAnyBindInfo(ItemStack item) {
+        return hasBoundOwner(item) || isBindable(item);
+    }
+
+    /**
+     * 检查物品是否已绑定玩家 (通过NBT)
+     */
+    public boolean hasBoundOwner(ItemStack item) {
+        return getBoundOwner(item) != null;
+    }
+
+    /**
+     * 获取绑定的玩家名
+     */
+    public String getBoundOwner(ItemStack item) {
+        if (isEmptyItem(item) || !item.hasItemMeta()) return null;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return null;
+        return meta.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+    }
+
+    /**
+     * 检查物品是否可绑定 (通过NBT标记或Lore)
+     */
+    public boolean isBindable(ItemStack item) {
+        if (isEmptyItem(item)) return false;
+        
+        // 已绑定的不算可绑定
+        if (hasBoundOwner(item)) return false;
+
+        // 检查NBT标记
+        if (config.isNbtBindEnabled() && hasBindableNbt(item)) {
+            return true;
+        }
+
+        // 检查Lore
+        if (config.isLoreBindEnabled() && hasBindableLore(item)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 检查是否有可绑定NBT标记
+     */
+    public boolean hasBindableNbt(ItemStack item) {
+        if (isEmptyItem(item) || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        return Boolean.TRUE.equals(meta.getPersistentDataContainer().get(bindableKey, PersistentDataType.BOOLEAN));
+    }
+
+    /**
+     * 检查是否有可绑定Lore
+     */
+    public boolean hasBindableLore(ItemStack item) {
+        if (isEmptyItem(item) || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasLore()) return false;
+        List<String> lore = meta.getLore();
+        if (lore == null || lore.isEmpty()) return false;
+
+        for (String bindLore : config.getBindableLores()) {
+            String targetLore = ColorHelper.parseColor(bindLore);
+            for (String line : lore) {
+                if (ColorHelper.parseColor(line).contains(targetLore)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 检查是否有已绑定Lore
+     */
+    public boolean hasBoundLore(ItemStack item) {
+        if (isEmptyItem(item) || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasLore()) return false;
+        List<String> lore = meta.getLore();
+        if (lore == null || lore.isEmpty()) return false;
+
+        String boundPattern = ColorHelper.parseColor(config.getBoundLore().replace("%player%", ""));
+        for (String line : lore) {
+            if (ColorHelper.parseColor(line).contains(boundPattern)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 检查玩家是否是物品的主人
+     */
+    public boolean isOwner(Player player, ItemStack item) {
+        String boundOwner = getBoundOwner(item);
+        return boundOwner == null || boundOwner.equals(player.getName());
+    }
+
+    // ================ 物品操作 ================
+
+    /**
+     * 标记物品为可绑定 (添加NBT和Lore)
+     */
+    public OwnerBindResult markBindable(ItemStack item) {
+        if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
+        if (hasBoundOwner(item)) return OwnerBindResult.ALREADY_BOUND;
+        if (isBindable(item)) return OwnerBindResult.ALREADY_BOUND; // 已经是可绑定状态
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
+        if (meta == null) return OwnerBindResult.INVALID_ITEM;
+
+        // 添加NBT标记
+        meta.getPersistentDataContainer().set(bindableKey, PersistentDataType.BOOLEAN, true);
+
+        // 添加Lore (使用配置的第一个可绑定Lore)
+        List<String> bindableLores = config.getBindableLores();
+        if (!bindableLores.isEmpty()) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+            lore.add(ColorHelper.parseColor(bindableLores.get(0)));
+            meta.setLore(lore);
+        }
+
+        item.setItemMeta(meta);
+        debug("物品已标记为可绑定");
+        return OwnerBindResult.SUCCESS;
+    }
+
+    /**
+     * 绑定物品给玩家
+     */
+    public OwnerBindResult bindToPlayer(ItemStack item, String playerName) {
+        if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
+        if (hasBoundOwner(item)) return OwnerBindResult.ALREADY_BOUND;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+        }
+        if (meta == null) return OwnerBindResult.INVALID_ITEM;
+
+        // 设置NBT
+        meta.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING, playerName);
+        // 移除可绑定标记
+        meta.getPersistentDataContainer().remove(bindableKey);
+
+        // 更新Lore
+        List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+        
+        // 移除可绑定Lore，添加已绑定Lore
+        String boundLoreLine = ColorHelper.parseColor(config.getBoundLore().replace("%player%", playerName));
+        boolean replaced = false;
+
+        for (int i = 0; i < lore.size(); i++) {
+            String line = lore.get(i);
+            for (String bindLore : config.getBindableLores()) {
+                if (ColorHelper.parseColor(line).contains(ColorHelper.parseColor(bindLore))) {
+                    lore.set(i, boundLoreLine);
+                    replaced = true;
+                    break;
+                }
+            }
+            if (replaced) break;
+        }
+
+        if (!replaced) {
+            lore.add(boundLoreLine);
+        }
+
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+
+        debug("物品已绑定给玩家: " + playerName);
+        return OwnerBindResult.SUCCESS;
+    }
+
+    /**
+     * 解除绑定
+     */
+    public OwnerBindResult unbind(ItemStack item) {
+        if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
+        if (!hasBoundOwner(item) && !isBindable(item)) return OwnerBindResult.NOT_BOUND;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return OwnerBindResult.INVALID_ITEM;
+
+        // 移除NBT
+        meta.getPersistentDataContainer().remove(ownerKey);
+        meta.getPersistentDataContainer().remove(bindableKey);
+
+        // 移除绑定相关Lore
+        if (meta.hasLore()) {
+            List<String> lore = new ArrayList<>(Objects.requireNonNull(meta.getLore()));
+            String boundPattern = ColorHelper.parseColor(config.getBoundLore().replace("%player%", ""));
+            
+            lore.removeIf(line -> {
+                String cleanLine = ColorHelper.parseColor(line);
+                if (cleanLine.contains(boundPattern)) return true;
+                for (String bindLore : config.getBindableLores()) {
+                    if (cleanLine.contains(ColorHelper.parseColor(bindLore))) return true;
+                }
+                return false;
+            });
+            
+            meta.setLore(lore);
+        }
+
+        item.setItemMeta(meta);
+        return OwnerBindResult.SUCCESS;
+    }
+
+    /**
+     * 修复物品Lore (确保NBT和Lore一致)
+     */
+    public boolean repairItemLore(ItemStack item) {
+        if (!config.isRepairMode() || isEmptyItem(item) || !item.hasItemMeta()) return false;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+
+        String boundOwner = getBoundOwner(item);
+        boolean changed = false;
+
+        // 如果有NBT绑定但没有对应Lore
+        if (boundOwner != null && !hasBoundLore(item)) {
+            List<String> lore = meta.hasLore() ? new ArrayList<>(Objects.requireNonNull(meta.getLore())) : new ArrayList<>();
+            
+            // 移除可绑定Lore
+            lore.removeIf(line -> {
+                for (String bindLore : config.getBindableLores()) {
+                    if (ColorHelper.parseColor(line).contains(ColorHelper.parseColor(bindLore))) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            String boundLoreLine = ColorHelper.parseColor(config.getBoundLore().replace("%player%", boundOwner));
+            lore.add(boundLoreLine);
+            meta.setLore(lore);
+            changed = true;
+        }
+
+        if (changed) {
+            item.setItemMeta(meta);
+            debug("修复了物品Lore");
+        }
+        return changed;
+    }
+}

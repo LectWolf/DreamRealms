@@ -1,5 +1,20 @@
 # 更新日志
 
+## v1.0.4
+
+### 新增
+
+- OwnerBind 物主绑定模块
+  - 通过 Lore 或 NBT 识别可绑定物品
+  - 自动绑定功能 (丢弃/切换/拾取时)
+  - 非物主操作时自动丢出或邮件归还
+  - 阻止 Q 键丢出绑定物品 (可配置)
+  - 阻止从容器拿取他人绑定物品 (可配置)
+  - 挂钩 SweetMail 邮件归还
+  - 挂钩 GlobalMarketPlus/zAuctionHouse 禁止上架
+  - 命令: mark/bind/unbind/info/reload
+  - 权限: bypass/nobind/admin
+
 ## v1.0.3
 
 ### 新增

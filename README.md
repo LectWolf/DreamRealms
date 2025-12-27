@@ -2,21 +2,36 @@
 
 为次梦领域 Minecraft 服务器开发的专属插件，基于 [PluginBase](https://github.com/MrXiaoM/PluginBase) 框架。
 
+## 支持版本
+
+- **Minecraft**: 1.21+
+- **Java**: 21+
+- **服务端核心**: Spigot / Paper / Folia
+
 ## 功能模块
 
-| 模块     | 说明                     | 状态 |
-| -------- | ------------------------ | ---- |
-| TimeSync | 服务器时间与现实时间同步 | ✅   |
+| 模块      | 说明                     | 状态 |
+| --------- | ------------------------ | ---- |
+| TimeSync  | 服务器时间与现实时间同步 | ✅   |
+| Welcome   | 新玩家欢迎系统           | ✅   |
+| DogTag    | 死亡狗牌掉落系统         | ✅   |
+| ShiftF    | Shift+F 快捷键执行命令   | ✅   |
+| OwnerBind | 物主绑定系统             | ✅   |
 
 ## 文档
 
 详细文档请查看 [在线文档](https://lectwolf.github.io/DreamRealms/)
 
-## 依赖
+## 软依赖
 
-- Java 21+
-- Spigot/Paper 1.21+
-- Vault (可选，经济系统)
+- Vault - 经济系统
+- PlaceholderAPI - 变量支持
+- PlayerPoints - 点券系统
+- CraftEngine - 自定义物品
+- ItemsAdder - 自定义物品
+- SweetMail - 邮件系统
+- GlobalMarketPlus - 全球市场
+- zAuctionHouse - 拍卖行
 
 ## 安装
 
@@ -27,10 +42,12 @@
 
 ## 命令
 
-| 命令           | 说明         | 权限                   |
-| -------------- | ------------ | ---------------------- |
-| `/dr reload`   | 重载配置     | `dreamrealms.admin`    |
-| `/dr timesync` | 时间同步模块 | `dreamrealms.timesync` |
+| 命令           | 说明         | 权限                    |
+| -------------- | ------------ | ----------------------- |
+| `/dr reload`   | 重载配置     | `dreamrealms.admin`     |
+| `/dr timesync` | 时间同步模块 | `dreamrealms.timesync`  |
+| `/dr welcome`  | 欢迎模块     | `dreamrealms.welcome`   |
+| `/dr ob`       | 物主绑定模块 | `dreamrealms.ownerbind` |
 
 ## 构建
 
@@ -38,7 +55,7 @@
 ./gradlew build
 ```
 
-产物位于 `build/libs/`
+产物位于 `out/`
 
 ## 许可证
 
