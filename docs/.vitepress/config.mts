@@ -36,6 +36,7 @@ export default defineConfig({
             { text: "TimeSync 时间同步", link: "/modules/timesync" },
             { text: "Welcome 欢迎系统", link: "/modules/welcome" },
             { text: "DogTag 狗牌系统", link: "/modules/dogtag" },
+            { text: "ShiftF 快捷键", link: "/modules/shiftf" },
           ],
         },
       ],
