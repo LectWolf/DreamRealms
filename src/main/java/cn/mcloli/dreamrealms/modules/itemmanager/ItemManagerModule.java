@@ -2,8 +2,10 @@ package cn.mcloli.dreamrealms.modules.itemmanager;
 
 import cn.mcloli.dreamrealms.DreamRealms;
 import cn.mcloli.dreamrealms.command.CommandMain;
+import cn.mcloli.dreamrealms.command.ModuleCommandManager;
 import cn.mcloli.dreamrealms.func.AbstractModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.command.ItemManagerCommand;
+import cn.mcloli.dreamrealms.modules.itemmanager.command.ItemManagerCommands;
 import cn.mcloli.dreamrealms.modules.itemmanager.config.ItemManagerConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.database.ItemManagerDatabase;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
@@ -20,6 +22,7 @@ public class ItemManagerModule extends AbstractModule {
     private ItemManagerConfig config;
     private ItemManagerDatabase database;
     private ItemManagerCommand command;
+    private ModuleCommandManager commandManager;
     private ItemManagerMessages.Holder lang;
 
     // 菜单配置
@@ -111,10 +114,21 @@ public class ItemManagerModule extends AbstractModule {
         }
         loreEditMenuConfig.reloadConfig(cfg);
 
-        // 注册命令
+        // 注册命令到 /dr itemmanager
         if (command == null) {
             command = new ItemManagerCommand(this);
             CommandMain.inst().registerHandler(command);
+        }
+
+        // 注册独立命令 /itemmanager 和 /im (动态注册，无需 plugin.yml)
+        if (commandManager == null) {
+            commandManager = ItemManagerCommands.create(this);
+            cn.mcloli.dreamrealms.utils.CommandRegister.register(
+                    "itemmanager",
+                    new String[]{"im"},
+                    "物品管理器",
+                    commandManager
+            );
         }
 
         info("模块已加载");

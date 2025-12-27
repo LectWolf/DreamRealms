@@ -4,9 +4,10 @@ title: "&0编辑物品"
 
 inventory:
   - "XXXXXXXXX"
-  - "XPXXSXXCX"
+  - "XPOXSXXXX"
   - "XNLEAFDXX"
   - "XXXIGXXXX"
+  - "XXXXXXXXX"
   - "XXXXBXXXX"
 
 # 主图标
@@ -15,6 +16,15 @@ items:
   P:
     material: STONE
     display: "&f预览"
+    lore:
+      - "&e左键获取物品"
+
+  # 查看命令按钮
+  O:
+    material: COMMAND_BLOCK
+    display: "&b查看获取命令"
+    lore:
+      - "&7点击查看获取命令"
 
   # 序列化按钮
   S:
@@ -82,13 +92,6 @@ items:
     display: "&e设置分类"
     lore:
       - "&7将物品移动到其他分类"
-
-  # 复制命令
-  C:
-    material: COMMAND_BLOCK
-    display: "&b复制获取命令"
-    lore:
-      - "&7点击复制获取命令到剪贴板"
 
 # 其他图标
 other-items:

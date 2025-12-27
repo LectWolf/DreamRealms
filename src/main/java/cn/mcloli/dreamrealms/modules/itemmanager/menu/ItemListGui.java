@@ -88,14 +88,16 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
                     if (page > 0) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyPrevIcon(player));
                     }
                 }
                 case '>' -> {
                     if (hasNextPage()) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyNextIcon(player));
                     }
                 }
                 default -> config.applyIcon(this, inventory, player, i);
@@ -203,8 +205,8 @@ public class ItemListGui extends AbstractInteractiveGui<ItemListMenuConfig> {
             ItemStack item = storedItem.getItemStack().clone();
             item.setAmount(1);
             Util.giveItem(player, item);
-        } else if (click == ClickType.DROP) {
-            // Q键 - 删除
+        } else if (click == ClickType.CONTROL_DROP) {
+            // Shift+Q - 删除
             module.getDatabase().deleteItem(storedItem.getGuid());
             items.remove(index);
             refreshInventory();

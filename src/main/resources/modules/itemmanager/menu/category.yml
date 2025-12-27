@@ -7,7 +7,8 @@ inventory:
   - "XCCCCCCCX"
   - "XCCCCCCCX"
   - "XCCCCCCCX"
-  - "X<XUAX>PX"
+  - "XCCCCCCCX"
+  - "X<XUAX>XX"
 
 # 主图标
 items:
@@ -18,8 +19,9 @@ items:
     lore:
       - "&7物品数量: &f%count%"
       - ""
-      - "&e左键编辑 &7| &c右键删除"
+      - "&e左键编辑"
       - "&7Shift+左键前移 &7| &7Shift+右键后移"
+      - "&cCtrl+Q删除"
 
   # 添加分类按钮
   A:
@@ -41,17 +43,19 @@ other-items:
     material: BLACK_STAINED_GLASS_PANE
     display: " "
 
-  P:
-    material: PLAYER_HEAD
-    skull-owner: "%player_name%"
-    display: "&e%player_name%"
-    lore:
-      - "&7物品管理器"
-
   "<":
     material: ARROW
-    display: "&7上一页"
+    display: "&e◀ 上一页"
 
   ">":
     material: ARROW
-    display: "&7下一页"
+    display: "&e下一页 ▶"
+
+  # 不存在时显示的图标
+  "<_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "

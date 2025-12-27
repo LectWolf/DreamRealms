@@ -33,6 +33,24 @@ public class ItemListMenuConfig extends AbstractMenuConfig<IGui> {
         return addItemIcon;
     }
 
+    /**
+     * 获取空的上一页图标
+     */
+    @Nullable
+    public ItemStack getEmptyPrevIcon(Player player) {
+        Icon icon = otherIcons.get("<_empty");
+        return icon != null ? icon.generateIcon(player) : null;
+    }
+
+    /**
+     * 获取空的下一页图标
+     */
+    @Nullable
+    public ItemStack getEmptyNextIcon(Player player) {
+        Icon icon = otherIcons.get(">_empty");
+        return icon != null ? icon.generateIcon(player) : null;
+    }
+
     @Override
     protected void clearMainIcons() {
         itemSlotIcon = null;

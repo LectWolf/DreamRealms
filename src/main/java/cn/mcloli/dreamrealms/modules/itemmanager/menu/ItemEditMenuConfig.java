@@ -18,6 +18,7 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
 
     // 主图标
     private Icon previewIcon;
+    private Icon commandIcon;
     private Icon serializeIcon;
     private Icon nameIcon;
     private Icon loreIcon;
@@ -27,7 +28,6 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
     private Icon durabilityIcon;
     private Icon identifierIcon;
     private Icon categoryIcon;
-    private Icon copyCommandIcon;
 
     public ItemEditMenuConfig(DreamRealms plugin, ItemManagerModule module) {
         super(plugin, module.getModuleMenuPath() + "/item_edit.yml");
@@ -36,6 +36,10 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
 
     public Icon getPreviewIcon() {
         return previewIcon;
+    }
+
+    public Icon getCommandIcon() {
+        return commandIcon;
     }
 
     public Icon getSerializeIcon() {
@@ -74,13 +78,10 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
         return categoryIcon;
     }
 
-    public Icon getCopyCommandIcon() {
-        return copyCommandIcon;
-    }
-
     @Override
     protected void clearMainIcons() {
         previewIcon = null;
+        commandIcon = null;
         serializeIcon = null;
         nameIcon = null;
         loreIcon = null;
@@ -90,13 +91,13 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
         durabilityIcon = null;
         identifierIcon = null;
         categoryIcon = null;
-        copyCommandIcon = null;
     }
 
     @Override
     protected boolean loadMainIcon(ConfigurationSection section, String key, Icon icon) {
         switch (key) {
             case "P" -> previewIcon = icon;
+            case "O" -> commandIcon = icon;
             case "S" -> serializeIcon = icon;
             case "N" -> nameIcon = icon;
             case "L" -> loreIcon = icon;
@@ -106,7 +107,6 @@ public class ItemEditMenuConfig extends AbstractMenuConfig<IGui> {
             case "D" -> durabilityIcon = icon;
             case "I" -> identifierIcon = icon;
             case "G" -> categoryIcon = icon;
-            case "C" -> copyCommandIcon = icon;
             default -> {
                 return false;
             }

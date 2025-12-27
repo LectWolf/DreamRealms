@@ -18,6 +18,3 @@ commands:
   dreamrealms:
     description: 'The main command of DreamRealms'
     aliases: [ dr ]
-  example:
-    description: 'Example module command'
-    aliases: [ ex ]

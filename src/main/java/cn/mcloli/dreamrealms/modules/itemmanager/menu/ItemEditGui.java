@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
+import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -56,6 +57,13 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
                     // 预览物品
                     inventory.setItem(i, storedItem.getItemStack().clone());
                 }
+                case 'O' -> {
+                    // 查看命令按钮
+                    AbstractMenuConfig.Icon icon = config.getCommandIcon();
+                    if (icon != null) {
+                        inventory.setItem(i, icon.generateIcon(player));
+                    }
+                }
                 case 'S' -> {
                     // 序列化按钮 - 仅非序列化物品显示
                     if (!storedItem.isSerialized()) {
@@ -89,13 +97,6 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
                         inventory.setItem(i, icon.generateIcon(player));
                     }
                 }
-                case 'C' -> {
-                    // 复制命令按钮
-                    AbstractMenuConfig.Icon icon = config.getCopyCommandIcon();
-                    if (icon != null) {
-                        inventory.setItem(i, icon.generateIcon(player));
-                    }
-                }
                 default -> config.applyIcon(this, inventory, player, i);
             }
         }
@@ -121,6 +122,8 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
         module.debug("ItemEditGui click: key=" + key + ", click=" + click);
 
         switch (key) {
+            case 'P' -> handlePreviewClick(click);
+            case 'O' -> handleCommandClick();
             case 'S' -> handleSerialize();
             case 'N' -> handleEditName();
             case 'L' -> handleEditLore();
@@ -130,7 +133,6 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
             case 'D' -> handleEditDurability();
             case 'I' -> handleEditIdentifier();
             case 'G' -> handleEditCategory();
-            case 'C' -> handleCopyCommand();
             case 'B' -> {
                 // 返回
                 parentGui.refresh();
@@ -138,6 +140,28 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
             }
             default -> config.handleOtherIconClick(player, click, key);
         }
+    }
+
+    private void handlePreviewClick(ClickType click) {
+        if (click == ClickType.LEFT) {
+            // 左键 - 获取物品
+            ItemStack item = storedItem.getItemStack().clone();
+            item.setAmount(1);
+            Util.giveItem(player, item);
+        }
+    }
+
+    private void handleCommandClick() {
+        // 关闭菜单后显示获取命令
+        player.closeInventory();
+        
+        String identifier = storedItem.getIdentifier() != null 
+                ? storedItem.getIdentifier() 
+                : storedItem.getGuid().toString();
+        String command = "/dr im give " + player.getName() + " " + identifier + " 1";
+
+        // 发送带按钮的消息
+        ItemManagerMessages.chat__cmd_buttons.tm(player, Pair.of("{command}", command));
     }
 
     private void handleSerialize() {
@@ -158,7 +182,7 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
         ItemStack item = storedItem.getItemStack();
         String currentName = ItemStackUtil.getItemDisplayName(item);
         if (currentName != null && !currentName.isEmpty()) {
-            ItemManagerMessages.edit__current_name.tm(player, Pair.of("{name}", currentName));
+            ItemManagerMessages.edit__current_name.t(player, Pair.of("{name}", currentName));
         }
         
         ChatInputUtil.requestInput(player, ItemManagerMessages.input__item_name.str(), input -> {
@@ -214,20 +238,6 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
     private void handleEditCategory() {
         // 打开分类选择菜单
         new CategorySelectGui(player, module.getCategoryMenuConfig(), storedItem, this).open();
-    }
-
-    private void handleCopyCommand() {
-        // 优先使用标识名，否则使用完整 GUID
-        String identifier = storedItem.getIdentifier() != null 
-                ? storedItem.getIdentifier() 
-                : storedItem.getGuid().toString();
-        String command = "/dr im give " + player.getName() + " " + identifier + " 1";
-
-        // 使用 MiniMessage 发送可点击复制的消息
-        ItemManagerMessages.chat__copy_cmd.tm(player,
-                Pair.of("{command}", command));
-
-        player.closeInventory();
     }
 
     /**

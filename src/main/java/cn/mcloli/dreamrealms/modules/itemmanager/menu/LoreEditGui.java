@@ -87,14 +87,16 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
                     if (page > 0) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyPrevIcon(player));
                     }
                 }
                 case '>' -> {
                     if (hasNextPage()) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyNextIcon(player));
                     }
                 }
                 default -> config.applyIcon(this, inventory, player, i);
@@ -202,7 +204,7 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         
         // 显示当前内容供复制
         String currentLine = loreList.get(index);
-        ItemManagerMessages.lore__current.tm(player, 
+        ItemManagerMessages.lore__current.t(player, 
                 Pair.of("{index}", String.valueOf(index + 1)),
                 Pair.of("{content}", currentLine));
         

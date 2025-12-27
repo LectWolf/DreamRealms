@@ -94,7 +94,8 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
                     if (page > 0) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyPrevIcon(player));
                     }
                 }
                 case '>' -> {
@@ -102,7 +103,8 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
                     if (hasNextPage()) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyNextIcon(player));
                     }
                 }
                 default -> config.applyIcon(this, inventory, player, i);
@@ -146,6 +148,7 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
         lore.add("");
         lore.add(ColorHelper.parseColor(ItemManagerMessages.gui__category_edit.str()));
         lore.add(ColorHelper.parseColor(ItemManagerMessages.gui__category_sort.str()));
+        lore.add(ColorHelper.parseColor(ItemManagerMessages.gui__category_delete.str()));
         ItemStackUtil.setItemLore(item, lore);
 
         return item;
@@ -183,8 +186,8 @@ public class CategoryGui extends AbstractInteractiveGui<CategoryMenuConfig> {
         if (click == ClickType.LEFT) {
             // 左键 - 打开分类
             new ItemListGui(player, module.getItemListMenuConfig(), category).open();
-        } else if (click == ClickType.RIGHT) {
-            // 右键 - 删除分类
+        } else if (click == ClickType.CONTROL_DROP) {
+            // Shift+Q - 删除分类
             module.getDatabase().deleteCategory(category.getId());
             categories.remove(index);
             refreshInventory();

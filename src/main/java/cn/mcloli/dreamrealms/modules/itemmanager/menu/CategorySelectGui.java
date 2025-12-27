@@ -98,14 +98,16 @@ public class CategorySelectGui extends AbstractInteractiveGui<CategoryMenuConfig
                     if (page > 0) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyPrevIcon(player));
                     }
                 }
                 case '>' -> {
                     if (hasNextPage()) {
                         config.applyIcon(this, inventory, player, i);
                     } else {
-                        inventory.setItem(i, null);
+                        // 显示空图标
+                        inventory.setItem(i, config.getEmptyNextIcon(player));
                     }
                 }
                 default -> config.applyIcon(this, inventory, player, i);

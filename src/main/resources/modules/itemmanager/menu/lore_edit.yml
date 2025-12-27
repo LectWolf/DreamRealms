@@ -7,6 +7,7 @@ inventory:
   - "XLLLLLLLX"
   - "XLLLLLLLX"
   - "XLLLLLLLX"
+  - "XLLLLLLLX"
   - "X<XBA>XXX"
 
 # 主图标
@@ -37,8 +38,17 @@ other-items:
 
   "<":
     material: ARROW
-    display: "&7上一页"
+    display: "&e◀ 上一页"
 
   ">":
     material: ARROW
-    display: "&7下一页"
+    display: "&e下一页 ▶"
+
+  # 不存在时显示的图标
+  "<_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
