@@ -4,14 +4,21 @@ title: "&0编辑 Flag"
 
 inventory:
   - "XXXXXXXXX"
+  - "XPXXXXXXX"
   - "XFFFFFFFX"
-  - "XFFXXXXXX"
-  - "XXXXXXXXX"
+  - "XFFFFFFFX"
   - "XXXXXXXXX"
   - "XXXXBXXXX"
 
 # 主图标
 items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+    lore:
+      - "&e左键获取物品"
+
   # Flag 槽位 (动态填充)
   F:
     material: LIME_DYE

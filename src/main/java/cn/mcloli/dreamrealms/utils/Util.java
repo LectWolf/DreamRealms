@@ -48,6 +48,17 @@ public class Util {
     }
 
     /**
+     * 解析单精度浮点数
+     */
+    public static Optional<Float> parseFloat(String str) {
+        try {
+            return Optional.of(Float.parseFloat(str));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * 解析长整数
      */
     public static Optional<Long> parseLong(String str) {

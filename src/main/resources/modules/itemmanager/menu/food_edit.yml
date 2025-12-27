@@ -1,0 +1,96 @@
+# 食物组件编辑菜单配置
+
+title: "&0编辑食物组件"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XPXXXXXXX"
+  - "XNSTCUAXX"
+  - "XXXXXXXXX"
+  - "XXXXXXXXX"
+  - "XXXRBXXXX"
+
+# 主图标
+items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+    lore:
+      - "&e左键获取物品"
+
+  # 营养值 (饱食度)
+  N:
+    material: COOKED_BEEF
+    display: "&e营养值"
+    lore:
+      - "&7当前: &f%nutrition%"
+      - ""
+      - "&e点击修改"
+
+  # 饱和度
+  S:
+    material: GOLDEN_APPLE
+    display: "&e饱和度"
+    lore:
+      - "&7当前: &f%saturation%"
+      - ""
+      - "&e点击修改"
+
+  # 食用时间
+  T:
+    material: CLOCK
+    display: "&e食用时间"
+    lore:
+      - "&7当前: &f%eat_seconds% &7秒"
+      - ""
+      - "&e点击修改"
+
+  # 可以一直吃
+  C:
+    material: CAKE
+    display: "&e可以一直吃"
+    lore:
+      - "&7状态: %status%"
+      - "&7即使饱食度满也能吃"
+      - ""
+      - "&e点击切换"
+
+  # 使用转换物品
+  U:
+    material: BOWL
+    display: "&e使用后转换"
+    lore:
+      - "&7吃完后转换为其他物品"
+      - "&7(如碗、玻璃瓶)"
+      - ""
+      - "&8开发中..."
+
+  # 效果
+  A:
+    material: POTION
+    display: "&e食用效果"
+    lore:
+      - "&7吃完后获得的药水效果"
+      - ""
+      - "&8开发中..."
+
+  # 移除食物组件
+  R:
+    material: BARRIER
+    display: "&c移除食物组件"
+    lore:
+      - "&7点击移除食物组件"
+      - "&7物品将不再可食用"
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品属性"

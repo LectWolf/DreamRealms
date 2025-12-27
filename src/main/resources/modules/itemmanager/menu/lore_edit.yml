@@ -4,7 +4,7 @@ title: "&0编辑 Lore"
 
 inventory:
   - "XXXXXXXXX"
-  - "XLLLLLLLX"
+  - "XPXXXXXXX"
   - "XLLLLLLLX"
   - "XLLLLLLLX"
   - "XLLLLLLLX"
@@ -12,6 +12,13 @@ inventory:
 
 # 主图标
 items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+    lore:
+      - "&e左键获取物品"
+
   # Lore 行槽位 (动态填充)
   L:
     material: PAPER

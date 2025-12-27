@@ -240,7 +240,8 @@ public class ItemEditGui extends AbstractInteractiveGui<ItemEditMenuConfig> {
 
     private void handleEditDurability() {
         if (!storedItem.isSerialized()) return;
-        ItemManagerMessages.edit__durability_wip.t(player);
+        // 打开物品属性编辑菜单
+        new ItemPropertiesGui(player, module.getItemPropertiesMenuConfig(), storedItem, this).open();
     }
 
     private void handleEditIdentifier() {

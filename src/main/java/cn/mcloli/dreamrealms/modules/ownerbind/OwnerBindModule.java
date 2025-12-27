@@ -281,54 +281,71 @@ public class OwnerBindModule extends AbstractModule {
 
     /**
      * 匹配 NBT 值 (支持字符串、整数、浮点数、布尔值)
+     * PDC.get() 在类型不匹配时会抛出异常，需要逐个 try-catch
      */
     private boolean matchNbtValue(org.bukkit.persistence.PersistentDataContainer pdc, NamespacedKey key, String expectedValue) {
         // 尝试字符串匹配
-        String strValue = pdc.get(key, PersistentDataType.STRING);
-        if (strValue != null && strValue.equals(expectedValue)) {
-            return true;
-        }
+        try {
+            String strValue = pdc.get(key, PersistentDataType.STRING);
+            if (strValue != null && strValue.equals(expectedValue)) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试整数匹配
-        Integer intValue = pdc.get(key, PersistentDataType.INTEGER);
-        if (intValue != null && expectedValue.equals(String.valueOf(intValue))) {
-            return true;
-        }
+        try {
+            Integer intValue = pdc.get(key, PersistentDataType.INTEGER);
+            if (intValue != null && expectedValue.equals(String.valueOf(intValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试长整数匹配
-        Long longValue = pdc.get(key, PersistentDataType.LONG);
-        if (longValue != null && expectedValue.equals(String.valueOf(longValue))) {
-            return true;
-        }
+        try {
+            Long longValue = pdc.get(key, PersistentDataType.LONG);
+            if (longValue != null && expectedValue.equals(String.valueOf(longValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试浮点数匹配
-        Double doubleValue = pdc.get(key, PersistentDataType.DOUBLE);
-        if (doubleValue != null && expectedValue.equals(String.valueOf(doubleValue))) {
-            return true;
-        }
+        try {
+            Double doubleValue = pdc.get(key, PersistentDataType.DOUBLE);
+            if (doubleValue != null && expectedValue.equals(String.valueOf(doubleValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
-        Float floatValue = pdc.get(key, PersistentDataType.FLOAT);
-        if (floatValue != null && expectedValue.equals(String.valueOf(floatValue))) {
-            return true;
-        }
+        try {
+            Float floatValue = pdc.get(key, PersistentDataType.FLOAT);
+            if (floatValue != null && expectedValue.equals(String.valueOf(floatValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试布尔值匹配
-        Boolean boolValue = pdc.get(key, PersistentDataType.BOOLEAN);
-        if (boolValue != null && expectedValue.equalsIgnoreCase(String.valueOf(boolValue))) {
-            return true;
-        }
+        try {
+            Boolean boolValue = pdc.get(key, PersistentDataType.BOOLEAN);
+            if (boolValue != null && expectedValue.equalsIgnoreCase(String.valueOf(boolValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试字节匹配
-        Byte byteValue = pdc.get(key, PersistentDataType.BYTE);
-        if (byteValue != null && expectedValue.equals(String.valueOf(byteValue))) {
-            return true;
-        }
+        try {
+            Byte byteValue = pdc.get(key, PersistentDataType.BYTE);
+            if (byteValue != null && expectedValue.equals(String.valueOf(byteValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         // 尝试短整数匹配
-        Short shortValue = pdc.get(key, PersistentDataType.SHORT);
-        if (shortValue != null && expectedValue.equals(String.valueOf(shortValue))) {
-            return true;
-        }
+        try {
+            Short shortValue = pdc.get(key, PersistentDataType.SHORT);
+            if (shortValue != null && expectedValue.equals(String.valueOf(shortValue))) {
+                return true;
+            }
+        } catch (Exception ignored) {}
         
         return false;
     }

@@ -20,6 +20,7 @@ public class CategoryMenuConfig extends AbstractMenuConfig<IGui> {
     private Icon categoryIcon;
     private Icon addCategoryIcon;
     private Icon uncategorizedIcon;
+    private Icon backIcon;
 
     public CategoryMenuConfig(DreamRealms plugin, ItemManagerModule module) {
         super(plugin, module.getModuleMenuPath() + "/category.yml");
@@ -36,6 +37,10 @@ public class CategoryMenuConfig extends AbstractMenuConfig<IGui> {
 
     public Icon getUncategorizedIcon() {
         return uncategorizedIcon;
+    }
+
+    public Icon getBackIcon() {
+        return backIcon;
     }
 
     /**
@@ -56,11 +61,21 @@ public class CategoryMenuConfig extends AbstractMenuConfig<IGui> {
         return icon != null ? icon.generateIcon(player) : null;
     }
 
+    /**
+     * 获取空的返回按钮图标
+     */
+    @Nullable
+    public ItemStack getEmptyBackIcon(Player player) {
+        Icon icon = otherIcons.get("B_empty");
+        return icon != null ? icon.generateIcon(player) : null;
+    }
+
     @Override
     protected void clearMainIcons() {
         categoryIcon = null;
         addCategoryIcon = null;
         uncategorizedIcon = null;
+        backIcon = null;
     }
 
     @Override
@@ -69,6 +84,7 @@ public class CategoryMenuConfig extends AbstractMenuConfig<IGui> {
             case "C" -> categoryIcon = icon;
             case "A" -> addCategoryIcon = icon;
             case "U" -> uncategorizedIcon = icon;
+            case "B" -> backIcon = icon;
             default -> {
                 return false;
             }

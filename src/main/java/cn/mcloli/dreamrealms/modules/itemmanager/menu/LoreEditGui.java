@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.ChatInputUtil;
+import cn.mcloli.dreamrealms.utils.Util;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -74,6 +75,10 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
             }
 
             switch (key) {
+                case 'P' -> {
+                    // 预览物品
+                    inventory.setItem(i, storedItem.getItemStack().clone());
+                }
                 case 'L' -> {
                     int index = config.getKeyIndex(key, i) + page * slotsPerPage;
                     inventory.setItem(i, getLoreLineItem(index));
@@ -144,6 +149,7 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
         module.debug("LoreEditGui click: key=" + key + ", index=" + index + ", click=" + click);
 
         switch (key) {
+            case 'P' -> handlePreviewClick(click);
             case 'L' -> handleLoreLineClick(click, index + page * slotsPerPage);
             case 'A' -> handleAddLine();
             case 'E' -> handleAddEmptyLine();
@@ -166,6 +172,14 @@ public class LoreEditGui extends AbstractInteractiveGui<LoreEditMenuConfig> {
                 }
             }
             default -> config.handleOtherIconClick(player, click, key);
+        }
+    }
+
+    private void handlePreviewClick(ClickType click) {
+        if (click == ClickType.LEFT) {
+            ItemStack item = storedItem.getItemStack().clone();
+            item.setAmount(1);
+            Util.giveItem(player, item);
         }
     }
 

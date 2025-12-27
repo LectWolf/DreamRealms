@@ -4,6 +4,7 @@ import cn.mcloli.dreamrealms.gui.AbstractInteractiveGui;
 import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
+import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -52,6 +53,10 @@ public class FlagEditGui extends AbstractInteractiveGui<FlagEditMenuConfig> {
             if (key == null) continue;
 
             switch (key) {
+                case 'P' -> {
+                    // 预览物品
+                    inventory.setItem(i, storedItem.getItemStack().clone());
+                }
                 case 'F' -> {
                     if (flagIndex < flags.length) {
                         inventory.setItem(i, getFlagItem(flags[flagIndex]));
@@ -123,12 +128,21 @@ public class FlagEditGui extends AbstractInteractiveGui<FlagEditMenuConfig> {
         module.debug("FlagEditGui click: key=" + key + ", index=" + index);
 
         switch (key) {
+            case 'P' -> handlePreviewClick(click);
             case 'F' -> handleFlagClick(index);
             case 'B' -> {
                 parentGui.refresh();
                 parentGui.open();
             }
             default -> config.handleOtherIconClick(player, click, key);
+        }
+    }
+
+    private void handlePreviewClick(ClickType click) {
+        if (click == ClickType.LEFT) {
+            ItemStack item = storedItem.getItemStack().clone();
+            item.setAmount(1);
+            Util.giveItem(player, item);
         }
     }
 

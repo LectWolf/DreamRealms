@@ -80,8 +80,16 @@ public class CategorySelectGui extends AbstractInteractiveGui<CategoryMenuConfig
                     inventory.setItem(i, getCategoryItem(index));
                 }
                 case 'A' -> {
-                    // 隐藏添加按钮
-                    inventory.setItem(i, null);
+                    // 隐藏添加按钮，显示空图标
+                    inventory.setItem(i, config.getEmptyBackIcon(player));
+                }
+                case 'B' -> {
+                    // 返回按钮 - 显示返回图标
+                    if (config.getBackIcon() != null) {
+                        inventory.setItem(i, config.getBackIcon().generateIcon(player));
+                    } else {
+                        config.applyIcon(this, inventory, player, i);
+                    }
                 }
                 case 'U' -> {
                     // 未分类按钮 - 点击移除分类
@@ -170,6 +178,11 @@ public class CategorySelectGui extends AbstractInteractiveGui<CategoryMenuConfig
                 // 移除分类
                 storedItem.setCategoryId(null);
                 module.getDatabase().saveItem(storedItem);
+                // 返回编辑页
+                parentGui.refresh();
+                parentGui.open();
+            }
+            case 'B' -> {
                 // 返回编辑页
                 parentGui.refresh();
                 parentGui.open();

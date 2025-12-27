@@ -8,7 +8,7 @@ inventory:
   - "XCCCCCCCX"
   - "XCCCCCCCX"
   - "XCCCCCCCX"
-  - "X<XUAX>XX"
+  - "X<XUAB>XX"
 
 # 主图标
 items:
@@ -37,6 +37,13 @@ items:
     lore:
       - "&7查看未分类的物品"
 
+  # 返回按钮
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回上一页"
+
 # 其他图标
 other-items:
   X:
@@ -57,5 +64,10 @@ other-items:
     display: " "
 
   ">_empty":
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  # 返回按钮不存在时显示的图标
+  "B_empty":
     material: BLACK_STAINED_GLASS_PANE
     display: " "

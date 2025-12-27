@@ -6,6 +6,7 @@ import cn.mcloli.dreamrealms.modules.itemmanager.ItemManagerModule;
 import cn.mcloli.dreamrealms.modules.itemmanager.data.StoredItem;
 import cn.mcloli.dreamrealms.modules.itemmanager.lang.ItemManagerMessages;
 import cn.mcloli.dreamrealms.utils.AttributeUtil;
+import cn.mcloli.dreamrealms.utils.Util;
 import com.google.common.collect.Multimap;
 import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
@@ -89,6 +90,10 @@ public class AttributeEditGui extends AbstractInteractiveGui<AttributeEditMenuCo
             }
 
             switch (key) {
+                case 'P' -> {
+                    // 预览物品
+                    inventory.setItem(i, storedItem.getItemStack().clone());
+                }
                 case 'A' -> {
                     int index = config.getKeyIndex(key, i) + page * slotsPerPage;
                     inventory.setItem(i, getAttributeItem(index));
@@ -175,6 +180,7 @@ public class AttributeEditGui extends AbstractInteractiveGui<AttributeEditMenuCo
         module.debug("AttributeEditGui click: key=" + key + ", index=" + index + ", click=" + click);
 
         switch (key) {
+            case 'P' -> handlePreviewClick(click);
             case 'A' -> handleAttributeClick(click, index + page * slotsPerPage);
             case 'N' -> handleAddAttribute();
             case 'B' -> {
@@ -194,6 +200,14 @@ public class AttributeEditGui extends AbstractInteractiveGui<AttributeEditMenuCo
                 }
             }
             default -> config.handleOtherIconClick(player, click, key);
+        }
+    }
+
+    private void handlePreviewClick(ClickType click) {
+        if (click == ClickType.LEFT) {
+            ItemStack item = storedItem.getItemStack().clone();
+            item.setAmount(1);
+            Util.giveItem(player, item);
         }
     }
 

@@ -16,8 +16,10 @@ import cn.mcloli.dreamrealms.modules.itemmanager.menu.CategoryMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.EnchantSelectMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.FlagEditMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.FoodEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemEditMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemListMenuConfig;
+import cn.mcloli.dreamrealms.modules.itemmanager.menu.ItemPropertiesMenuConfig;
 import cn.mcloli.dreamrealms.modules.itemmanager.menu.LoreEditMenuConfig;
 import org.bukkit.configuration.MemoryConfiguration;
 import top.mrxiaom.pluginbase.func.AutoRegister;
@@ -42,6 +44,8 @@ public class ItemManagerModule extends AbstractModule {
     private AttributeDetailMenuConfig attributeDetailMenuConfig;
     private AttributeSelectMenuConfig attributeSelectMenuConfig;
     private FlagEditMenuConfig flagEditMenuConfig;
+    private ItemPropertiesMenuConfig itemPropertiesMenuConfig;
+    private FoodEditMenuConfig foodEditMenuConfig;
 
     public ItemManagerModule(DreamRealms plugin) {
         super(plugin, "itemmanager");
@@ -102,6 +106,14 @@ public class ItemManagerModule extends AbstractModule {
 
     public FlagEditMenuConfig getFlagEditMenuConfig() {
         return flagEditMenuConfig;
+    }
+
+    public ItemPropertiesMenuConfig getItemPropertiesMenuConfig() {
+        return itemPropertiesMenuConfig;
+    }
+
+    public FoodEditMenuConfig getFoodEditMenuConfig() {
+        return foodEditMenuConfig;
     }
 
     @Override
@@ -179,6 +191,16 @@ public class ItemManagerModule extends AbstractModule {
             flagEditMenuConfig = new FlagEditMenuConfig(plugin, this);
         }
         flagEditMenuConfig.reloadConfig(cfg);
+
+        if (itemPropertiesMenuConfig == null) {
+            itemPropertiesMenuConfig = new ItemPropertiesMenuConfig(plugin, this);
+        }
+        itemPropertiesMenuConfig.reloadConfig(cfg);
+
+        if (foodEditMenuConfig == null) {
+            foodEditMenuConfig = new FoodEditMenuConfig(plugin, this);
+        }
+        foodEditMenuConfig.reloadConfig(cfg);
 
         // 注册命令到 /dr itemmanager
         if (command == null) {

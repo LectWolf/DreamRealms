@@ -1,0 +1,186 @@
+# 物品属性编辑菜单配置
+
+title: "&0编辑物品属性"
+
+inventory:
+  - "XXXXXXXXX"
+  - "XPXXXXXXX"
+  - "XDMSUHGFX"
+  - "XCNIEXRXX"
+  - "X12345XXX"
+  - "XXXXBXXXX"
+
+# 主图标
+items:
+  # 预览物品
+  P:
+    material: STONE
+    display: "&f预览"
+
+  # 当前耐久/损耗
+  D:
+    material: IRON_PICKAXE
+    display: "&e当前耐久"
+    lore:
+      - "&7当前损耗: &f%damage%"
+      - "&7剩余耐久: &f%remaining%"
+      - ""
+      - "&e点击修改"
+
+  # 最大耐久
+  M:
+    material: DIAMOND_PICKAXE
+    display: "&e最大耐久"
+    lore:
+      - "&7当前: &f%max_damage%"
+      - ""
+      - "&e点击修改"
+      - "&7右键重置为默认"
+
+  # 最大堆叠
+  S:
+    material: CHEST
+    display: "&e最大堆叠"
+    lore:
+      - "&7当前: &f%max_stack%"
+      - ""
+      - "&e点击修改"
+      - "&7右键重置为默认"
+
+  # 无法破坏
+  U:
+    material: BEDROCK
+    display: "&e无法破坏"
+    lore:
+      - "&7状态: %status%"
+      - ""
+      - "&e点击切换"
+
+  # 隐藏提示
+  H:
+    material: BARRIER
+    display: "&e隐藏提示"
+    lore:
+      - "&7状态: %status%"
+      - ""
+      - "&e点击切换"
+
+  # 附魔光效
+  G:
+    material: GLOWSTONE_DUST
+    display: "&e附魔光效"
+    lore:
+      - "&7状态: %status%"
+      - ""
+      - "&e点击切换"
+
+  # 防火
+  F:
+    material: MAGMA_CREAM
+    display: "&e防火"
+    lore:
+      - "&7状态: %status%"
+      - ""
+      - "&e点击切换"
+
+  # 自定义模型数据
+  C:
+    material: PAINTING
+    display: "&e自定义模型数据"
+    lore:
+      - "&7当前: &f%custom_model_data%"
+      - ""
+      - "&e点击修改"
+      - "&7右键清除"
+
+  # 物品名称 (ItemName)
+  N:
+    material: NAME_TAG
+    display: "&e物品名称"
+    lore:
+      - "&7当前: &f%item_name%"
+      - ""
+      - "&e点击修改"
+      - "&7右键清除"
+
+  # 物品模型 (ItemModel)
+  I:
+    material: ITEM_FRAME
+    display: "&e物品模型"
+    lore:
+      - "&7当前: &f%item_model%"
+      - ""
+      - "&e点击修改"
+      - "&7右键清除"
+
+  # 附魔可用性
+  E:
+    material: ENCHANTING_TABLE
+    display: "&e附魔可用性"
+    lore:
+      - "&7当前: &f%enchantable%"
+      - ""
+      - "&e点击修改"
+      - "&7右键清除"
+
+  # 稀有度
+  R:
+    material: NETHER_STAR
+    display: "&e稀有度"
+    lore:
+      - "&7当前: %rarity%"
+      - ""
+      - "&e点击切换"
+      - "&7右键清除"
+
+  # === 复杂组件 ===
+
+  # 食物组件
+  1:
+    material: APPLE
+    display: "&e食物组件"
+    lore:
+      - "&7编辑食物属性"
+      - "&7营养值/饱和度/食用时间等"
+      - ""
+      - "&e点击编辑"
+
+  # 工具组件
+  2:
+    material: IRON_PICKAXE
+    display: "&7工具组件"
+    lore:
+      - "&8开发中..."
+
+  # 使用冷却
+  3:
+    material: CLOCK
+    display: "&7使用冷却"
+    lore:
+      - "&8开发中..."
+
+  # 可装备
+  4:
+    material: IRON_CHESTPLATE
+    display: "&7可装备"
+    lore:
+      - "&8开发中..."
+
+  # 伤害抗性
+  5:
+    material: SHIELD
+    display: "&7伤害抗性"
+    lore:
+      - "&8开发中..."
+
+# 其他图标
+other-items:
+  X:
+    material: BLACK_STAINED_GLASS_PANE
+    display: " "
+
+  B:
+    material: ARROW
+    display: "&7返回"
+    lore:
+      - "&7返回物品编辑"

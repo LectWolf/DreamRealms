@@ -76,12 +76,13 @@ items:
     lore:
       - "&7隐藏附魔、属性等信息"
 
-  # 修改耐久
+  # 物品属性
   D:
-    material: IRON_PICKAXE
-    display: "&e修改耐久"
+    material: COMPARATOR
+    display: "&e物品属性"
     lore:
-      - "&7修改物品耐久度"
+      - "&7修改物品的各种属性"
+      - "&7耐久、堆叠、稀有度等"
 
   # 设置标识名
   I:
