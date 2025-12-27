@@ -1,7 +1,5 @@
 package cn.mcloli.dreamrealms.modules.welcome.data;
 
-import org.bukkit.scheduler.BukkitTask;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -19,8 +17,8 @@ public class WelcomeSession {
     // 已欢迎的玩家UUID集合
     private final Set<UUID> welcomers = new HashSet<>();
 
-    // 奖励任务
-    private BukkitTask rewardTask;
+    // 奖励任务取消器
+    private Runnable rewardTaskCanceller;
 
     // 新玩家是否在线
     private boolean newPlayerOnline = true;
@@ -59,18 +57,14 @@ public class WelcomeSession {
         welcomers.add(playerUuid);
     }
 
-    public BukkitTask getRewardTask() {
-        return rewardTask;
-    }
-
-    public void setRewardTask(BukkitTask rewardTask) {
-        this.rewardTask = rewardTask;
+    public void setRewardTaskCanceller(Runnable canceller) {
+        this.rewardTaskCanceller = canceller;
     }
 
     public void cancelRewardTask() {
-        if (rewardTask != null) {
-            rewardTask.cancel();
-            rewardTask = null;
+        if (rewardTaskCanceller != null) {
+            rewardTaskCanceller.run();
+            rewardTaskCanceller = null;
         }
     }
 

@@ -194,4 +194,31 @@ public class Util {
     public static void runLater(Runnable runnable, long delayTicks) {
         plugin().getScheduler().runTaskLater(runnable, delayTicks);
     }
+
+    /**
+     * 延迟执行 (tick) - 可取消版本
+     * @return 取消器，调用 run() 可取消任务（如果任务尚未执行）
+     */
+    public static Runnable runLaterCancellable(Runnable runnable, long delayTicks) {
+        // 使用 AtomicBoolean 来标记是否已取消
+        java.util.concurrent.atomic.AtomicBoolean cancelled = new java.util.concurrent.atomic.AtomicBoolean(false);
+        
+        plugin().getScheduler().runTaskLater(() -> {
+            if (!cancelled.get()) {
+                runnable.run();
+            }
+        }, delayTicks);
+        
+        // 返回取消器
+        return () -> cancelled.set(true);
+    }
+
+    /**
+     * 定时重复执行 (tick)
+     * @return 取消器，调用 run() 可取消任务
+     */
+    public static Runnable runTaskTimer(Runnable runnable, long delayTicks, long periodTicks) {
+        var task = plugin().getScheduler().runTaskTimer(runnable, delayTicks, periodTicks);
+        return task::cancel;
+    }
 }

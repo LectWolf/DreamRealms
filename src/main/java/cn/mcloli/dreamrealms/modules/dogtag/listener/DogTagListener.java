@@ -5,8 +5,10 @@ import cn.mcloli.dreamrealms.modules.dogtag.DogTagModule;
 import cn.mcloli.dreamrealms.modules.dogtag.config.DogTagConfig;
 import cn.mcloli.dreamrealms.modules.dogtag.data.DogTagData;
 import cn.mcloli.dreamrealms.utils.ItemBuilder;
+import cn.mcloli.dreamrealms.utils.ItemNameUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import top.mrxiaom.pluginbase.utils.ColorHelper;
 
@@ -73,8 +76,11 @@ public class DogTagListener implements Listener {
             return;
         }
 
-        // 添加到掉落物
-        event.getDrops().add(dogTag);
+        // 在死亡位置生成掉落物 (兼容 keepInventory)
+        Location dropLoc = victim.getLocation().add(0, 0.5, 0);
+        Item droppedItem = victim.getWorld().dropItem(dropLoc, dogTag);
+        // 不给初速度，让物品原地掉落
+        droppedItem.setVelocity(new Vector(0, 0, 0));
         module.debug("玩家 " + victim.getName() + " 死亡，掉落狗牌: " + matchedTag.getId());
     }
 
@@ -159,11 +165,6 @@ public class DogTagListener implements Listener {
         if (weapon.getType() == Material.AIR) {
             return "拳头";
         }
-        ItemMeta meta = weapon.getItemMeta();
-        if (meta != null && meta.hasDisplayName()) {
-            return meta.getDisplayName();
-        }
-        // 使用物品本地化名称
-        return weapon.getType().name();
+        return ItemNameUtil.getItemName(weapon);
     }
 }

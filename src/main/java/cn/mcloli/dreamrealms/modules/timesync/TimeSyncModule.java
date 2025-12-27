@@ -7,11 +7,11 @@ import cn.mcloli.dreamrealms.modules.timesync.command.TimeSyncCommand;
 import cn.mcloli.dreamrealms.modules.timesync.config.TimeSyncConfig;
 import cn.mcloli.dreamrealms.modules.timesync.lang.TimeSyncMessages;
 import cn.mcloli.dreamrealms.modules.timesync.listener.TimeSyncListener;
+import cn.mcloli.dreamrealms.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.scheduler.BukkitTask;
 import top.mrxiaom.pluginbase.func.AutoRegister;
 
 import java.util.Calendar;
@@ -22,7 +22,7 @@ public class TimeSyncModule extends AbstractModule {
     private TimeSyncConfig config;
     private TimeSyncListener listener;
     private TimeSyncCommand command;
-    private BukkitTask syncTask;
+    private Runnable syncTaskCanceller;
     private TimeSyncMessages.Holder lang;
 
     public TimeSyncModule(DreamRealms plugin) {
@@ -72,14 +72,14 @@ public class TimeSyncModule extends AbstractModule {
 
     public void startSyncTask() {
         stopSyncTask();
-        syncTask = Bukkit.getScheduler().runTaskTimer(plugin, this::syncTime, 0L, config.getSyncInterval());
+        syncTaskCanceller = Util.runTaskTimer(this::syncTime, 0L, config.getSyncInterval());
         debug("同步任务已启动, 间隔: " + config.getSyncInterval() + " ticks");
     }
 
     public void stopSyncTask() {
-        if (syncTask != null) {
-            syncTask.cancel();
-            syncTask = null;
+        if (syncTaskCanceller != null) {
+            syncTaskCanceller.run();
+            syncTaskCanceller = null;
             debug("同步任务已停止");
         }
     }

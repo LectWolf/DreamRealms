@@ -123,11 +123,12 @@ public class WelcomeListener implements Listener {
         WelcomeSession session = module.getSession(newPlayerUuid);
         if (session == null) return;
 
-        var task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        // 使用 Folia 兼容的可取消延迟任务
+        Runnable canceller = Util.runLaterCancellable(() -> {
             distributeRewards(newPlayerUuid);
         }, delayTicks);
 
-        session.setRewardTask(task);
+        session.setRewardTaskCanceller(canceller);
         module.debug("设置奖励任务, 延迟: " + config.getRewardDelayMinutes() + " 分钟");
     }
 
