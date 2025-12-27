@@ -121,15 +121,16 @@ public class ItemManagerModule extends AbstractModule {
         }
 
         // 注册独立命令 /itemmanager 和 /im (动态注册，无需 plugin.yml)
-        if (commandManager == null) {
-            commandManager = ItemManagerCommands.create(this);
-            cn.mcloli.dreamrealms.utils.CommandRegister.register(
-                    "itemmanager",
-                    new String[]{"im"},
-                    "物品管理器",
-                    commandManager
-            );
-        }
+        // 每次重载都重新注册命令，确保命令处理器指向当前模块实例
+        commandManager = ItemManagerCommands.create(this);
+        // 先注销可能存在的旧命令
+        cn.mcloli.dreamrealms.utils.CommandRegister.unregister("itemmanager");
+        cn.mcloli.dreamrealms.utils.CommandRegister.register(
+                "itemmanager",
+                new String[]{"im"},
+                "物品管理器",
+                commandManager
+        );
 
         info("模块已加载");
     }
