@@ -13,6 +13,7 @@ export default defineConfig({
       { text: "首页", link: "/" },
       { text: "指南", link: "/guide/" },
       { text: "模块", link: "/modules/" },
+      { text: "API", link: "/api/" },
       { text: "更新日志", link: "/changelog" },
       { text: "GitHub", link: "https://github.com/LectWolf/DreamRealms" },
     ],
@@ -38,6 +39,15 @@ export default defineConfig({
             { text: "DogTag 狗牌系统", link: "/modules/dogtag" },
             { text: "ShiftF 快捷键", link: "/modules/shiftf" },
             { text: "OwnerBind 物主绑定", link: "/modules/ownerbind" },
+          ],
+        },
+      ],
+      "/api/": [
+        {
+          text: "API",
+          items: [
+            { text: "概述", link: "/api/" },
+            { text: "OwnerBind", link: "/api/ownerbind" },
           ],
         },
       ],

@@ -1,6 +1,7 @@
 package cn.mcloli.dreamrealms.modules.ownerbind.listener;
 
 import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindEvent;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -53,6 +54,15 @@ public class OwnerBindListener implements Listener {
      * @return true 如果玩家可以操作该物品
      */
     private boolean processItem(Player player, ItemStack item) {
+        return processItem(player, item, OwnerBindEvent.BindSource.OTHER);
+    }
+
+    /**
+     * 处理物品：修复Lore + 自动绑定 + 检查所有权
+     * @param source 绑定来源
+     * @return true 如果玩家可以操作该物品
+     */
+    private boolean processItem(Player player, ItemStack item, OwnerBindEvent.BindSource source) {
         if (module.isEmptyItem(item)) return true;
 
         // 修复Lore
@@ -60,7 +70,7 @@ public class OwnerBindListener implements Listener {
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
         if (!hasNobindPermission(player) && module.isBindable(item)) {
-            module.bindToPlayer(item, player.getName());
+            module.bindToPlayer(item, player.getName(), source);
             module.debug("物品自动绑定给: " + player.getName());
         }
 
@@ -172,7 +182,7 @@ public class OwnerBindListener implements Listener {
             // 不阻止时，后续逻辑会处理（物品掉落）
         }
 
-        if (!processItem(player, currentItem)) {
+        if (!processItem(player, currentItem, OwnerBindEvent.BindSource.INVENTORY)) {
             String boundOwner = module.getBoundOwner(currentItem);
             
             if (module.getModuleConfig().isHookSweetMail() && isPlayerInventory) {
@@ -221,7 +231,7 @@ public class OwnerBindListener implements Listener {
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
         if (!hasNobindPermission(player) && module.isBindable(item)) {
-            module.bindToPlayer(item, player.getName());
+            module.bindToPlayer(item, player.getName(), OwnerBindEvent.BindSource.PICKUP);
         }
     }
 
@@ -231,7 +241,7 @@ public class OwnerBindListener implements Listener {
         ItemStack item = event.getItem();
         if (module.isEmptyItem(item)) return;
 
-        if (!processItem(player, item)) {
+        if (!processItem(player, item, OwnerBindEvent.BindSource.INTERACT)) {
             event.setCancelled(true);
             String boundOwner = module.getBoundOwner(item);
             
@@ -257,7 +267,7 @@ public class OwnerBindListener implements Listener {
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
         if (!hasNobindPermission(player) && module.isBindable(newItem) && !module.hasBoundOwner(newItem)) {
-            module.bindToPlayer(newItem, player.getName());
+            module.bindToPlayer(newItem, player.getName(), OwnerBindEvent.BindSource.HOLD);
         }
 
         // 检查所有权
@@ -290,7 +300,7 @@ public class OwnerBindListener implements Listener {
 
         // 自动绑定 (有 nobind 权限的玩家不会自动绑定)
         if (!hasNobindPermission(player) && module.isBindable(item) && !module.hasBoundOwner(item)) {
-            module.bindToPlayer(item, player.getName());
+            module.bindToPlayer(item, player.getName(), OwnerBindEvent.BindSource.HOLD);
         }
 
         // 检查所有权

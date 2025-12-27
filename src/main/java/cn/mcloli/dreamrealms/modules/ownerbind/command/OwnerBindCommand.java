@@ -3,6 +3,9 @@ package cn.mcloli.dreamrealms.modules.ownerbind.command;
 import cn.mcloli.dreamrealms.command.ISubCommandHandler;
 import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
 import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindResult;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindEvent;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindMarkEvent;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerUnbindEvent;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
 import com.google.common.collect.Lists;
 import org.bukkit.command.CommandSender;
@@ -121,7 +124,7 @@ public class OwnerBindCommand implements ISubCommandHandler {
             return OwnerBindMessages.already_marked.t(player);
         }
 
-        OwnerBindResult result = module.markBindable(item);
+        OwnerBindResult result = module.markBindable(item, OwnerBindMarkEvent.MarkSource.COMMAND);
         return switch (result) {
             case SUCCESS -> OwnerBindMessages.mark_success.t(player);
             default -> OwnerBindMessages.mark_failed.t(player);
@@ -142,7 +145,7 @@ public class OwnerBindCommand implements ISubCommandHandler {
             targetPlayer = player.getName();
         }
 
-        OwnerBindResult result = module.bindToPlayer(item, targetPlayer);
+        OwnerBindResult result = module.bindToPlayer(item, targetPlayer, OwnerBindEvent.BindSource.COMMAND);
         return switch (result) {
             case SUCCESS -> OwnerBindMessages.bind_success.t(player, Pair.of("%player%", targetPlayer));
             case ALREADY_BOUND -> {
@@ -159,7 +162,7 @@ public class OwnerBindCommand implements ISubCommandHandler {
             return OwnerBindMessages.hand_empty.t(player);
         }
 
-        OwnerBindResult result = module.unbind(item);
+        OwnerBindResult result = module.unbind(item, OwnerUnbindEvent.UnbindSource.COMMAND);
         return switch (result) {
             case SUCCESS -> OwnerBindMessages.unbind_success.t(player);
             case NOT_BOUND -> OwnerBindMessages.not_bound.t(player);

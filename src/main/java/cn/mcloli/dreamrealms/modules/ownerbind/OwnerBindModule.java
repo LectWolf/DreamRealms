@@ -3,6 +3,9 @@ package cn.mcloli.dreamrealms.modules.ownerbind;
 import cn.mcloli.dreamrealms.DreamRealms;
 import cn.mcloli.dreamrealms.command.CommandMain;
 import cn.mcloli.dreamrealms.func.AbstractModule;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindEvent;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerBindMarkEvent;
+import cn.mcloli.dreamrealms.modules.ownerbind.api.OwnerUnbindEvent;
 import cn.mcloli.dreamrealms.modules.ownerbind.command.OwnerBindCommand;
 import cn.mcloli.dreamrealms.modules.ownerbind.config.OwnerBindConfig;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
@@ -259,9 +262,26 @@ public class OwnerBindModule extends AbstractModule {
      * 标记物品为可绑定 (添加NBT和Lore)
      */
     public OwnerBindResult markBindable(ItemStack item) {
+        return markBindable(item, OwnerBindMarkEvent.MarkSource.OTHER);
+    }
+
+    /**
+     * 标记物品为可绑定 (添加NBT和Lore)
+     * @param item 物品
+     * @param source 标记来源
+     */
+    public OwnerBindResult markBindable(ItemStack item, OwnerBindMarkEvent.MarkSource source) {
         if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
         if (hasBoundOwner(item)) return OwnerBindResult.ALREADY_BOUND;
         if (isBindable(item)) return OwnerBindResult.ALREADY_BOUND; // 已经是可绑定状态
+
+        // 触发事件
+        OwnerBindMarkEvent event = new OwnerBindMarkEvent(item, source);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            debug("标记可绑定被取消 (事件)");
+            return OwnerBindResult.INVALID_ITEM;
+        }
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -289,8 +309,26 @@ public class OwnerBindModule extends AbstractModule {
      * 绑定物品给玩家
      */
     public OwnerBindResult bindToPlayer(ItemStack item, String playerName) {
+        return bindToPlayer(item, playerName, OwnerBindEvent.BindSource.OTHER);
+    }
+
+    /**
+     * 绑定物品给玩家
+     * @param item 物品
+     * @param playerName 玩家名
+     * @param source 绑定来源
+     */
+    public OwnerBindResult bindToPlayer(ItemStack item, String playerName, OwnerBindEvent.BindSource source) {
         if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
         if (hasBoundOwner(item)) return OwnerBindResult.ALREADY_BOUND;
+
+        // 触发事件
+        OwnerBindEvent event = new OwnerBindEvent(item, playerName, source);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            debug("绑定被取消 (事件): " + playerName);
+            return OwnerBindResult.INVALID_ITEM;
+        }
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) {
@@ -337,8 +375,27 @@ public class OwnerBindModule extends AbstractModule {
      * 解除绑定
      */
     public OwnerBindResult unbind(ItemStack item) {
+        return unbind(item, OwnerUnbindEvent.UnbindSource.OTHER);
+    }
+
+    /**
+     * 解除绑定
+     * @param item 物品
+     * @param source 解绑来源
+     */
+    public OwnerBindResult unbind(ItemStack item, OwnerUnbindEvent.UnbindSource source) {
         if (isEmptyItem(item)) return OwnerBindResult.EMPTY_ITEM;
         if (!hasBoundOwner(item) && !isBindable(item)) return OwnerBindResult.NOT_BOUND;
+
+        String previousOwner = getBoundOwner(item);
+
+        // 触发事件
+        OwnerUnbindEvent event = new OwnerUnbindEvent(item, previousOwner, source);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            debug("解绑被取消 (事件)");
+            return OwnerBindResult.INVALID_ITEM;
+        }
 
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return OwnerBindResult.INVALID_ITEM;
@@ -365,6 +422,7 @@ public class OwnerBindModule extends AbstractModule {
         }
 
         item.setItemMeta(meta);
+        debug("物品已解绑" + (previousOwner != null ? ", 原主人: " + previousOwner : ""));
         return OwnerBindResult.SUCCESS;
     }
 
