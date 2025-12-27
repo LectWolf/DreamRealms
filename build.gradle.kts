@@ -100,6 +100,24 @@ tasks {
     jar {
         enabled = false // 禁用默认 jar 任务，只输出 shadowJar
     }
+    // 清理旧的构建产物，只保留最新的
+    val cleanOldArtifacts = create("cleanOldArtifacts") {
+        doLast {
+            // 清理 build/libs 目录
+            val libsDir = file("build/libs")
+            if (libsDir.exists()) {
+                libsDir.listFiles()?.filter { it.name.endsWith(".jar") }?.forEach { it.delete() }
+            }
+            // 清理 out 目录
+            val outDir = rootProject.file("out")
+            if (outDir.exists()) {
+                outDir.listFiles()?.filter { it.name.endsWith(".jar") }?.forEach { it.delete() }
+            }
+        }
+    }
+    shadowJar {
+        dependsOn(cleanOldArtifacts)
+    }
     val copyTask = create<Copy>("copyBuildArtifact") {
         dependsOn(shadowJar)
         from(shadowJar.get().outputs)
