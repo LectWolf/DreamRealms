@@ -95,18 +95,36 @@ public class CommandRegister {
      * 注销命令
      */
     public static boolean unregister(@NotNull String name) {
-        if (commandMap == null || knownCommands == null) return false;
+        if (commandMap == null || knownCommands == null) {
+            init();
+            if (commandMap == null || knownCommands == null) return false;
+        }
 
         Command command = knownCommands.get(name.toLowerCase());
+        if (command == null) {
+            // 尝试带前缀查找
+            String fallbackPrefix = DreamRealms.getInstance().getName().toLowerCase();
+            command = knownCommands.get(fallbackPrefix + ":" + name.toLowerCase());
+        }
         if (command == null) return false;
 
-        // 从 knownCommands 中移除
+        // 从 commandMap 注销
         command.unregister(commandMap);
-        knownCommands.remove(name.toLowerCase());
         
-        // 移除别名
+        // 从 knownCommands 中移除所有相关键 (包括带前缀的)
+        final Command finalCommand = command;
+        knownCommands.keySet().removeIf(key -> 
+            key.equalsIgnoreCase(finalCommand.getName()) || 
+            finalCommand.getAliases().contains(key) ||
+            key.endsWith(":" + finalCommand.getName().toLowerCase())
+        );
+        
+        // 移除别名 (包括带前缀的)
         for (String alias : command.getAliases()) {
-            knownCommands.remove(alias.toLowerCase());
+            knownCommands.keySet().removeIf(key -> 
+                key.equalsIgnoreCase(alias) || 
+                key.endsWith(":" + alias.toLowerCase())
+            );
             registeredCommands.remove(alias.toLowerCase());
         }
         
