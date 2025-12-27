@@ -8,6 +8,7 @@ DreamRealms 采用模块化设计，每个功能独立成模块。
 | ----------------------------- | ------------------------ | ---- |
 | [TimeSync](/modules/timesync) | 服务器时间与现实时间同步 | ✅   |
 | [Welcome](/modules/welcome)   | 新玩家欢迎系统           | ✅   |
+| [DogTag](/modules/dogtag)     | 死亡狗牌掉落系统         | ✅   |
 
 ## 启用模块
 

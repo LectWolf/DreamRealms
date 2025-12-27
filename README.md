@@ -1,6 +1,6 @@
-# DreamRealms
+# DreamRealms 次梦领域
 
-Minecraft Spigot/Paper 插件，基于 [PluginBase](https://github.com/MrXiaoM/PluginBase) 框架开发。
+为次梦领域 Minecraft 服务器开发的专属插件，基于 [PluginBase](https://github.com/MrXiaoM/PluginBase) 框架。
 
 ## 功能模块
 

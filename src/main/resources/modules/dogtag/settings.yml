@@ -1,0 +1,65 @@
+# 狗牌模块配置
+
+# 调试模式
+debug: false
+
+# 是否仅 PVP 死亡掉落狗牌
+# true = 只有被玩家击杀才掉落
+# false = 任何死亡都掉落
+pvp-only: true
+
+# 日期格式化 (Java SimpleDateFormat)
+date-format: "yyyy-MM-dd HH:mm:ss"
+
+# 绕过权限列表 (拥有这些权限的玩家死亡不掉落狗牌)
+bypass-permissions:
+  - "dreamrealms.dogtag.bypass"
+
+# 狗牌配置
+# 玩家死亡时会按优先级检查权限，使用第一个匹配的狗牌
+#
+# 可用变量:
+#   {victim}       - 死亡玩家名称
+#   {killer}       - 击杀者名称 (非PVP死亡显示"未知")
+#   {killer_level} - 击杀者等级
+#   {weapon}       - 击杀武器名称
+#   {death_time}   - 死亡时间 (按 date-format 格式化)
+#   {world}        - 死亡世界名称
+#   {x}            - 死亡坐标 X
+#   {y}            - 死亡坐标 Y
+#   {z}            - 死亡坐标 Z
+#   %xxx%          - 支持 PlaceholderAPI 变量 (以死者为上下文)
+#
+dogtags:
+  # VIP 狗牌 (高优先级)
+  vip:
+    permission: "dreamrealms.dogtag.vip"
+    priority: 100
+    material: NAME_TAG
+    custom-model-data: 1001
+    display: "&6⭐ {victim} 的金色狗牌"
+    lore:
+      - ""
+      - "&7击杀者: &c{killer}"
+      - "&7武器: &e{weapon}"
+      - "&7击杀者等级: &b{killer_level}"
+      - ""
+      - "&7死亡时间: &f{death_time}"
+      - "&7死亡位置: &f{world} ({x}, {y}, {z})"
+      - ""
+      - "&e✦ VIP 专属狗牌 ✦"
+
+  # 默认狗牌 (低优先级)
+  default:
+    permission: "dreamrealms.dogtag.default"
+    priority: 0
+    material: NAME_TAG
+    # custom-model-data: 1000  # 可选
+    display: "&c{victim} 的狗牌"
+    lore:
+      - ""
+      - "&7击杀者: &c{killer}"
+      - "&7武器: &e{weapon}"
+      - ""
+      - "&7死亡时间: &f{death_time}"
+      - "&7死亡位置: &f{world} ({x}, {y}, {z})"

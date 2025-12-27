@@ -1,0 +1,7 @@
+# ShiftF 快捷键模块配置
+
+# 调试模式
+debug: false
+
+# Shift+F 执行的命令 (不带斜杠)
+command: "trmenu open 游戏菜单"

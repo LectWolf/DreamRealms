@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: DreamRealms
-  text: Minecraft 服务器插件
-  tagline: 基于 PluginBase 框架开发
+  text: 次梦领域服务器插件
+  tagline: 为次梦领域 Minecraft 服务器开发的专属插件
   actions:
     - theme: brand
       text: 快速开始

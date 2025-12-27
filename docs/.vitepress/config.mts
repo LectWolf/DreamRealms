@@ -5,8 +5,10 @@ export default defineConfig({
   description: "Minecraft Spigot/Paper 插件文档",
   lang: "zh-CN",
   base: "/DreamRealms/",
+  head: [["link", { rel: "icon", href: "/DreamRealms/favicon.svg" }]],
 
   themeConfig: {
+    logo: "/favicon.svg",
     nav: [
       { text: "首页", link: "/" },
       { text: "指南", link: "/guide/" },
@@ -32,6 +34,8 @@ export default defineConfig({
           items: [
             { text: "概述", link: "/modules/" },
             { text: "TimeSync 时间同步", link: "/modules/timesync" },
+            { text: "Welcome 欢迎系统", link: "/modules/welcome" },
+            { text: "DogTag 狗牌系统", link: "/modules/dogtag" },
           ],
         },
       ],
