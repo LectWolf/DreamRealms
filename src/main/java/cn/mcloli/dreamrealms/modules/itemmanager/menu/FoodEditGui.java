@@ -113,7 +113,7 @@ public class FoodEditGui extends AbstractInteractiveGui<FoodEditMenuConfig> {
             if (seconds != null) {
                 lore.add(ColorHelper.parseColor("&7当前: &f" + String.format("%.2f", seconds) + " &7秒"));
             } else {
-                lore.add(ColorHelper.parseColor("&7当前: &7未设置消耗组件"));
+                lore.add(ColorHelper.parseColor("&7当前: &f1.6 &7秒 &8(默认)"));
             }
             lore.add("");
             lore.add(ColorHelper.parseColor("&e点击修改"));
