@@ -42,7 +42,6 @@ export default defineConfig({
             { text: "Debug 调试工具", link: "/modules/debug" },
             { text: "ItemManager 物品管理器", link: "/modules/itemmanager" },
             { text: "CosmeticMenu 时装菜单", link: "/modules/cosmeticmenu" },
-            { text: "GiftPoints 点券赠送", link: "/modules/giftpoints" },
             { text: "Wank 导管模块", link: "/modules/wank" },
           ],
         },
