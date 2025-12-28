@@ -13,8 +13,8 @@ prompt:
 
 # 每日最大导管次数范围 (随机)
 max-times:
-  min: 3
-  max: 5
+  min: 5
+  max: 10
 
 # 导管持续时间范围 (秒)
 wank-duration:
@@ -23,22 +23,41 @@ wank-duration:
 
 # 射精持续时间范围 (秒)
 shoot-duration:
-  min: 2
-  max: 5
+  min: 3
+  max: 15
 
 # 命令冷却时间 (秒)
-cooldown: 30
+cooldown: 10
+
+# 导管动画配置
+wank-animation:
+  # 手部动作间隔 (tick, 越小越快, 原版为4)
+  hand-swing-interval: 4
+  # 音效音量
+  sound-volume: 0.3
 
 # 精液药水配置
 milk-item:
-  custom-model-data: 10001
+  # 物品材质
+  material: POTION
+  # 自定义模型数据 (注释掉表示不设置)
+  # custom-model-data: 10001
+  # 药水颜色 (十六进制, 仅药水类型有效)
+  color: "#FFFAF0"
   # 名称 (支持 %player% 占位符)
-  name: "&b%player%的精液"
+  name: "&f%player% &7的精华"
   # 描述 (支持 %player%, %duration% 占位符)
   lore:
-    - "&7新鲜出炉"
-    - "&b%duration%&7秒的高质量蛋白质"
-    - "&b%player%&7精选"
+    - "&7温热的液体"
+    - "&7坚持了 &f%duration% &7秒"
+    - ""
+    - "&8来自 %player%"
+  # NBT 标记配置
+  nbt:
+    # 是否添加 NBT 标记用于识别
+    enabled: true
+    # NBT 键名
+    key: "dreamrealms_milk"
 
 # 剪刀功能配置
 scissors:
@@ -46,3 +65,85 @@ scissors:
   enabled: true
   # 被剪后禁用时间 (游戏内一天 = 24000 ticks = 20分钟)
   disable-duration-ticks: 24000
+  # 每次剪刀扣除的耐久
+  durability-cost: 3
+  # 剪刀冷却时间 (秒)
+  cooldown: 1
+  # 剪刀受击配置
+  hit-effect:
+    # 是否启用受击效果
+    enabled: true
+    # 伤害值 (0 = 只有受击效果不扣血)
+    damage: 1
+  # 剪掉时的伤害配置
+  cut-damage:
+    # 是否启用剪掉伤害
+    enabled: true
+    # 伤害百分比 (基于目标最大血量, 0.5 = 50%)
+    percent: 0.5
+  # 剪刀进度恢复间隔 (秒)，每隔这么久恢复一次被剪进度
+  recovery-interval: 10
+  # 裤子保护配置
+  pants-protection:
+    # 是否启用裤子保护 (穿裤子需要多剪几刀)
+    enabled: true
+    # 每次剪刀扣除裤子的耐久
+    pants-durability-cost: 3
+    # 不同材质裤子需要的剪刀次数
+    cuts-required:
+      LEATHER: 3
+      CHAINMAIL: 5
+      IRON: 8
+      GOLDEN: 4
+      DIAMOND: 12
+      NETHERITE: 15
+    # 附魔加成配置 (等级 * 基数 = 增加的刀数)
+    enchantment-bonus:
+      # 保护附魔
+      PROTECTION: 2
+      # 爆炸保护
+      BLAST_PROTECTION: 1
+      # 火焰保护
+      FIRE_PROTECTION: 1
+      # 弹射物保护
+      PROJECTILE_PROTECTION: 1
+      # 耐久附魔
+      UNBREAKING: 4
+  # 掉落物配置
+  drop:
+    # 是否掉落物品
+    enabled: true
+    # 掉落物品材质
+    material: END_ROD
+    # 自定义模型数据 (注释掉表示不设置)
+    # custom-model-data: 10001
+    # 掉落物品名称 (支持 %player% 占位符)
+    name: "&c%player%的牛牛"
+    # 掉落物品描述
+    lore:
+      - "&7被剪下来的..."
+    # 原主人捡起延迟 (秒)，其他玩家无延迟
+    owner-pickup-delay: 5
+    # NBT 标记配置
+    nbt:
+      # 是否添加 NBT 标记
+      enabled: true
+      # NBT 键名
+      key: "dreamrealms_cut"
+
+# 射精效果配置 (羊驼口水)
+shoot-particle:
+  # 口水速度范围 (随机)
+  speed-min: 1.5
+  speed-max: 5.0
+  # 是否造成伤害
+  damage-enabled: true
+  # 伤害值 (0 = 只有受击效果不扣血)
+  damage: 1
+
+# 次数重置配置
+reset:
+  # 重置时间 (游戏内时间, 格式: HH:mm, 如 06:00 表示游戏内早上6点)
+  time: "06:00"
+  # 重置的世界 (用于获取游戏时间)
+  world: "world"

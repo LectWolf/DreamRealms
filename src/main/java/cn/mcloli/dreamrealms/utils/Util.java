@@ -232,4 +232,17 @@ public class Util {
         var task = plugin().getScheduler().runTaskTimer(runnable, delayTicks, periodTicks);
         return task::cancel;
     }
+
+    /**
+     * 在实体所在区域定时重复执行 (Folia 兼容)
+     * @param entity 目标实体
+     * @param runnable 要执行的任务
+     * @param delayTicks 延迟 tick
+     * @param periodTicks 周期 tick
+     * @return 取消器，调用 run() 可取消任务
+     */
+    public static <T extends org.bukkit.entity.Entity> Runnable runAtEntityTimer(T entity, java.util.function.Consumer<T> runnable, long delayTicks, long periodTicks) {
+        var task = plugin().getScheduler().runAtEntityTimer(entity, runnable, delayTicks, periodTicks);
+        return task::cancel;
+    }
 }

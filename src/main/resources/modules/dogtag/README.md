@@ -15,9 +15,24 @@
 
 ## 权限
 
-| 权限                        | 说明           |
-| --------------------------- | -------------- |
-| `dreamrealms.dogtag.bypass` | 死亡不掉落狗牌 |
+| 权限                        | 说明                       |
+| --------------------------- | -------------------------- |
+| `dreamrealms.dogtag.bypass` | 死亡不掉落狗牌（绕过权限） |
+| 自定义权限                  | 在配置中为每种狗牌设置权限 |
+
+### 狗牌权限配置示例
+
+```yaml
+tags:
+  vip:
+    permission: "group.vip" # 拥有此权限的玩家掉落此狗牌
+    priority: 10 # 优先级越高越先匹配
+    material: "GOLD_INGOT"
+  default:
+    permission: "" # 空表示无权限要求（默认狗牌）
+    priority: 0
+    material: "IRON_INGOT"
+```
 
 ## 配置文件
 

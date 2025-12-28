@@ -25,6 +25,8 @@ public enum WankMessages implements IHolderAccessor {
     scissors_cut_success("&a你剪掉了 &b%target% &a的牛牛!"),
     scissors_cut_victim("&c你的牛牛被 &b%player% &c剪掉了! 今天无法导管了..."),
     scissors_already_cut("&c%target% 的牛牛已经被剪掉了"),
+    scissors_progress("&c你正在攻击 &b%target% &c的牛牛 &7| &f%current%/%required%"),
+    scissors_victim_progress("&c你的牛牛正在被攻击 &7| &f%current%/%required%"),
 
     admin_reset("&a已重置所有玩家的导管次数"),
     ;

@@ -57,7 +57,7 @@ dependencies {
     compileOnly("com.github.MrXiaoM:SweetMail:1.1.2")
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.1.3.0")
     compileOnly(files("libs/GlobalMarketPlus-v1.2.12.1.jar")) // GlobalMarketPlus 本地依赖
-    compileOnly("com.ghostchu:quickshop-api:6.2.0.6") // QuickShop-Hikari
+    compileOnly("com.ghostchu:quickshop-api:6.2.0.10") // QuickShop-Hikari API (事件类)
 
     // GiftPoints 软依赖
     compileOnly(files("libs/SweetCheckout-v1.0.8.jar"))

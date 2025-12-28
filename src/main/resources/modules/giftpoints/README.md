@@ -11,8 +11,8 @@
 
 ## 依赖
 
-- **SweetCheckout** - 支付系统
-- **PlayerPoints** - 点券系统
+- SweetCheckout (必须) - 支付系统
+- PlayerPoints (必须) - 点券系统
 
 ## 命令
 

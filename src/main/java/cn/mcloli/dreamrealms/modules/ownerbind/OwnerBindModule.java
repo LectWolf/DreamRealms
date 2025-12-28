@@ -121,7 +121,7 @@ public class OwnerBindModule extends AbstractModule {
         }
 
         // ZAuctionHouse Hook
-        if (config.isHookZAuctionHouse() && Bukkit.getPluginManager().isPluginEnabled("zAuctionHouse")) {
+        if (config.isHookZAuctionHouse() && Bukkit.getPluginManager().isPluginEnabled("zAuctionHouseV3")) {
             if (zAuctionHouseListener == null) {
                 zAuctionHouseListener = new ZAuctionHouseListener(this);
                 registerEvents(zAuctionHouseListener);

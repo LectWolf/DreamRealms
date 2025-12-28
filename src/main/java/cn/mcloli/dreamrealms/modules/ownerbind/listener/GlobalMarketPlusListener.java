@@ -57,12 +57,12 @@ public class GlobalMarketPlusListener implements Listener {
         ItemStack item = event.getItem();
         if (module.hasAnyBindInfo(item)) {
             event.setCancelled(true);
-            // 尝试通知收件人
-            UUID ownerUUID = event.getOwnerUUID();
-            if (ownerUUID != null) {
-                Player owner = Bukkit.getPlayer(ownerUUID);
-                if (owner != null) {
-                    OwnerBindMessages.anti_market_tip.tm(owner);
+            // 通知发送者
+            UUID senderUUID = event.getSenderUUID();
+            if (senderUUID != null) {
+                Player sender = Bukkit.getPlayer(senderUUID);
+                if (sender != null) {
+                    OwnerBindMessages.anti_market_tip.tm(sender);
                 }
             }
             module.debug("阻止发送绑定物品邮件: " + item.getType());
