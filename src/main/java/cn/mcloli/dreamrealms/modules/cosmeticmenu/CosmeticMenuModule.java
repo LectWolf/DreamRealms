@@ -20,6 +20,9 @@ public class CosmeticMenuModule extends AbstractModule {
     
     // 菜单配置
     private CosmeticListMenuConfig cosmeticListMenuConfig;
+    
+    // 命令是否已注册
+    private boolean commandRegistered = false;
 
     public CosmeticMenuModule(DreamRealms plugin) {
         super(plugin, "cosmeticmenu");
@@ -46,12 +49,15 @@ public class CosmeticMenuModule extends AbstractModule {
     public void reloadConfig(MemoryConfiguration cfg) {
         if (!checkModuleEnabled(cfg)) {
             info("模块已禁用");
+            // 模块禁用时注销命令
+            unregisterCommand();
             return;
         }
 
         // 检查 HMCCosmetics 是否已加载
         if (!Bukkit.getPluginManager().isPluginEnabled("HMCCosmetics")) {
             warn("HMCCosmetics 未安装或未启用，模块无法加载");
+            unregisterCommand();
             return;
         }
 
@@ -74,15 +80,37 @@ public class CosmeticMenuModule extends AbstractModule {
         cosmeticListMenuConfig.reloadConfig(cfg);
 
         // 注册独立命令 /cos (动态注册，无需 plugin.yml)
-        command = new CosmeticCommand(this);
+        registerCommand();
+
+        info("模块已加载");
+    }
+    
+    /**
+     * 注册命令
+     */
+    private void registerCommand() {
+        // 先注销旧命令，确保使用新的 executor
         CommandRegister.unregister("cos");
-        CommandRegister.register(
+        
+        command = new CosmeticCommand(this);
+        if (CommandRegister.register(
                 "cos",
                 new String[]{},
                 "时装菜单",
                 command
-        );
-
-        info("模块已加载");
+        )) {
+            commandRegistered = true;
+        }
+    }
+    
+    /**
+     * 注销命令
+     */
+    private void unregisterCommand() {
+        if (commandRegistered) {
+            CommandRegister.unregister("cos");
+            commandRegistered = false;
+            command = null;
+        }
     }
 }

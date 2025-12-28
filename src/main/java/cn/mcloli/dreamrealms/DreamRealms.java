@@ -116,4 +116,10 @@ public class DreamRealms extends BukkitPlugin {
     protected void afterEnable() {
         getLogger().info("DreamRealms 加载完毕");
     }
+
+    @Override
+    protected void afterDisable() {
+        // 注销所有动态注册的命令
+        cn.mcloli.dreamrealms.utils.CommandRegister.unregisterAll();
+    }
 }

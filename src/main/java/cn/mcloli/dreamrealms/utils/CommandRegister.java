@@ -102,54 +102,48 @@ public class CommandRegister {
 
         String fallbackPrefix = DreamRealms.getInstance().getName().toLowerCase();
         String prefixedName = fallbackPrefix + ":" + name.toLowerCase();
+        String nameLower = name.toLowerCase();
         
-        // 优先查找带前缀的命令 (本插件注册的)
-        Command command = knownCommands.get(prefixedName);
+        boolean removed = false;
         
-        // 如果没有带前缀的，检查无前缀的是否是本插件注册的
-        if (command == null) {
-            Command unprefixedCommand = knownCommands.get(name.toLowerCase());
-            // 只有当命令是本插件注册的 DynamicCommand 时才注销
-            if (unprefixedCommand instanceof DynamicCommand) {
-                command = unprefixedCommand;
-            }
-        }
-        
-        if (command == null) return false;
-        
-        // 确保只注销本插件的命令
-        if (!(command instanceof DynamicCommand)) {
-            return false;
-        }
-
-        // 从 commandMap 注销
-        command.unregister(commandMap);
-        
-        // 只移除本插件注册的命令键
-        final String cmdName = command.getName().toLowerCase();
-        knownCommands.remove(prefixedName);
-        
-        // 检查无前缀的命令是否指向本插件的命令，如果是则移除
-        Command unprefixed = knownCommands.get(cmdName);
-        if (unprefixed instanceof DynamicCommand) {
-            knownCommands.remove(cmdName);
-        }
-        
-        // 移除别名 (只移除本插件注册的)
-        for (String alias : command.getAliases()) {
-            String aliasLower = alias.toLowerCase();
-            String prefixedAlias = fallbackPrefix + ":" + aliasLower;
-            knownCommands.remove(prefixedAlias);
+        // 移除带前缀的命令
+        Command prefixedCommand = knownCommands.get(prefixedName);
+        if (prefixedCommand != null) {
+            prefixedCommand.unregister(commandMap);
+            knownCommands.remove(prefixedName);
+            removed = true;
             
-            Command aliasCmd = knownCommands.get(aliasLower);
-            if (aliasCmd instanceof DynamicCommand) {
-                knownCommands.remove(aliasLower);
+            // 移除别名
+            for (String alias : prefixedCommand.getAliases()) {
+                String aliasLower = alias.toLowerCase();
+                knownCommands.remove(fallbackPrefix + ":" + aliasLower);
+                // 检查无前缀别名是否指向同一命令
+                Command aliasCmd = knownCommands.get(aliasLower);
+                if (aliasCmd == prefixedCommand) {
+                    knownCommands.remove(aliasLower);
+                }
+                registeredCommands.remove(aliasLower);
             }
-            registeredCommands.remove(aliasLower);
         }
         
-        registeredCommands.remove(name.toLowerCase());
-        return true;
+        // 移除无前缀的命令 (如果是本插件注册的)
+        Command unprefixedCommand = knownCommands.get(nameLower);
+        if (unprefixedCommand instanceof DynamicCommand) {
+            unprefixedCommand.unregister(commandMap);
+            knownCommands.remove(nameLower);
+            removed = true;
+            
+            // 移除别名
+            for (String alias : unprefixedCommand.getAliases()) {
+                String aliasLower = alias.toLowerCase();
+                knownCommands.remove(aliasLower);
+                knownCommands.remove(fallbackPrefix + ":" + aliasLower);
+                registeredCommands.remove(aliasLower);
+            }
+        }
+        
+        registeredCommands.remove(nameLower);
+        return removed;
     }
 
     /**
@@ -157,6 +151,23 @@ public class CommandRegister {
      */
     public static boolean isRegistered(@NotNull String name) {
         return registeredCommands.contains(name.toLowerCase());
+    }
+
+    /**
+     * 注销所有本插件注册的命令
+     * 应在插件禁用时调用
+     */
+    public static void unregisterAll() {
+        if (commandMap == null || knownCommands == null) {
+            return;
+        }
+        
+        // 复制一份避免 ConcurrentModificationException
+        Set<String> toUnregister = new HashSet<>(registeredCommands);
+        for (String name : toUnregister) {
+            unregister(name);
+        }
+        registeredCommands.clear();
     }
 
     /**
