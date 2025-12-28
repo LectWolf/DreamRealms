@@ -2,6 +2,7 @@ package cn.mcloli.dreamrealms.modules.ownerbind.listener;
 
 import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,6 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import studio.trc.bukkit.globalmarketplus.api.event.AuctionStartEvent;
 import studio.trc.bukkit.globalmarketplus.api.event.MerchandiseBuyEvent;
 import studio.trc.bukkit.globalmarketplus.api.event.MerchandiseSellEvent;
+import studio.trc.bukkit.globalmarketplus.api.event.NewMailEvent;
+
+import java.util.UUID;
 
 public class GlobalMarketPlusListener implements Listener {
 
@@ -45,6 +49,23 @@ public class GlobalMarketPlusListener implements Listener {
         if (module.hasAnyBindInfo(item)) {
             event.setCancelled(true);
             OwnerBindMessages.anti_market_tip.tm(player);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onNewMail(NewMailEvent event) {
+        ItemStack item = event.getItem();
+        if (module.hasAnyBindInfo(item)) {
+            event.setCancelled(true);
+            // 尝试通知收件人
+            UUID ownerUUID = event.getOwnerUUID();
+            if (ownerUUID != null) {
+                Player owner = Bukkit.getPlayer(ownerUUID);
+                if (owner != null) {
+                    OwnerBindMessages.anti_market_tip.tm(owner);
+                }
+            }
+            module.debug("阻止发送绑定物品邮件: " + item.getType());
         }
     }
 }

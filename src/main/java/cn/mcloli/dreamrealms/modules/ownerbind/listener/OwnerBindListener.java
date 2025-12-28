@@ -39,6 +39,8 @@ public class OwnerBindListener implements Listener {
     private final Map<UUID, Boolean> playerInventoryOpenMap = new ConcurrentHashMap<>();
     // 存储死亡保留的物品及其原始槽位 (槽位 -> 物品)
     private final Map<UUID, Map<Integer, ItemStack>> deathKeepItems = new ConcurrentHashMap<>();
+    // 存储玩家拿起绑定物品时的原始槽位 (用于关闭背包时归还)
+    private final Map<UUID, Integer> cursorBoundItemSlot = new ConcurrentHashMap<>();
 
     public OwnerBindListener(OwnerBindModule module) {
         this.module = module;
@@ -199,13 +201,32 @@ public class OwnerBindListener implements Listener {
         playerInventoryOpenMap.put(player.getUniqueId(), true);
 
         ItemStack currentItem = event.getCurrentItem();
+        
+        // 记录拿起绑定物品的槽位 (用于关闭背包时归还)
+        // 只在玩家背包中点击自己的绑定物品时记录
+        boolean isPlayerInventory = event.getClickedInventory() != null 
+                && event.getClickedInventory().getType() == InventoryType.PLAYER;
+        if (isPlayerInventory && !module.isEmptyItem(currentItem) 
+                && module.hasBoundOwner(currentItem) && module.isOwner(player, currentItem)) {
+            // 检查是否是拿起物品的操作 (左键/右键点击非空物品，且光标为空)
+            ItemStack cursor = event.getCursor();
+            if (module.isEmptyItem(cursor)) {
+                cursorBoundItemSlot.put(player.getUniqueId(), event.getSlot());
+                module.debug("记录绑定物品槽位: " + event.getSlot() + " -> " + currentItem.getType());
+            }
+        }
+        
+        // 当玩家放下光标物品时，清除记录的槽位
+        if (!module.isEmptyItem(event.getCursor()) && module.hasBoundOwner(event.getCursor())) {
+            // 如果是放下绑定物品到某个槽位，清除记录
+            cursorBoundItemSlot.remove(player.getUniqueId());
+        }
+        
         if (module.isEmptyItem(currentItem)) return;
 
         // 快速路径：没有绑定信息的物品直接跳过
         if (quickCheck(currentItem)) return;
 
-        boolean isPlayerInventory = event.getClickedInventory() != null 
-                && event.getClickedInventory().getType() == InventoryType.PLAYER;
         boolean isContainerInventory = event.getClickedInventory() != null 
                 && event.getClickedInventory().getType() != InventoryType.PLAYER
                 && event.getClickedInventory().getType() != InventoryType.CREATIVE;
@@ -529,11 +550,12 @@ public class OwnerBindListener implements Listener {
             }
         }
 
-        // 阻止Q键丢出 (bypass 权限可以绕过)
+        // 阻止丢出绑定物品 (bypass 权限可以绕过)
+        // 无论背包是否打开都阻止丢弃
         if (module.getModuleConfig().isAntiDrop() 
                 && !hasBypassPermission(player)
-                && module.hasBoundOwner(item) 
-                && !playerInventoryOpenMap.getOrDefault(player.getUniqueId(), false)) {
+                && module.hasBoundOwner(item)
+                && module.isOwner(player, item)) {
             OwnerBindMessages.anti_drop_tip.tm(player);
             event.setCancelled(true);
         }
@@ -542,6 +564,42 @@ public class OwnerBindListener implements Listener {
     @EventHandler
     public void onCloseInventory(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
+            // 检查光标上是否有绑定物品
+            ItemStack cursorItem = player.getItemOnCursor();
+            if (!module.isEmptyItem(cursorItem) && module.hasBoundOwner(cursorItem)) {
+                // 如果是自己的绑定物品，放回原始槽位
+                if (module.isOwner(player, cursorItem)) {
+                    Integer originalSlot = cursorBoundItemSlot.remove(player.getUniqueId());
+                    if (originalSlot != null) {
+                        // 清空光标
+                        player.setItemOnCursor(null);
+                        
+                        var inventory = player.getInventory();
+                        ItemStack occupyingItem = inventory.getItem(originalSlot);
+                        
+                        // 把绑定物品放回原位
+                        inventory.setItem(originalSlot, cursorItem);
+                        
+                        // 如果原位被占用，把占用的物品丢出
+                        if (!module.isEmptyItem(occupyingItem)) {
+                            player.getWorld().dropItemNaturally(player.getLocation(), occupyingItem);
+                            module.debug("原槽位被占用，丢出物品: " + occupyingItem.getType());
+                        }
+                        
+                        module.debug("关闭背包时归还绑定物品到槽位 " + originalSlot + ": " + cursorItem.getType());
+                    } else {
+                        // 没有记录原始槽位（可能是从其他地方拿的），尝试放入背包
+                        player.setItemOnCursor(null);
+                        Util.giveItem(player, cursorItem);
+                        module.debug("关闭背包时归还光标上的绑定物品（无原始槽位）: " + cursorItem.getType());
+                    }
+                }
+                // 如果不是自己的绑定物品，让它正常掉落（会被拾取事件处理）
+            } else {
+                // 光标上没有绑定物品，清除记录
+                cursorBoundItemSlot.remove(player.getUniqueId());
+            }
+            
             playerInventoryOpenMap.put(player.getUniqueId(), false);
         }
     }
@@ -552,10 +610,20 @@ public class OwnerBindListener implements Listener {
         String worldName = player.getWorld().getName();
         String action = module.getModuleConfig().getDeathDropAction(worldName);
         
-        module.debug("玩家死亡: " + player.getName() + ", 世界: " + worldName + ", 处理方式: " + action);
+        // 检查世界是否开启了 keepInventory 游戏规则
+        boolean keepInventory = Boolean.TRUE.equals(player.getWorld().getGameRuleValue(org.bukkit.GameRule.KEEP_INVENTORY));
+        
+        module.debug("玩家死亡: " + player.getName() + ", 世界: " + worldName + ", 处理方式: " + action + ", keepInventory: " + keepInventory);
         
         // DEFAULT 不处理
         if ("DEFAULT".equals(action)) {
+            return;
+        }
+        
+        // 如果世界已开启 keepInventory 且配置为 KEEP，则不需要额外处理
+        // 因为物品本身就会保留在背包中
+        if (keepInventory && "KEEP".equals(action)) {
+            module.debug("世界已开启 keepInventory，跳过 KEEP 处理");
             return;
         }
         
@@ -613,14 +681,51 @@ public class OwnerBindListener implements Listener {
                 module.debug("保留绑定物品数量: " + boundItemsWithSlot.size());
             }
             case "DROP" -> {
-                // 掉落到地上 - 重新添加到掉落列表
-                drops.addAll(boundItemsWithSlot.values());
+                // 掉落到地上
+                if (keepInventory) {
+                    // keepInventory 开启时，需要手动清空背包并掉落物品
+                    clearBoundItemsFromInventory(inventory, boundItemsWithSlot);
+                    // 手动掉落物品到玩家位置
+                    for (ItemStack item : boundItemsWithSlot.values()) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), item);
+                    }
+                } else {
+                    // 正常情况下添加到掉落列表即可
+                    drops.addAll(boundItemsWithSlot.values());
+                }
                 module.debug("掉落绑定物品数量: " + boundItemsWithSlot.size());
             }
             case "DESTROY" -> {
-                // 销毁物品 - 已从掉落列表移除，不做任何处理
+                // 销毁物品 - 已从掉落列表移除
+                // 如果世界开启了 keepInventory，需要手动清空背包中的绑定物品
+                if (keepInventory) {
+                    clearBoundItemsFromInventory(inventory, boundItemsWithSlot);
+                }
                 module.debug("销毁绑定物品数量: " + boundItemsWithSlot.size());
             }
+        }
+    }
+
+    /**
+     * 从背包中清空指定槽位的绑定物品
+     * 用于 keepInventory 开启时强制移除绑定物品
+     */
+    private void clearBoundItemsFromInventory(org.bukkit.inventory.PlayerInventory inventory, Map<Integer, ItemStack> boundItemsWithSlot) {
+        for (int slot : boundItemsWithSlot.keySet()) {
+            if (slot >= 0 && slot < 36) {
+                // 主背包槽位
+                inventory.setItem(slot, null);
+            } else if (slot >= 36 && slot <= 39) {
+                // 装备栏
+                int armorIndex = slot - 36;
+                ItemStack[] armor = inventory.getArmorContents();
+                armor[armorIndex] = null;
+                inventory.setArmorContents(armor);
+            } else if (slot == 40) {
+                // 副手
+                inventory.setItemInOffHand(null);
+            }
+            module.debug("清空背包槽位: " + slot);
         }
     }
 

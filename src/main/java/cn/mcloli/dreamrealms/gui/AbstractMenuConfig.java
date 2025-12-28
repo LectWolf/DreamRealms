@@ -321,6 +321,18 @@ public abstract class AbstractMenuConfig<T extends IGui> extends AbstractPluginH
     }
 
     /**
+     * 应用 other-items 中的图标到指定槽位
+     */
+    public void applyOtherIcon(Inventory inv, Player player, int slot, String iconKey) {
+        Icon icon = otherIcons.get(iconKey);
+        if (icon != null) {
+            inv.setItem(slot, icon.generateIcon(player));
+        } else {
+            inv.setItem(slot, null);
+        }
+    }
+
+    /**
      * 子类实现：清空主图标
      */
     protected abstract void clearMainIcons();

@@ -1,0 +1,24 @@
+# GiftPoints 点券赠送模块配置
+
+# 调试模式
+debug: false
+
+# 点券比例 (1 元 = 多少点券)
+points-scale: 10
+
+# 支付超时时间 (秒)
+payment-timeout: 300
+
+# 支付方式开关
+payment:
+  wechat: true
+  alipay: true
+
+# 金额选项 (元)
+amount-options:
+  - 1
+  - 5
+  - 10
+  - 20
+  - 50
+  - 100

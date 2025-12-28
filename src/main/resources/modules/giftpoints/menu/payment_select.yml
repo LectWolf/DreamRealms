@@ -1,0 +1,24 @@
+# 支付方式选择菜单配置
+
+title: "&0选择支付方式"
+inventory:
+  - "         "
+  - "   W A   "
+  - "    B    "
+
+items:
+  W:
+    material: EMERALD
+    display: "&a微信支付"
+    lore:
+      - "&7使用微信支付"
+
+  A:
+    material: LAPIS_LAZULI
+    display: "&b支付宝"
+    lore:
+      - "&7使用支付宝支付"
+
+  B:
+    material: BARRIER
+    display: "&c返回"

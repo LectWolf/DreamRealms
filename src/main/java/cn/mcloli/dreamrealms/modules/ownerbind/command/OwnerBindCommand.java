@@ -209,10 +209,18 @@ public class OwnerBindCommand implements ISubCommandHandler {
         String sub = args[0].toLowerCase();
         if (args.length == 2 && "bind".equals(sub)) {
             // 返回在线玩家名
-            return null; // 返回 null 使用默认的玩家名补全
+            return startsWith(getOnlinePlayerNames(), args[1]);
         }
 
         return Collections.emptyList();
+    }
+
+    private List<String> getOnlinePlayerNames() {
+        List<String> names = new ArrayList<>();
+        for (org.bukkit.entity.Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+            names.add(player.getName());
+        }
+        return names;
     }
 
     private boolean showHelp(CommandSender sender) {

@@ -4,6 +4,7 @@ import cn.mcloli.dreamrealms.modules.ownerbind.OwnerBindModule;
 import cn.mcloli.dreamrealms.modules.ownerbind.lang.OwnerBindMessages;
 import com.ghostchu.quickshop.api.event.ShopCreateEvent;
 import com.ghostchu.quickshop.api.shop.Shop;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,7 +30,7 @@ public class QuickShopListener implements Listener {
         Shop shop = event.getShop();
         ItemStack item = shop.getItem();
         if (module.hasAnyBindInfo(item)) {
-            event.setCancelled(true, "物品已绑定，无法创建商店");
+            event.setCancelled(true, Component.text("物品已绑定，无法创建商店"));
             UUID creatorUuid = event.getCreator().getUniqueIdIfRealPlayer().orElse(null);
             if (creatorUuid != null) {
                 Player player = Bukkit.getPlayer(creatorUuid);

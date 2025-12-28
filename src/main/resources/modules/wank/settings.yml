@@ -1,0 +1,48 @@
+# Wank 导管模块配置
+
+# 调试模式
+debug: false
+
+# 睡觉时提示配置
+prompt:
+  # 触发概率 (0.0-1.0, 0.7 = 70%)
+  chance: 0.7
+  # 延迟发送提示的时间范围 (秒)
+  delay-min: 1
+  delay-max: 3
+
+# 每日最大导管次数范围 (随机)
+max-times:
+  min: 3
+  max: 5
+
+# 导管持续时间范围 (秒)
+wank-duration:
+  min: 3
+  max: 30
+
+# 射精持续时间范围 (秒)
+shoot-duration:
+  min: 2
+  max: 5
+
+# 命令冷却时间 (秒)
+cooldown: 30
+
+# 精液药水配置
+milk-item:
+  custom-model-data: 10001
+  # 名称 (支持 %player% 占位符)
+  name: "&b%player%的精液"
+  # 描述 (支持 %player%, %duration% 占位符)
+  lore:
+    - "&7新鲜出炉"
+    - "&b%duration%&7秒的高质量蛋白质"
+    - "&b%player%&7精选"
+
+# 剪刀功能配置
+scissors:
+  # 是否启用剪刀功能
+  enabled: true
+  # 被剪后禁用时间 (游戏内一天 = 24000 ticks = 20分钟)
+  disable-duration-ticks: 24000

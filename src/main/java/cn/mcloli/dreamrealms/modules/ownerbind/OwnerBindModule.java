@@ -371,12 +371,12 @@ public class OwnerBindModule extends AbstractModule {
     }
 
     // 预编译正则表达式，避免重复编译
-    private static final java.util.regex.Pattern COLOR_CODE_PATTERN = java.util.regex.Pattern.compile("§[0-9a-fk-orA-FK-OR]");
-    private static final java.util.regex.Pattern HEX_COLOR_PATTERN = java.util.regex.Pattern.compile("§x(§[0-9a-fA-F]){6}");
+    private static final java.util.regex.Pattern COLOR_CODE_PATTERN = java.util.regex.Pattern.compile("[§&][0-9a-fk-orA-FK-OR]");
+    private static final java.util.regex.Pattern HEX_COLOR_PATTERN = java.util.regex.Pattern.compile("[§&]x([§&][0-9a-fA-F]){6}");
 
     /**
      * 将文本转换为纯文本 (移除所有格式)
-     * 支持传统颜色代码和 MiniMessage 格式
+     * 支持传统颜色代码 (& 和 §) 和 MiniMessage 格式
      */
     private String toPlainText(String text) {
         if (text == null || text.isEmpty()) return "";
@@ -391,7 +391,7 @@ public class OwnerBindModule extends AbstractModule {
             }
         }
         
-        // 移除所有颜色代码 (使用预编译的正则)
+        // 移除所有颜色代码 (使用预编译的正则，支持 & 和 § 两种格式)
         String result = HEX_COLOR_PATTERN.matcher(text).replaceAll("");
         result = COLOR_CODE_PATTERN.matcher(result).replaceAll("");
         return result;
@@ -408,8 +408,11 @@ public class OwnerBindModule extends AbstractModule {
         if (lore == null || lore.isEmpty()) return false;
 
         String boundPattern = toPlainText(config.getBoundLore().replace("%player%", ""));
+        debug("检查绑定Lore, 模式: [" + boundPattern + "]");
         for (String line : lore) {
-            if (toPlainText(line).contains(boundPattern)) {
+            String linePlain = toPlainText(line);
+            debug("  Lore行: [" + linePlain + "], 包含模式: " + linePlain.contains(boundPattern));
+            if (linePlain.contains(boundPattern)) {
                 return true;
             }
         }
