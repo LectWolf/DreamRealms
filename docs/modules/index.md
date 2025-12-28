@@ -14,6 +14,8 @@ DreamRealms 采用模块化设计，每个功能独立成模块。
 | [Debug](/modules/debug)               | 调试工具模块             | ✅   |
 | [ItemManager](/modules/itemmanager)   | 物品管理器               | ✅   |
 | [CosmeticMenu](/modules/cosmeticmenu) | HMCCosmetics 时装菜单    | ✅   |
+| [GiftPoints](/modules/giftpoints)     | 点券赠送系统             | ✅   |
+| [Wank](/modules/wank)                 | 导管娱乐模块             | ✅   |
 
 ## 启用模块
 
